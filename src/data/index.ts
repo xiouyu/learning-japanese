@@ -8,7 +8,7 @@ export const STEPS = raw as Step[];
 export const ROADMAP: RoadmapItem[] = [
   ...STEPS.map((s) => ({ n: s.id, t: s.title, row: s.row, note: s.note, part: s.part })),
   // 還沒加進網站的下一課：學習路線最後顯示「下一站」
-  { n: STEPS.length + 1, t: '第 6 課 チーズバーガーください', row: '第6課', note: '準備中', part: '下一站', ext: true },
+  { n: STEPS.length + 1, t: '第 7 課 部屋が4つあります', row: '第7課', note: '準備中', part: '下一站', ext: true },
 ];
 
 export const GOJUON: GojuonRow[] = [
