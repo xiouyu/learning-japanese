@@ -1,0 +1,15 @@
+{
+  "name": "gojuon-renshucho",
+  "private": true,
+  "version": "1.0.0",
+  "description": "五十音練習帳：いろどり 入門 A1 前的假名基礎互動練習網站",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^6.3.5"
+  }
+}

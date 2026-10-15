@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>五十音練習帳</title>
+<meta name="description" content="いろどり 入門 A1 前的假名基礎練習：平假名、濁音、拗音到片假名，共 33 步。">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&family=Noto+Sans+TC:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap">
+<style>[hidden]{display:none!important}body{margin:0}</style>
+</head>
+<body>
+
+
+<header class="top">
+  <div class="wrap">
+    <h1>五十音練習帳</h1>
+    <p class="sub">いろどり 入門 A1 前的假名基礎。從平假名、濁音、拗音到片假名，共 33 步。通過每一步的解鎖測驗，才會開放下一步。</p>
+    <div class="prog" aria-label="學習進度">
+      <div class="cellsets" id="cells"></div>
+      <div class="lbl" id="plabel"></div>
+    </div>
+    <div class="banner" id="voiceBanner" hidden></div>
+  </div>
+</header>
+
+<nav class="tabs" aria-label="功能">
+  <div class="wrap" role="tablist">
+    <button class="tab" role="tab" data-tab="learn">學習</button>
+    <button class="tab" role="tab" data-tab="flash">字卡</button>
+    <button class="tab" role="tab" data-tab="quiz">測驗</button>
+    <button class="tab" role="tab" data-tab="words">單字</button>
+    <button class="tab" role="tab" data-tab="table">五十音表</button>
+  </div>
+</nav>
+
+<main>
+  <div class="wrap">
+    <section class="panel" id="p-learn" role="tabpanel"></section>
+    <section class="panel" id="p-flash" role="tabpanel" hidden></section>
+    <section class="panel" id="p-quiz" role="tabpanel" hidden></section>
+    <section class="panel" id="p-words" role="tabpanel" hidden></section>
+    <section class="panel" id="p-table" role="tabpanel" hidden></section>
+  </div>
+</main>
+<div class="toast" id="toast" hidden></div>
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>
