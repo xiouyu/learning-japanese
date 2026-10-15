@@ -1,6 +1,6 @@
 # 一步一步學習日文
 
-日文學習網站，目前內容是五十音（Quasar CLI + Vue 3 + TypeScript + Pinia，PWA，Supabase 同步）。使用者是台灣的日文初學者，一律用繁體中文、台灣用語回覆。教學方式見 `docs/teaching-guide.md`。
+日文學習網站，目前內容是五十音和《いろどり》入門（A1）第 1～18 課（Quasar CLI + Vue 3 + TypeScript + Pinia，PWA，Supabase 同步）。使用者是台灣的日文初學者，一律用繁體中文、台灣用語回覆。教學方式見 `docs/teaching-guide.md`。
 
 ## 常用指令
 
