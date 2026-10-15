@@ -18,7 +18,7 @@
       </button>
       <template v-if="next && (next.part === step.part || step.id === p.curU)">
         <span v-if="next.ext" class="chip locked">
-          下一站・<span class="kn">課本第 1 課</span>{{ p.curU > p.d.passed ? '・學完全部假名後' : '' }}
+          下一站・<span class="kn">{{ next.row }}</span>・準備中
         </span>
         <span v-else class="chip locked">
           第 {{ next.n }} 步 <span class="kn">{{ stepLabel(next.n) }}</span>・{{ lockMsg }}
@@ -29,10 +29,28 @@
     <div class="stephead">
       <div class="eyebrow">第 {{ step.id }} 步・{{ step.row }}{{ step.id <= p.d.passed ? '・已通過' : '・學習中' }}</div>
       <h2>{{ step.title }}</h2>
-      <p class="lead muted">{{ step.rule }}點一下字卡可以聽發音，並在下方描字練習。</p>
+      <p class="lead muted">{{ step.rule }}{{ isPhrase ? '點一下句子可以聽發音，並在下方跟著唸。' : '點一下字卡可以聽發音，並在下方描字練習。' }}</p>
     </div>
 
-    <div class="kgrid">
+    <!-- 課本的句子 -->
+    <div v-if="isPhrase" class="plist">
+      <button
+        v-for="(x, i) in step.kana"
+        :key="x.k"
+        class="pcard"
+        :aria-pressed="i === p.curKana"
+        @click="pickKana(i)"
+      >
+        <span v-if="x.ex" class="badge">注意</span>
+        <span class="pk kana">{{ x.k }}</span>
+        <span class="rom">{{ x.r }}</span>
+        <span class="pz">{{ x.z }}</span>
+        <span v-if="x.o" class="org">{{ x.ol || '寫成' }} <b class="kana">{{ x.o }}</b></span>
+        <span v-if="x.audio" class="ptag">真人錄音</span>
+      </button>
+    </div>
+
+    <div v-else class="kgrid">
       <button
         v-for="(x, i) in step.kana"
         :key="x.k"
@@ -48,7 +66,45 @@
       </button>
     </div>
 
-    <div class="sec">
+    <!-- 課本的會話 -->
+    <div v-if="step.dialogs?.length" class="sec">
+      <h3>聽會話</h3>
+      <p class="muted lead">先聽錄音，想想看他們在什麼場合說這些話，再看下面的句子確認。</p>
+      <div class="dlist">
+        <div v-for="d in step.dialogs" :key="d.label" class="dcard">
+          <div class="dhead">
+            <span class="dlabel">{{ d.label }}</span>
+            <button class="btn icon-btn" :aria-label="`播放 ${d.label}`" @click="playDialog(d)"><SpeakerIcon /></button>
+          </div>
+          <div v-for="(l, li) in d.lines" :key="li" class="dline">
+            <span v-if="l.who" class="who">{{ l.who }}</span>
+            <span>
+              <span class="kana dt">{{ l.t }}</span>
+              <span v-if="l.r" class="kana dr">（{{ l.r }}）</span>
+              <span v-if="l.m" class="muted dm">{{ l.m }}</span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 句子的步驟：跟讀練習 -->
+    <div v-if="isPhrase" class="sec">
+      <h3>跟讀練習</h3>
+      <div class="shadow">
+        <div class="kana sbig">{{ kana.k }}</div>
+        <div class="rom">{{ kana.r }}</div>
+        <p>{{ kana.z }}</p>
+        <div class="hrow">
+          <button class="btn primary" @click="sayKana"><SpeakerIcon /> 播放</button>
+          <button class="btn" @click="stepKana(-1)">← 上一句</button>
+          <button class="btn" @click="stepKana(1)">下一句 →</button>
+        </div>
+        <p class="muted">先聽 3 次，再跟著錄音一起唸 3 次（シャドーイング），最後不看字自己說說看。</p>
+      </div>
+    </div>
+
+    <div v-else class="sec">
       <h3>描字練習</h3>
       <div class="studio">
         <div class="padwrap">
@@ -56,7 +112,7 @@
           <div class="hrow">
             <button class="btn" @click="pad?.clear()">清除</button>
             <button class="btn" @click="guide = !guide">{{ guide ? '隱藏範本' : '顯示範本' }}</button>
-            <button class="btn icon-btn" aria-label="播放發音" @click="speak(kana.k)"><SpeakerIcon /></button>
+            <button class="btn icon-btn" aria-label="播放發音" @click="sayKana"><SpeakerIcon /></button>
           </div>
         </div>
         <div class="info">
@@ -79,7 +135,7 @@
     </div>
 
     <div class="sec">
-      <h3>唸唸看：用學過的字組成的單字</h3>
+      <h3>{{ isPhrase ? '課本裡的其他詞語和句子' : '唸唸看：用學過的字組成的單字' }}</h3>
       <p class="muted lead">先自己唸，再按「看答案」或播放發音確認。</p>
       <WordList v-if="step.words.length" :words="step.words" />
       <p v-else class="muted">這一步能組成的單字太少，先把字唸熟、寫熟，下一步開始就有單字可以唸。</p>
@@ -92,7 +148,7 @@
     <div v-else class="unlock">
       <h3>解鎖測驗：第 {{ step.id }} 步 {{ step.row }}</h3>
       <p>
-        這一步的內容都唸熟、寫熟之後，再來考解鎖測驗。共 {{ QN }} 題，看字選拼音、聽音選字、看拼音選字三種題型混在一起，答對
+        這一步的內容都{{ isPhrase ? '聽熟、唸熟' : '唸熟、寫熟' }}之後，再來考解鎖測驗。共 {{ QN }} 題，看字選拼音、聽音選字、看拼音選字三種題型混在一起，答對
         {{ PASS }} 題以上就解鎖下一步。沒通過可以一直重考。
       </p>
       <div class="hrow">
@@ -100,13 +156,15 @@
       </div>
     </div>
 
+    <p v-if="step.source" class="muted credit">出處：{{ step.source }}・《いろどり 生活の日本語》入門（A1）©The Japan Foundation</p>
+
     <div class="sec">
       <h3>學習路線</h3>
       <ol class="road">
         <template v-for="(r, i) in ROADMAP" :key="r.n">
           <li v-if="i === 0 || ROADMAP[i - 1]!.part !== r.part" class="rgrp">{{ r.part }}</li>
           <li>
-            <span class="n">{{ r.ext ? '終點' : `第 ${r.n} 步` }}</span>
+            <span class="n">{{ r.ext ? '下一站' : `第 ${r.n} 步` }}</span>
             <span>
               <span class="t">{{ r.t }}</span>
               <span v-if="r.note" class="muted" style="font-size: 13px"> ・{{ r.note }}</span>
@@ -123,8 +181,9 @@
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { ROADMAP, STEPS, stepLabel } from '@/data';
-import type { RoadmapItem } from '@/data/types';
+import type { Dialog, RoadmapItem } from '@/data/types';
 import { PASS, QN, sqFontSize } from '@/lib/kana';
+import { playAudio, say } from '@/composables/useAudio';
 import { speak } from '@/composables/useSpeech';
 import { useProgressStore } from '@/stores/progress';
 import WritingPad from '@/components/WritingPad.vue';
@@ -140,6 +199,7 @@ const guide = ref(true);
 
 const step = computed(() => STEPS.find((x) => x.id === p.d.step) ?? STEPS[0]!);
 const kana = computed(() => step.value.kana[p.curKana] ?? step.value.kana[0]!);
+const isPhrase = computed(() => step.value.kind === 'phrase');
 const next = computed(() => ROADMAP.find((r) => r.n === p.curU + 1));
 const lockMsg = computed(() => (p.curU > p.d.passed ? `通過第 ${p.curU} 步測驗後解鎖` : '內容準備中'));
 const parts = computed(() => [...new Set(STEPS.filter((x) => x.id <= p.curU).map((x) => x.part))]);
@@ -157,7 +217,16 @@ function pickPart(pt: string) {
 
 function pickKana(i: number) {
   p.curKana = i;
-  speak(step.value.kana[i]!.k);
+  const k = step.value.kana[i]!;
+  say(k, k.k);
+}
+
+const sayKana = () => say(kana.value, kana.value.k);
+
+/** 會話：有錄音播錄音，沒有就用語音合成一句一句唸 */
+function playDialog(d: Dialog) {
+  if (d.audio) playAudio(d.audio);
+  else speak(d.lines.map((l) => l.t).join('　'));
 }
 
 function stepKana(delta: number) {
@@ -173,7 +242,7 @@ function startUnlock() {
 function roadState(r: RoadmapItem): { cls: string; label: string } {
   if (r.ext) {
     const done = p.d.passed >= STEPS.length;
-    return { cls: done ? 'cur' : '', label: done ? '下一站' : '最後' };
+    return { cls: done ? 'cur' : '', label: '準備中' };
   }
   if (r.n <= p.d.passed) return { cls: 'done', label: '已通過' };
   if (r.n === p.curU && p.curU > p.d.passed) return { cls: 'cur', label: '學習中' };

@@ -38,7 +38,7 @@ const tail = computed(() => {
   const passed = p.d.passed;
   if (passed >= STEPS.length) {
     const nx = ROADMAP.find((r) => r.n === passed + 1);
-    return nx?.ext ? '假名全部學完了！接下來回到課本第 1 課' : `第 ${passed + 1} 步內容準備中`;
+    return nx?.ext ? `目前的內容全部學完了！下一站：${nx.row}（準備中）` : `第 ${passed + 1} 步內容準備中`;
   }
   return `正在學第 ${p.curU} 步・${stepLabel(p.curU)}`;
 });

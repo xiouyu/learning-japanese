@@ -1,4 +1,11 @@
-/** 一個假名（或拗音、長音的範例詞）的教材資料 */
+/** 課本音檔的一段：src 是 public/ 底下的路徑，start／end 是秒數（不填就播整個檔案） */
+export interface AudioRef {
+  src: string;
+  start?: number;
+  end?: number;
+}
+
+/** 一個假名（或拗音、長音的範例詞、課本的一句話）的教材資料 */
 export interface Kana {
   /** 假名本身 */
   k: string;
@@ -14,12 +21,23 @@ export interface Kana {
   ex?: boolean;
   /** 實際發音（例如 を 填 o），測驗時同音字不會出現在同一題 */
   snd?: string;
+  /** 課本的真人錄音；沒有就用瀏覽器的語音合成 */
+  audio?: AudioRef;
 }
 
 export interface Word {
   w: string;
   r: string;
   m: string;
+  audio?: AudioRef;
+}
+
+/** 課本的一段會話（聴解スクリプト） */
+export interface Dialog {
+  /** 標題，例如「① 01-02」 */
+  label: string;
+  audio?: AudioRef;
+  lines: { who?: string; t: string; r?: string; m?: string }[];
 }
 
 export interface Step {
@@ -27,13 +45,18 @@ export interface Step {
   row: string;
   title: string;
   part: string;
-  kind: 'hira' | 'kata';
+  /** hira／kata：假名的步驟；phrase：課本的句子（顯示成句子卡片和跟讀練習） */
+  kind: 'hira' | 'kata' | 'phrase';
   rule: string;
   kana: Kana[];
   notes: string[];
   words: Word[];
   /** 學習路線上的小註解 */
   note?: string;
+  /** 課本的會話 */
+  dialogs?: Dialog[];
+  /** 出處，例如「《いろどり》入門 第1課 p.1-3」 */
+  source?: string;
 }
 
 export interface RoadmapItem {

@@ -28,7 +28,7 @@
         <template v-if="flipped">
           <button class="btn" @click="again">不熟，等一下再考</button>
           <button class="btn primary" @click="know">記住了</button>
-          <button class="btn icon-btn" aria-label="再聽一次" @click="speak(cur.k)"><SpeakerIcon /></button>
+          <button class="btn icon-btn" aria-label="再聽一次" @click="say(cur, cur.k)"><SpeakerIcon /></button>
         </template>
         <button v-else class="btn primary" @click="flip">翻面</button>
       </div>
@@ -41,7 +41,7 @@
 import { onActivated, onDeactivated, ref, watch } from 'vue';
 import type { KanaItem } from '@/data/types';
 import { fitPx, shuffle } from '@/lib/kana';
-import { speak } from '@/composables/useSpeech';
+import { say } from '@/composables/useAudio';
 import { useProgressStore } from '@/stores/progress';
 import ScopeChips from '@/components/ScopeChips.vue';
 import SpeakerIcon from '@/components/SpeakerIcon.vue';
@@ -65,7 +65,7 @@ function start() {
 
 function flip() {
   flipped.value = !flipped.value;
-  if (flipped.value && cur.value) speak(cur.value.k);
+  if (flipped.value && cur.value) say(cur.value, cur.value.k);
 }
 
 function nextCard() {

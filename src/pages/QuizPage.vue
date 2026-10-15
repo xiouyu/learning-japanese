@@ -20,7 +20,7 @@
       <div v-if="wrongList.length" class="sec">
         <h3>答錯的字</h3>
         <div class="hrow">
-          <button v-for="k in wrongList" :key="k.k" class="chip" @click="speak(k.k)">
+          <button v-for="k in wrongList" :key="k.k" class="chip" @click="say(k, k.k)">
             <span class="kn">{{ k.k }}</span> {{ k.r }}
           </button>
         </div>
@@ -46,16 +46,16 @@
       <div class="qprompt">
         <span v-if="q.m === 'k2r'" class="kana" :style="{ fontSize: fitPx(q.a.k, 96, 440) }">{{ q.a.k }}</span>
         <span v-else-if="q.m === 'r2k'" class="mono">{{ q.a.r }}</span>
-        <button v-else class="btn primary" style="font-size: 16px; padding: 14px 22px" @click="speak(q.a.k)">
+        <button v-else class="btn primary" style="font-size: 16px; padding: 14px 22px" @click="say(q.a, q.a.k)">
           <SpeakerIcon /> {{ answered ? '再聽一次' : '播放發音' }}
         </button>
       </div>
-      <div class="opts">
+      <div class="opts" :class="{ single: singleCol }">
         <button
           v-for="o in q.opts"
           :key="o.k"
           class="opt"
-          :class="[q.m === 'k2r' ? 'r' : 'k', answered && (o.k === q.a.k ? 'right' : o.k === answered ? 'wrong' : '')]"
+          :class="[q.m === 'k2r' ? 'r' : 'k', answered && (o.k === q.a.k ? 'right' : o.k === answered ? 'wrong' : ''), { long: (q.m === 'k2r' ? o.r : o.k).length > 7 }]"
           :disabled="!!answered"
           @click="answer(o.k)"
         >
@@ -84,7 +84,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { ALL_KANA, ROADMAP, STEPS, stepLabel } from '@/data';
 import type { KanaItem } from '@/data/types';
 import { MODES, PASS, fitPx, makeQs, type Question, type QuizMode } from '@/lib/kana';
-import { speak } from '@/composables/useSpeech';
+import { say } from '@/composables/useAudio';
 import { useProgressStore } from '@/stores/progress';
 import ScopeChips from '@/components/ScopeChips.vue';
 import SpeakerIcon from '@/components/SpeakerIcon.vue';
@@ -105,6 +105,11 @@ const unlock = ref(0);
 let active = false;
 
 const q = computed(() => qs.value[i.value]);
+/** 選項有長句子時排成一欄 */
+const singleCol = computed(() => {
+  const cur = q.value;
+  return !!cur && cur.opts.some((o) => (cur.m === 'k2r' ? o.r : o.k).length > 7);
+});
 const done = computed(() => qs.value.length > 0 && i.value >= qs.value.length);
 const ok = computed(() => score.value >= PASS);
 const unlockStep = computed(() => STEPS.find((x) => x.id === unlock.value));
@@ -123,7 +128,7 @@ const resultMsg = computed(() => {
   if (!ok.value) return `答對 ${score.value} 題，還差 ${PASS - score.value} 題。把答錯的字再練一下，隨時可以重考。`;
   const nextR = ROADMAP.find((r) => r.n === id + 1);
   if (nextHas.value) return `通過了！第 ${id + 1} 步 ${stepLabel(id + 1)} 已經解鎖。`;
-  if (nextR?.ext) return '恭喜！平假名、片假名全部學完了。接下來回到課本《いろどり》第 1 課，開始學打招呼。';
+  if (nextR?.ext) return `恭喜！目前的內容全部學完了。下一站是${nextR.t}，內容準備好就會加進來。`;
   if (nextR) return `通過了！第 ${id} 步完成。第 ${id + 1} 步的內容還沒加進網站，準備好再繼續。`;
   return '通過了！全部步驟都完成了。';
 });
@@ -145,7 +150,7 @@ function start(unlockId: number) {
 }
 
 function autoSpeak() {
-  if (active && q.value?.m === 'a2k') speak(q.value.a.k);
+  if (active && q.value?.m === 'a2k') say(q.value.a, q.value.a.k);
 }
 
 function pickMode(m: QuizMode) {
@@ -158,7 +163,7 @@ function answer(k: string) {
   answered.value = k;
   if (k === q.value.a.k) score.value++;
   else wrong.value.push(q.value.a);
-  if (q.value.m !== 'a2k') speak(q.value.a.k);
+  if (q.value.m !== 'a2k') say(q.value.a, q.value.a.k);
 }
 
 function next() {

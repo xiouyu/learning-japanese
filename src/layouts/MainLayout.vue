@@ -15,7 +15,7 @@
           </div>
         </div>
         <p class="sub">
-          いろどり 入門 A1 前的假名基礎。從平假名、濁音、拗音到片假名，共 {{ STEPS.length }} 步。通過每一步的解鎖測驗，才會開放下一步。
+          跟著《いろどり 生活の日本語》入門（A1）一步一步學：先打好五十音基礎，再學課本內容。共 {{ STEPS.length }} 步，通過每一步的解鎖測驗，才會開放下一步。
         </p>
         <ProgressStrip />
         <div v-if="voiceWarning" class="banner">{{ voiceWarning }}</div>

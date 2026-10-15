@@ -4,7 +4,7 @@
       <div class="w">{{ w.w }}</div>
       <div v-show="isShown(w.w)" class="ans"><span class="mono">{{ w.r }}</span>{{ w.m }}</div>
       <div class="ctl">
-        <button class="btn icon-btn" :aria-label="`播放 ${w.w}`" @click="speak(w.w)"><SpeakerIcon /></button>
+        <button class="btn icon-btn" :aria-label="`播放 ${w.w}`" @click="say(w, w.w)"><SpeakerIcon /></button>
         <button class="btn" @click="toggle(w.w)">{{ isShown(w.w) ? '隱藏' : '看答案' }}</button>
       </div>
     </div>
@@ -14,7 +14,7 @@
 <script setup lang="ts">
 import { reactive, watch } from 'vue';
 import type { Word } from '@/data/types';
-import { speak } from '@/composables/useSpeech';
+import { say } from '@/composables/useAudio';
 import SpeakerIcon from './SpeakerIcon.vue';
 
 const props = defineProps<{ words: Word[]; revealAll?: boolean }>();
