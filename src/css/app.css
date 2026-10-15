@@ -17,6 +17,8 @@
   --f-kana:"UD Digi Kyokasho N-R","UD デジタル 教科書体 N-R","UD Digi Kyokasho NK-R","BIZ UDMincho","Hiragino Mincho ProN","Yu Mincho",serif;
   --f-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
   --f-mono:"DM Mono",ui-monospace,Consolas,monospace;
+  /* 描字板範本：硬筆字（像鉛筆、原子筆寫的字），不用毛筆粗細變化的字型 */
+  --f-pad:"Klee One","UD Digi Kyokasho N-R","BIZ UDMincho",serif;
   --q-primary:#2C4F82;
 }
 /* 深色主題：Quasar Dark 設成 auto，會跟著系統切換並在 body 加上 body--dark */
@@ -37,7 +39,7 @@ p{margin:0}
 
 /* header */
 .top{padding-block:28px 18px}
-.top h1{font-family:var(--f-kana);font-weight:600;font-size:clamp(30px,6vw,42px);letter-spacing:.06em}
+.top h1{font-family:var(--f-kana);font-weight:600;font-size:clamp(26px,6vw,40px);letter-spacing:.06em}
 .top .sub{color:var(--muted);margin-top:2px}
 .prog{margin-top:16px;display:grid;gap:6px}
 .cells{display:grid;grid-template-columns:repeat(46,minmax(0,1fr));gap:2px;width:100%;max-width:560px}
@@ -192,6 +194,10 @@ canvas.pad{width:100%;aspect-ratio:1/1;max-width:100%;display:block;border-radiu
 body,body.body--dark{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.7}
 .top-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .sync-btn{white-space:nowrap}
+.top-actions{display:flex;align-items:center;gap:4px;flex:none}
+.theme-btn{padding:7px !important}
+/* 手機上登入後只顯示同步圖示，讓標題和按鈕排在同一行 */
+@media (max-width:480px){.sync-btn.compact{padding:7px}.sync-btn.compact .sync-text{display:none}}
 .banner.offline{border-color:var(--accent);background:var(--accent-soft)}
 .account-card{width:min(420px,calc(100vw - 32px));background:var(--surface);color:var(--ink)}
 .account-title{font-size:20px;font-weight:700}

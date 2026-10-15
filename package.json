@@ -1,8 +1,8 @@
 {
   "name": "gojuon-renshucho",
   "version": "2.0.0",
-  "description": "五十音練習帳：いろどり 入門 A1 前的假名基礎互動練習",
-  "productName": "五十音練習帳",
+  "description": "一步一步學習日文：跟著《いろどり》入門 A1，從五十音開始",
+  "productName": "一步一步學習日文",
   "type": "module",
   "private": true,
   "scripts": {

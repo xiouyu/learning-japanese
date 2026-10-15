@@ -1,7 +1,7 @@
 {
-  "name": "五十音練習帳",
-  "short_name": "五十音",
-  "description": "いろどり 入門 A1 前的假名基礎互動練習",
+  "name": "一步一步學習日文",
+  "short_name": "學日文",
+  "description": "跟著《いろどり》入門 A1，一步一步學日文：從五十音開始",
   "lang": "zh-Hant",
   "start_url": ".",
   "scope": ".",

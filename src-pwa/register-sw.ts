@@ -10,7 +10,7 @@ register(import.meta.env.QUASAR_SERVICE_WORKER_FILE, {
 
   updated() {
     Notify.create({
-      message: '練習帳有新版本',
+      message: '網站有新版本',
       timeout: 0,
       actions: [
         { label: '重新整理', color: 'white', handler: () => window.location.reload() },

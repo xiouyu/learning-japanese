@@ -32,7 +32,7 @@
       <q-card-section v-else class="account-body">
         <p>登入信已寄到 <b>{{ email }}</b>。</p>
         <p>
-          請<b>用這台裝置</b>打開信，點信裡的「Sign in」連結，就會回到練習帳並自動登入。連結 1 小時內有效，只能用一次。
+          請<b>用這台裝置</b>打開信，點信裡的「Sign in」連結，就會回到網站並自動登入。連結 1 小時內有效，只能用一次。
         </p>
         <p class="muted" style="font-size: 13px">沒收到的話，看一下垃圾郵件匣。信裡如果有 6 位數驗證碼，也可以直接填在下面。</p>
         <q-input

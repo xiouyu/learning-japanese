@@ -3,11 +3,16 @@
     <header class="top">
       <div class="page-wrap">
         <div class="top-row">
-          <h1>五十音練習帳</h1>
-          <button v-if="sync.enabled" class="btn ghost sync-btn" :aria-label="syncLabel" @click="account = true">
-            <q-icon :name="syncIcon" size="18px" />
-            <span>{{ syncLabel }}</span>
-          </button>
+          <h1>一步一步學習日文</h1>
+          <div class="top-actions">
+            <button v-if="sync.enabled" class="btn ghost sync-btn" :class="{ compact: sync.loggedIn }" :aria-label="syncLabel" :title="syncLabel" @click="account = true">
+              <q-icon :name="syncIcon" size="18px" />
+              <span class="sync-text">{{ syncLabel }}</span>
+            </button>
+            <button class="btn ghost icon-btn theme-btn" :aria-label="themeLabel" :title="themeLabel" @click="toggleTheme">
+              <q-icon :name="$q.dark.isActive ? 'light_mode' : 'dark_mode'" size="20px" />
+            </button>
+          </div>
         </div>
         <p class="sub">
           いろどり 入門 A1 前的假名基礎。從平假名、濁音、拗音到片假名，共 {{ STEPS.length }} 步。通過每一步的解鎖測驗，才會開放下一步。
@@ -46,6 +51,7 @@ import { useQuasar } from 'quasar';
 import { STEPS } from '@/data';
 import { initSpeech, voiceWarning } from '@/composables/useSpeech';
 import { useSyncStore } from '@/stores/sync';
+import { saveTheme, type ThemePref } from '@/lib/theme';
 import ProgressStrip from '@/components/ProgressStrip.vue';
 import AccountDialog from '@/components/AccountDialog.vue';
 
@@ -82,6 +88,14 @@ const syncIcon = computed(() => {
   if (!sync.loggedIn) return 'cloud_off';
   return { syncing: 'cloud_sync', synced: 'cloud_done', offline: 'cloud_off', error: 'sync_problem', idle: 'cloud' }[sync.status];
 });
+
+// 深色／淺色切換：點一下就換成另一種，並記在這台裝置
+const themeLabel = computed(() => ($q.dark.isActive ? '切換成淺色' : '切換成深色'));
+function toggleTheme() {
+  const next: ThemePref = $q.dark.isActive ? 'light' : 'dark';
+  $q.dark.set(next === 'dark');
+  saveTheme(next);
+}
 
 const setOnline = () => (offline.value = !navigator.onLine);
 onMounted(() => {

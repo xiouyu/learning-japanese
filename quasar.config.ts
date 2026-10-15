@@ -5,7 +5,7 @@ import { defineConfig } from '#q-app';
 
 export default defineConfig(() => {
   return {
-    boot: ['sync'],
+    boot: ['theme', 'sync'],
 
     css: ['app.css'],
 

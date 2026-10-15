@@ -83,7 +83,7 @@ function draw() {
     ctx.save();
     ctx.globalAlpha = 0.2;
     ctx.fillStyle = v('--ink');
-    ctx.font = `${Math.round(Math.min(w * 0.74, (w * 0.92) / glyphs(props.char)))}px ${v('--f-kana')}`;
+    ctx.font = `600 ${Math.round(Math.min(w * 0.74, (w * 0.92) / glyphs(props.char)))}px ${v('--f-pad')}`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(props.char, w / 2, w / 2 + w * 0.03);
@@ -119,7 +119,7 @@ onMounted(() => {
   ro.observe(canvas.value!);
   if (document.fonts) {
     document.fonts
-      .load('100px "BIZ UDMincho"', 'あかさたなはまやらわんアカサタナハマヤラワン')
+      .load('600 100px "Klee One"', 'あかさたなはまやらわんアカサタナハマヤラワン')
       .then(draw)
       .catch(() => {});
   }
