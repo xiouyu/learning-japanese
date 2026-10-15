@@ -41,7 +41,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { useQuasar } from 'quasar';
 import { STEPS } from '@/data';
 import { initSpeech, voiceWarning } from '@/composables/useSpeech';
 import { useSyncStore } from '@/stores/sync';
@@ -57,7 +58,20 @@ const TABS = [
 ];
 
 const sync = useSyncStore();
+const $q = useQuasar();
 const account = ref(false);
+
+// 點信裡的登入連結回來後，顯示登入結果
+watch(
+  () => sync.linkNotice,
+  (n) => {
+    if (!n) return;
+    $q.notify({ type: n.ok ? 'positive' : 'negative', message: n.message, timeout: n.ok ? 3000 : 0, actions: n.ok ? [] : [{ label: '知道了', color: 'white' }] });
+    if (!n.ok) account.value = true;
+    sync.linkNotice = null;
+  },
+  { immediate: true },
+);
 const offline = ref(!navigator.onLine);
 
 const syncLabel = computed(() => {

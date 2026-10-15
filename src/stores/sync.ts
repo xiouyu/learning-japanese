@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue';
 import type { User } from '@supabase/supabase-js';
 import { STEPS } from '@/data';
 import { supabase } from '@/lib/supabase';
+import { authErrorMessage, parseAuthRedirect } from '@/lib/authRedirect';
 import { mergeProgress, normalize, sameProgress, type ProgressData } from '@/lib/progress';
 import { useProgressStore } from './progress';
 
@@ -18,6 +19,8 @@ export const useSyncStore = defineStore('sync', () => {
   const status = ref<SyncStatus>('idle');
   const lastSyncedAt = ref<number | null>(null);
   const errorMsg = ref('');
+  /** 點登入連結回到網站後要顯示的訊息（成功，或連結過期等錯誤），由畫面顯示一次 */
+  const linkNotice = ref<{ ok: boolean; message: string } | null>(null);
   const loggedIn = computed(() => user.value !== null);
 
   const progress = useProgressStore();
@@ -77,6 +80,7 @@ export const useSyncStore = defineStore('sync', () => {
   async function init() {
     if (!supabase || started) return;
     started = true;
+    await consumeLoginLink();
     const { data } = await supabase.auth.getSession();
     user.value = data.session?.user ?? null;
     supabase.auth.onAuthStateChange((event, session) => {
@@ -101,10 +105,33 @@ export const useSyncStore = defineStore('sync', () => {
     if (user.value) void syncNow();
   }
 
-  /** 寄出 6 位數登入驗證碼 */
+  /** 點了信裡的登入連結回到網站：從網址取出登入資料，然後把網址清乾淨 */
+  async function consumeLoginLink() {
+    if (!supabase) return;
+    const r = parseAuthRedirect(window.location.hash);
+    if (!r) return;
+    window.history.replaceState(window.history.state, '', window.location.pathname + window.location.search + '#/learn');
+    if (r.kind === 'error') {
+      linkNotice.value = { ok: false, message: authErrorMessage(r.code) };
+      return;
+    }
+    const { error } = await supabase.auth.setSession({ access_token: r.accessToken, refresh_token: r.refreshToken });
+    linkNotice.value = error
+      ? { ok: false, message: authErrorMessage(error.code ?? 'unknown') }
+      : { ok: true, message: '登入成功，正在同步進度' };
+  }
+
+  /** 寄出登入信：信裡有登入連結；有自訂信件範本時也會有 6 位數驗證碼 */
   async function sendCode(email: string) {
     if (!supabase) throw new Error('尚未設定同步服務');
-    const { error } = await supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: true } });
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        shouldCreateUser: true,
+        // 點連結後回到網站首頁（要加進 Supabase 的 Redirect URLs）
+        emailRedirectTo: window.location.origin + window.location.pathname,
+      },
+    });
     if (error) throw error;
   }
 
@@ -121,5 +148,5 @@ export const useSyncStore = defineStore('sync', () => {
     lastSyncedAt.value = null;
   }
 
-  return { enabled, user, loggedIn, status, lastSyncedAt, errorMsg, init, syncNow, sendCode, verifyCode, signOut };
+  return { enabled, user, loggedIn, status, lastSyncedAt, errorMsg, linkNotice, init, syncNow, sendCode, verifyCode, signOut };
 });

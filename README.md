@@ -3,7 +3,7 @@
 いろどり 入門 A1 前的假名基礎互動練習網站。從平假名、濁音、拗音到片假名，共 33 步，通過每一步的解鎖測驗才會開放下一步。
 
 - **可以離線使用（PWA）**：第一次開啟後就存在裝置上，可以加到手機主畫面，沒網路也能練習。
-- **跨裝置同步進度**：用 Email 驗證碼登入後，手機和電腦接著同一個進度學（使用 Supabase，沒設定也能正常使用）。
+- **跨裝置同步進度**：用 Email 登入信（點連結，或輸入驗證碼）登入後，手機和電腦接著同一個進度學（使用 Supabase，沒設定也能正常使用）。
 
 ## 功能
 
@@ -19,7 +19,7 @@
 
 - [Quasar](https://quasar.dev/)（Quasar CLI + Vite）、Vue 3、TypeScript、Pinia
 - PWA：Quasar PWA 模式（Workbox），Google Fonts 也會快取
-- 同步：[Supabase](https://supabase.com/)（Email 驗證碼登入 + Postgres，Row Level Security 只能讀寫自己的資料）
+- 同步：[Supabase](https://supabase.com/)（Email 登入信 + Postgres，Row Level Security 只能讀寫自己的資料）
 - 測試：Vitest
 
 ## 開發

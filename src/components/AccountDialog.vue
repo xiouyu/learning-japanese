@@ -25,15 +25,19 @@
           :disable="busy"
           @keyup.enter="send"
         />
-        <p class="muted" style="font-size: 13px">我們會寄一組 6 位數驗證碼到這個信箱，不需要設定密碼。</p>
+        <p class="muted" style="font-size: 13px">我們會寄一封登入信到這個信箱，不需要設定密碼。</p>
       </q-card-section>
 
-      <!-- 輸入驗證碼 -->
+      <!-- 等待點連結，或輸入驗證碼 -->
       <q-card-section v-else class="account-body">
-        <p>驗證碼已寄到 <b>{{ email }}</b>，請在 1 小時內輸入。</p>
+        <p>登入信已寄到 <b>{{ email }}</b>。</p>
+        <p>
+          請<b>用這台裝置</b>打開信，點信裡的「Sign in」連結，就會回到練習帳並自動登入。連結 1 小時內有效，只能用一次。
+        </p>
+        <p class="muted" style="font-size: 13px">沒收到的話，看一下垃圾郵件匣。信裡如果有 6 位數驗證碼，也可以直接填在下面。</p>
         <q-input
           v-model="code"
-          label="驗證碼"
+          label="驗證碼（選填）"
           outlined
           dense
           inputmode="numeric"
@@ -54,8 +58,8 @@
           <q-btn unelevated no-caps color="primary" label="寄驗證碼" :loading="busy" :disable="!validEmail" @click="send" />
         </template>
         <template v-else>
-          <q-btn flat no-caps label="換一個 Email" :disable="busy" @click="stage = 'email'" />
-          <q-btn unelevated no-caps color="primary" label="登入" :loading="busy" :disable="code.trim().length < 6" @click="verify" />
+          <q-btn flat no-caps label="重新寄信" :disable="busy" @click="stage = 'email'" />
+          <q-btn unelevated no-caps color="primary" label="用驗證碼登入" :loading="busy" :disable="code.trim().length < 6" @click="verify" />
         </template>
       </q-card-actions>
     </q-card>
@@ -104,7 +108,11 @@ async function send() {
     stage.value = 'code';
     code.value = '';
   } catch (e) {
-    $q.notify({ type: 'negative', message: `寄送失敗：${errText(e)}` });
+    const msg = errText(e);
+    $q.notify({
+      type: 'negative',
+      message: /rate limit|security purposes/i.test(msg) ? '寄信太頻繁了，請過一下子再試（免費方案每小時只能寄幾封）。' : `寄送失敗：${msg}`,
+    });
   } finally {
     busy.value = false;
   }

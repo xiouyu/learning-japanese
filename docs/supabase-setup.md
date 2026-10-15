@@ -15,39 +15,50 @@
 
 這會建立 `progress` 資料表（每個帳號一列），並開啟 Row Level Security：每個人只能讀寫自己的紀錄。
 
-## 3. 設定 Email 驗證碼登入
+## 3. 設定登入方式
 
-網站用「Email 收 6 位數驗證碼」登入，不用密碼。這樣在手機主畫面開的 App 也能直接輸入驗證碼，不會被連結帶到別的瀏覽器。
+網站用「Email 登入信」登入，不用密碼：寄信後點信裡的「Sign in」連結，就會回到練習帳並自動登入。
 
 1. 左側選 **Authentication** › **Sign In / Providers**，確認 **Email** 是開啟的。
-2. 左側選 **Authentication** › **Emails** › **Templates** › **Magic Link**，把內容改成會顯示驗證碼，例如：
+2. 左側選 **Authentication** › **URL Configuration**：
+   - **Site URL** 填 `https://xiouyu.github.io/learning-japanese/`
+   - **Redirect URLs** 按 **Add URL**，加入 `https://xiouyu.github.io/learning-japanese/`（本機開發另外加 `http://localhost:9000/`）
+
+   沒設定的話，點信裡的連結會被導到 `localhost:3000`，打不開。
+
+### （選用）改用 6 位數驗證碼
+
+點連結登入有一個限制：**iPhone 加到主畫面的 App** 跟 Safari 是分開的，點信裡的連結會在 Safari 登入，主畫面的 App 不會跟著登入。如果想在 iPhone 主畫面的 App 裡登入，需要讓登入信多一組驗證碼：
+
+1. Supabase 免費專案要先設定自己的寄信服務才能改信件內容：**Authentication** › **Emails** › **SMTP Settings**，可以用 Gmail（要先開兩步驟驗證，再建立「應用程式密碼」）或 Resend。
+2. 設定好後到 **Authentication** › **Emails** › **Templates**，把 **Magic Link** 和 **Confirm signup** 的內容改成：
 
    ```html
-   <h2>五十音練習帳 登入驗證碼</h2>
-   <p>你的驗證碼是：<strong>{{ .Token }}</strong></p>
-   <p>請在 1 小時內輸入。如果不是你本人操作，可以忽略這封信。</p>
+   <h2>五十音練習帳 登入</h2>
+   <p>驗證碼：<strong>{{ .Token }}</strong></p>
+   <p>或點這個連結登入：<a href="{{ .ConfirmationURL }}">登入練習帳</a></p>
+   <p>1 小時內有效。如果不是你本人操作，可以忽略這封信。</p>
    ```
 
-   主旨可以改成 `五十音練習帳 登入驗證碼`。**一定要有 `{{ .Token }}`**，不然信裡只有連結、沒有驗證碼。
-3. 第一次登入的新帳號會收到 **Confirm signup** 範本的信，也照上面加上 `{{ .Token }}`。
+網站的登入視窗兩種都支援：點連結，或把驗證碼填進「驗證碼（選填）」。
 
-> Supabase 內建的寄信服務每小時只能寄很少封信（適合自己用）。如果要給很多人用，到 **Authentication › Emails › SMTP Settings** 設定自己的寄信服務（例如 Resend、SendGrid）。
+> Supabase 內建的寄信服務每小時只能寄很少封信，同一個信箱也要隔一段時間才能再寄。只有自己用通常夠，寄不出去時等一下再試。
 
 ## 4. 取得連線資訊
 
 左側選 **Project Settings** › **API**（或 **Data API**），記下：
 
 - **Project URL**：例如 `https://abcdefgh.supabase.co`
-- **anon / publishable key**：一長串文字
+- **Publishable key**（Project Settings › API Keys，開頭是 `sb_publishable_`；舊專案叫 anon key）
 
-這兩個值本來就是要放在前端的，可以公開；資料安全由第 2 步的 Row Level Security 保護。**不要**用 `service_role` / secret key。
+這兩個值本來就是要放在前端的，可以公開；資料安全由第 2 步的 Row Level Security 保護。**不要**用 `service_role` 或 `sb_secret_` 開頭的 secret key。
 
 ## 5. 讓 GitHub Pages 上的網站使用
 
 1. 到 GitHub 專案的 **Settings › Secrets and variables › Actions**，切到 **Variables** 分頁。
 2. 新增兩個 Repository variable：
    - `SUPABASE_URL` = Project URL
-   - `SUPABASE_ANON_KEY` = anon / publishable key
+   - `SUPABASE_ANON_KEY` = publishable key
 3. 到 **Actions** › **Deploy to GitHub Pages** › **Run workflow** 重新部署。
 
 ## 6. 在自己電腦開發時使用
