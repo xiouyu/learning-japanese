@@ -25,27 +25,27 @@
           :disable="busy"
           @keyup.enter="send"
         />
-        <p class="muted" style="font-size: 13px">我們會寄一封登入信到這個信箱，不需要設定密碼。</p>
+        <p class="muted" style="font-size: 13px">我們會寄一組 6 位數驗證碼到這個信箱，不需要設定密碼。</p>
       </q-card-section>
 
-      <!-- 等待點連結，或輸入驗證碼 -->
+      <!-- 輸入驗證碼（也可以點信裡的連結） -->
       <q-card-section v-else class="account-body">
-        <p>登入信已寄到 <b>{{ email }}</b>。</p>
-        <p>
-          請<b>用這台裝置</b>打開信，點信裡的「Sign in」連結，就會回到網站並自動登入。連結 1 小時內有效，只能用一次。
-        </p>
-        <p class="muted" style="font-size: 13px">沒收到的話，看一下垃圾郵件匣。信裡如果有 6 位數驗證碼，也可以直接填在下面。</p>
+        <p>驗證碼已寄到 <b>{{ email }}</b>，請把信裡的 6 位數驗證碼填在下面。1 小時內有效。</p>
         <q-input
           v-model="code"
-          label="驗證碼（選填）"
+          label="驗證碼"
           outlined
           dense
           inputmode="numeric"
           autocomplete="one-time-code"
           maxlength="10"
           :disable="busy"
+          autofocus
           @keyup.enter="verify"
         />
+        <p class="muted" style="font-size: 13px">
+          也可以直接點信裡的「登入」連結。在手機主畫面的 App 裡請用驗證碼，點連結會跑到瀏覽器去登入。沒收到信的話，看一下垃圾郵件匣。
+        </p>
       </q-card-section>
 
       <q-card-actions align="right">
@@ -59,7 +59,7 @@
         </template>
         <template v-else>
           <q-btn flat no-caps label="重新寄信" :disable="busy" @click="stage = 'email'" />
-          <q-btn unelevated no-caps color="primary" label="用驗證碼登入" :loading="busy" :disable="code.trim().length < 6" @click="verify" />
+          <q-btn unelevated no-caps color="primary" label="登入" :loading="busy" :disable="code.replace(/\s/g, '').length < 6" @click="verify" />
         </template>
       </q-card-actions>
     </q-card>
@@ -119,10 +119,10 @@ async function send() {
 }
 
 async function verify() {
-  if (code.value.trim().length < 6 || busy.value) return;
+  if (code.value.replace(/\s/g, '').length < 6 || busy.value) return;
   busy.value = true;
   try {
-    await sync.verifyCode(email.value, code.value.trim());
+    await sync.verifyCode(email.value, code.value.replace(/\s/g, ''));
     stage.value = 'email';
     $q.notify({ type: 'positive', message: '登入成功，正在同步進度' });
   } catch (e) {

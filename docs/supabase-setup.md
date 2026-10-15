@@ -17,32 +17,42 @@
 
 ## 3. 設定登入方式
 
-網站用「Email 登入信」登入，不用密碼：寄信後點信裡的「Sign in」連結，就會回到練習帳並自動登入。
+網站用「Email 驗證碼」登入，不用密碼：寄信後把信裡的 6 位數驗證碼填進登入視窗；也可以直接點信裡的登入連結。
 
 1. 左側選 **Authentication** › **Sign In / Providers**，確認 **Email** 是開啟的。
-2. 左側選 **Authentication** › **URL Configuration**：
+2. 左側選 **Authentication** › **URL Configuration**（點連結登入時要用）：
    - **Site URL** 填 `https://xiouyu.github.io/learning-japanese/`
    - **Redirect URLs** 按 **Add URL**，加入 `https://xiouyu.github.io/learning-japanese/`（本機開發另外加 `http://localhost:9000/`）
 
-   沒設定的話，點信裡的連結會被導到 `localhost:3000`，打不開。
+### 用 Gmail 寄登入信（SMTP）
 
-### （選用）改用 6 位數驗證碼
+Supabase 免費專案要設定自己的寄信服務，才能改信件內容、讓信裡出現驗證碼。
 
-點連結登入有一個限制：**iPhone 加到主畫面的 App** 跟 Safari 是分開的，點信裡的連結會在 Safari 登入，主畫面的 App 不會跟著登入。如果想在 iPhone 主畫面的 App 裡登入，需要讓登入信多一組驗證碼：
+1. Google 帳號先開啟[兩步驟驗證](https://myaccount.google.com/signinoptions/twosv)，再到[應用程式密碼](https://myaccount.google.com/apppasswords)建立一組（名稱填 `Supabase`），複製那 16 個字的密碼。這組密碼不要給別人。
+2. Supabase 左側選 **Authentication** › **Emails** › **SMTP Settings**，打開 **Enable custom SMTP**：
 
-1. Supabase 免費專案要先設定自己的寄信服務才能改信件內容：**Authentication** › **Emails** › **SMTP Settings**，可以用 Gmail（要先開兩步驟驗證，再建立「應用程式密碼」）或 Resend。
-2. 設定好後到 **Authentication** › **Emails** › **Templates**，把 **Magic Link** 和 **Confirm signup** 的內容改成：
+   | 欄位 | 填什麼 |
+   |---|---|
+   | Sender email | 你的 Gmail 地址 |
+   | Sender name | `一步一步學習日文` |
+   | Host | `smtp.gmail.com` |
+   | Port | `465` |
+   | Username | 你的 Gmail 地址 |
+   | Password | 上一步的應用程式密碼（不要有空格） |
+
+3. 到 **Authentication** › **Emails** › **Templates**，把 **Magic Link** 和 **Confirm signup** 兩個範本都改成：
+
+   主旨：`一步一步學習日文 登入驗證碼`
 
    ```html
-   <h2>五十音練習帳 登入</h2>
-   <p>驗證碼：<strong>{{ .Token }}</strong></p>
-   <p>或點這個連結登入：<a href="{{ .ConfirmationURL }}">登入練習帳</a></p>
+   <h2>一步一步學習日文 登入</h2>
+   <p>驗證碼：<strong style="font-size:24px;letter-spacing:4px">{{ .Token }}</strong></p>
+   <p>在網站的登入視窗輸入驗證碼，或點這個連結登入：<a href="{{ .ConfirmationURL }}">登入</a></p>
    <p>1 小時內有效。如果不是你本人操作，可以忽略這封信。</p>
    ```
 
-網站的登入視窗兩種都支援：點連結，或把驗證碼填進「驗證碼（選填）」。
-
-> Supabase 內建的寄信服務每小時只能寄很少封信，同一個信箱也要隔一段時間才能再寄。只有自己用通常夠，寄不出去時等一下再試。
+> 個人 Gmail 每天最多約 500 封；Supabase 預設每小時 30 封，要改到 **Authentication › Rate Limits**。
+> iPhone 加到主畫面的 App 跟 Safari 是分開的，在 App 裡請用驗證碼登入；點連結會在 Safari 登入。
 
 ## 4. 取得連線資訊
 
