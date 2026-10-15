@@ -28,8 +28,10 @@ const rows = computed(() =>
   ).map(([label, set]) => {
     const U = p.curU;
     const passed = p.d.passed;
-    const done = ALL_KANA.filter((k) => k.step <= passed && set.has(k.k)).length;
-    const cur = U > passed ? ALL_KANA.filter((k) => k.step === U && set.has(k.k)).length : 0;
+    // 課本的步驟也會出現單一假名（例如數字「に」），同一個字只算一次
+    const count = (upTo: number) => new Set(ALL_KANA.filter((k) => k.step <= upTo && set.has(k.k)).map((k) => k.k)).size;
+    const done = count(passed);
+    const cur = U > passed ? count(U) - done : 0;
     return { label, done, cur };
   }),
 );
