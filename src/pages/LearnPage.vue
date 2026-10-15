@@ -76,13 +76,15 @@
             <span class="dlabel">{{ d.label }}</span>
             <button class="btn icon-btn" :aria-label="`播放 ${d.label}`" @click="playDialog(d)"><SpeakerIcon /></button>
           </div>
-          <div v-for="(l, li) in d.lines" :key="li" class="dline">
-            <span v-if="l.who" class="who">{{ l.who }}</span>
-            <span>
-              <span class="kana dt">{{ l.t }}</span>
-              <span v-if="l.r" class="kana dr">（{{ l.r }}）</span>
-              <span v-if="l.m" class="muted dm">{{ l.m }}</span>
-            </span>
+          <div class="dbody">
+            <template v-for="(l, li) in d.lines" :key="li">
+              <span v-if="l.who" class="who">{{ l.who }}</span>
+              <span :class="{ solo: !l.who }">
+                <span class="kana dt">{{ l.t }}</span>
+                <span v-if="l.r" class="kana dr">（{{ l.r }}）</span>
+                <span v-if="l.m" class="muted dm">{{ l.m }}</span>
+              </span>
+            </template>
           </div>
         </div>
       </div>

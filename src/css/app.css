@@ -222,8 +222,10 @@ body,body.body--dark{background:var(--bg);color:var(--ink);font-family:var(--f-b
 .dcard{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 14px;display:grid;gap:6px}
 .dhead{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .dlabel{font-size:13px;color:var(--muted);font-family:var(--f-mono)}
-.dline{display:grid;grid-template-columns:22px minmax(0,1fr);gap:6px;align-items:baseline}
-.who{font-family:var(--f-mono);font-size:13px;color:var(--accent)}
+/* 說話人欄跟著最長的名字變寬；沒有說話人的獨白佔滿整行 */
+.dbody{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:6px 10px;align-items:baseline}
+.dbody .solo{grid-column:1/-1}
+.who{font-family:var(--f-mono);font-size:13px;color:var(--accent);white-space:nowrap}
 .dt{font-size:19px}
 .dr{display:block;font-size:13px;color:var(--muted)}
 .dm{display:block;font-size:13px}
