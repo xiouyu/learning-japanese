@@ -11,31 +11,46 @@
         "k": "あ",
         "r": "a",
         "z": "像「ㄚ」",
-        "o": "安"
+        "o": "安",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/a.mp3"
+        }
       },
       {
         "k": "い",
         "r": "i",
         "z": "像「ㄧ」",
-        "o": "以"
+        "o": "以",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/i.mp3"
+        }
       },
       {
         "k": "う",
         "r": "u",
         "z": "像「ㄨ」，嘴唇不要嘟起來",
-        "o": "宇"
+        "o": "宇",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/u.mp3"
+        }
       },
       {
         "k": "え",
         "r": "e",
         "z": "像「ㄝ」",
-        "o": "衣"
+        "o": "衣",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/e.mp3"
+        }
       },
       {
         "k": "お",
         "r": "o",
         "z": "像「ㄛ」",
-        "o": "於"
+        "o": "於",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/o.mp3"
+        }
       }
     ],
     "notes": [
@@ -83,31 +98,46 @@
         "k": "か",
         "r": "ka",
         "z": "像「ㄎㄚ」",
-        "o": "加"
+        "o": "加",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/ka.mp3"
+        }
       },
       {
         "k": "き",
         "r": "ki",
         "z": "像「ㄎㄧ」",
-        "o": "幾"
+        "o": "幾",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/ki.mp3"
+        }
       },
       {
         "k": "く",
         "r": "ku",
         "z": "像「ㄎㄨ」，嘴唇放輕鬆",
-        "o": "久"
+        "o": "久",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/ku.mp3"
+        }
       },
       {
         "k": "け",
         "r": "ke",
         "z": "像「ㄎㄝ」",
-        "o": "計"
+        "o": "計",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/ke.mp3"
+        }
       },
       {
         "k": "こ",
         "r": "ko",
         "z": "像「ㄎㄛ」",
-        "o": "己"
+        "o": "己",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/ko.mp3"
+        }
       }
     ],
     "notes": [
@@ -164,32 +194,47 @@
         "k": "さ",
         "r": "sa",
         "z": "像「ㄙㄚ」",
-        "o": "左"
+        "o": "左",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/sa.mp3"
+        }
       },
       {
         "k": "し",
         "r": "shi",
         "z": "像「ㄒㄧ」，不是「ㄙㄧ」",
         "o": "之",
-        "ex": true
+        "ex": true,
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/shi.mp3"
+        }
       },
       {
         "k": "す",
         "r": "su",
         "z": "像「ㄙㄨ」，嘴唇放輕鬆",
-        "o": "寸"
+        "o": "寸",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/su.mp3"
+        }
       },
       {
         "k": "せ",
         "r": "se",
         "z": "像「ㄙㄝ」",
-        "o": "世"
+        "o": "世",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/se.mp3"
+        }
       },
       {
         "k": "そ",
         "r": "so",
         "z": "像「ㄙㄛ」",
-        "o": "曽"
+        "o": "曽",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/so.mp3"
+        }
       }
     ],
     "notes": [
@@ -252,33 +297,48 @@
         "k": "た",
         "r": "ta",
         "z": "像「ㄊㄚ」",
-        "o": "太"
+        "o": "太",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/ta.mp3"
+        }
       },
       {
         "k": "ち",
         "r": "chi",
         "z": "像「ㄑㄧ」，不是「ㄊㄧ」",
         "o": "知",
-        "ex": true
+        "ex": true,
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/chi.mp3"
+        }
       },
       {
         "k": "つ",
         "r": "tsu",
         "z": "像「ㄘㄨ」，嘴唇放輕鬆",
         "o": "川",
-        "ex": true
+        "ex": true,
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/tsu.mp3"
+        }
       },
       {
         "k": "て",
         "r": "te",
         "z": "像「ㄊㄝ」",
-        "o": "天"
+        "o": "天",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/te.mp3"
+        }
       },
       {
         "k": "と",
         "r": "to",
         "z": "像「ㄊㄛ」",
-        "o": "止"
+        "o": "止",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/to.mp3"
+        }
       }
     ],
     "notes": [
@@ -347,31 +407,46 @@
         "k": "な",
         "r": "na",
         "z": "像「ㄋㄚ」",
-        "o": "奈"
+        "o": "奈",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/na.mp3"
+        }
       },
       {
         "k": "に",
         "r": "ni",
         "z": "像「ㄋㄧ」",
-        "o": "仁"
+        "o": "仁",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/ni.mp3"
+        }
       },
       {
         "k": "ぬ",
         "r": "nu",
         "z": "像「ㄋㄨ」，嘴唇放輕鬆",
-        "o": "奴"
+        "o": "奴",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/nu.mp3"
+        }
       },
       {
         "k": "ね",
         "r": "ne",
         "z": "像「ㄋㄝ」",
-        "o": "祢"
+        "o": "祢",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/ne.mp3"
+        }
       },
       {
         "k": "の",
         "r": "no",
         "z": "像「ㄋㄛ」",
-        "o": "乃"
+        "o": "乃",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/no.mp3"
+        }
       }
     ],
     "notes": [
@@ -442,32 +517,47 @@
         "k": "は",
         "r": "ha",
         "z": "像「ㄏㄚ」",
-        "o": "波"
+        "o": "波",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/ha.mp3"
+        }
       },
       {
         "k": "ひ",
         "r": "hi",
         "z": "像「ㄏㄧ」，舌面靠近上顎，聽起來有點像輕輕的「ㄒㄧ」",
-        "o": "比"
+        "o": "比",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/hi.mp3"
+        }
       },
       {
         "k": "ふ",
         "r": "fu",
         "z": "像「ㄏㄨ」，上下嘴唇輕輕靠近吹氣，像吹蠟燭",
         "o": "不",
-        "ex": true
+        "ex": true,
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/fu.mp3"
+        }
       },
       {
         "k": "へ",
         "r": "he",
         "z": "像「ㄏㄝ」",
-        "o": "部"
+        "o": "部",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/he.mp3"
+        }
       },
       {
         "k": "ほ",
         "r": "ho",
         "z": "像「ㄏㄛ」",
-        "o": "保"
+        "o": "保",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/ho.mp3"
+        }
       }
     ],
     "notes": [
@@ -536,31 +626,46 @@
         "k": "ま",
         "r": "ma",
         "z": "像「ㄇㄚ」",
-        "o": "末"
+        "o": "末",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/ma.mp3"
+        }
       },
       {
         "k": "み",
         "r": "mi",
         "z": "像「ㄇㄧ」",
-        "o": "美"
+        "o": "美",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/mi.mp3"
+        }
       },
       {
         "k": "む",
         "r": "mu",
         "z": "像「ㄇㄨ」，嘴唇放輕鬆",
-        "o": "武"
+        "o": "武",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/mu.mp3"
+        }
       },
       {
         "k": "め",
         "r": "me",
         "z": "像「ㄇㄝ」",
-        "o": "女"
+        "o": "女",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/me.mp3"
+        }
       },
       {
         "k": "も",
         "r": "mo",
         "z": "像「ㄇㄛ」",
-        "o": "毛"
+        "o": "毛",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/mo.mp3"
+        }
       }
     ],
     "notes": [
@@ -634,19 +739,28 @@
         "k": "や",
         "r": "ya",
         "z": "像「ㄧㄚ」",
-        "o": "也"
+        "o": "也",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/ya.mp3"
+        }
       },
       {
         "k": "ゆ",
         "r": "yu",
         "z": "像「ㄧㄨ」，不是「ㄩ」",
-        "o": "由"
+        "o": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/yu.mp3"
+        }
       },
       {
         "k": "よ",
         "r": "yo",
         "z": "像「ㄧㄛ」",
-        "o": "与"
+        "o": "与",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/yo.mp3"
+        }
       }
     ],
     "notes": [
@@ -715,31 +829,46 @@
         "k": "ら",
         "r": "ra",
         "z": "介於「ㄌㄚ」和「ㄉㄚ」之間",
-        "o": "良"
+        "o": "良",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/ra.mp3"
+        }
       },
       {
         "k": "り",
         "r": "ri",
         "z": "介於「ㄌㄧ」和「ㄉㄧ」之間",
-        "o": "利"
+        "o": "利",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/ri.mp3"
+        }
       },
       {
         "k": "る",
         "r": "ru",
         "z": "介於「ㄌㄨ」和「ㄉㄨ」之間，嘴唇放輕鬆",
-        "o": "留"
+        "o": "留",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/ru.mp3"
+        }
       },
       {
         "k": "れ",
         "r": "re",
         "z": "介於「ㄌㄝ」和「ㄉㄝ」之間",
-        "o": "礼"
+        "o": "礼",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/re.mp3"
+        }
       },
       {
         "k": "ろ",
         "r": "ro",
         "z": "介於「ㄌㄛ」和「ㄉㄛ」之間",
-        "o": "呂"
+        "o": "呂",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/ro.mp3"
+        }
       }
     ],
     "notes": [
@@ -814,7 +943,10 @@
         "k": "わ",
         "r": "wa",
         "z": "像「ㄨㄚ」",
-        "o": "和"
+        "o": "和",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/wa.mp3"
+        }
       },
       {
         "k": "を",
@@ -822,14 +954,20 @@
         "z": "唸「ㄛ」，跟 お 同音",
         "o": "遠",
         "ex": true,
-        "snd": "o"
+        "snd": "o",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/wo.mp3"
+        }
       },
       {
         "k": "ん",
         "r": "n",
         "z": "鼻音，像「ㄣ」或「ㄥ」",
         "o": "无",
-        "ex": true
+        "ex": true,
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/n.mp3"
+        }
       }
     ],
     "notes": [
@@ -899,35 +1037,50 @@
         "r": "ga",
         "z": "像「ㄍㄚ」，但聲帶要震動",
         "o": "か＋゛",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/ga.mp3"
+        }
       },
       {
         "k": "ぎ",
         "r": "gi",
         "z": "像「ㄍㄧ」，聲帶震動",
         "o": "き＋゛",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/gi.mp3"
+        }
       },
       {
         "k": "ぐ",
         "r": "gu",
         "z": "像「ㄍㄨ」，聲帶震動",
         "o": "く＋゛",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/gu.mp3"
+        }
       },
       {
         "k": "げ",
         "r": "ge",
         "z": "像「ㄍㄝ」，聲帶震動",
         "o": "け＋゛",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/ge.mp3"
+        }
       },
       {
         "k": "ご",
         "r": "go",
         "z": "像「ㄍㄛ」，聲帶震動",
         "o": "こ＋゛",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/go.mp3"
+        }
       }
     ],
     "notes": [
@@ -997,7 +1150,10 @@
         "r": "za",
         "z": "像「ㄗㄚ」，聲帶震動",
         "o": "さ＋゛",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/za.mp3"
+        }
       },
       {
         "k": "じ",
@@ -1005,28 +1161,40 @@
         "z": "像「ㄐㄧ」，聲帶震動",
         "o": "し＋゛",
         "ol": "由",
-        "ex": true
+        "ex": true,
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/ji.mp3"
+        }
       },
       {
         "k": "ず",
         "r": "zu",
         "z": "像「ㄗㄨ」，聲帶震動，嘴唇放輕鬆",
         "o": "す＋゛",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/zu.mp3"
+        }
       },
       {
         "k": "ぜ",
         "r": "ze",
         "z": "像「ㄗㄝ」，聲帶震動",
         "o": "せ＋゛",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/ze.mp3"
+        }
       },
       {
         "k": "ぞ",
         "r": "zo",
         "z": "像「ㄗㄛ」，聲帶震動",
         "o": "そ＋゛",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/zo.mp3"
+        }
       }
     ],
     "notes": [
@@ -1095,7 +1263,10 @@
         "r": "da",
         "z": "像「ㄉㄚ」，聲帶震動",
         "o": "た＋゛",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/da.mp3"
+        }
       },
       {
         "k": "ぢ",
@@ -1104,7 +1275,10 @@
         "o": "ち＋゛",
         "ol": "由",
         "ex": true,
-        "snd": "ji"
+        "snd": "ji",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/di.mp3"
+        }
       },
       {
         "k": "づ",
@@ -1113,21 +1287,30 @@
         "o": "つ＋゛",
         "ol": "由",
         "ex": true,
-        "snd": "zu"
+        "snd": "zu",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/du.mp3"
+        }
       },
       {
         "k": "で",
         "r": "de",
         "z": "像「ㄉㄝ」，聲帶震動",
         "o": "て＋゛",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/de.mp3"
+        }
       },
       {
         "k": "ど",
         "r": "do",
         "z": "像「ㄉㄛ」，聲帶震動",
         "o": "と＋゛",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/do.mp3"
+        }
       }
     ],
     "notes": [
@@ -1197,35 +1380,50 @@
         "r": "ba",
         "z": "像「ㄅㄚ」，聲帶震動",
         "o": "は＋゛",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/ba.mp3"
+        }
       },
       {
         "k": "び",
         "r": "bi",
         "z": "像「ㄅㄧ」，聲帶震動",
         "o": "ひ＋゛",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/bi.mp3"
+        }
       },
       {
         "k": "ぶ",
         "r": "bu",
         "z": "像「ㄅㄨ」，聲帶震動",
         "o": "ふ＋゛",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/bu.mp3"
+        }
       },
       {
         "k": "べ",
         "r": "be",
         "z": "像「ㄅㄝ」，聲帶震動",
         "o": "へ＋゛",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/be.mp3"
+        }
       },
       {
         "k": "ぼ",
         "r": "bo",
         "z": "像「ㄅㄛ」，聲帶震動",
         "o": "ほ＋゛",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/bo.mp3"
+        }
       }
     ],
     "notes": [
@@ -1294,35 +1492,50 @@
         "r": "pa",
         "z": "像「ㄆㄚ」",
         "o": "は＋゜",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/pa.mp3"
+        }
       },
       {
         "k": "ぴ",
         "r": "pi",
         "z": "像「ㄆㄧ」",
         "o": "ひ＋゜",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/pi.mp3"
+        }
       },
       {
         "k": "ぷ",
         "r": "pu",
         "z": "像「ㄆㄨ」，嘴唇放輕鬆",
         "o": "ふ＋゜",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/pu.mp3"
+        }
       },
       {
         "k": "ぺ",
         "r": "pe",
         "z": "像「ㄆㄝ」",
         "o": "へ＋゜",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/pe.mp3"
+        }
       },
       {
         "k": "ぽ",
         "r": "po",
         "z": "像「ㄆㄛ」",
         "o": "ほ＋゜",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/po.mp3"
+        }
       }
     ],
     "notes": [
@@ -1401,7 +1614,10 @@
       {
         "k": "おばあさん",
         "r": "obaasan",
-        "z": "奶奶、外婆。ばあ 拉長"
+        "z": "奶奶、外婆。ばあ 拉長",
+        "audio": {
+          "src": "audio/irodori/A1/kana/words/obaasan.mp3"
+        }
       },
       {
         "k": "せんせい",
@@ -1495,7 +1711,10 @@
       {
         "k": "ざっし",
         "r": "zasshi",
-        "z": "雜誌"
+        "z": "雜誌",
+        "audio": {
+          "src": "audio/irodori/A1/kana/words/zasshi.mp3"
+        }
       },
       {
         "k": "いっぱい",
@@ -1566,7 +1785,10 @@
         "r": "kya",
         "z": "像「ㄎㄧㄚ」快速合成一拍",
         "o": "き＋小ゃ",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/kya.mp3"
+        }
       },
       {
         "k": "しゃ",
@@ -1574,7 +1796,10 @@
         "z": "像「ㄒㄧㄚ」合成一拍",
         "o": "し＋小ゃ",
         "ol": "由",
-        "ex": true
+        "ex": true,
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/sha.mp3"
+        }
       },
       {
         "k": "ちゃ",
@@ -1582,42 +1807,60 @@
         "z": "像「ㄑㄧㄚ」合成一拍",
         "o": "ち＋小ゃ",
         "ol": "由",
-        "ex": true
+        "ex": true,
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/cha.mp3"
+        }
       },
       {
         "k": "にゃ",
         "r": "nya",
         "z": "像「ㄋㄧㄚ」快速合成一拍",
         "o": "に＋小ゃ",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/nya.mp3"
+        }
       },
       {
         "k": "ひゃ",
         "r": "hya",
         "z": "像「ㄏㄧㄚ」快速合成一拍",
         "o": "ひ＋小ゃ",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/hya.mp3"
+        }
       },
       {
         "k": "みゃ",
         "r": "mya",
         "z": "像「ㄇㄧㄚ」快速合成一拍",
         "o": "み＋小ゃ",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/mya.mp3"
+        }
       },
       {
         "k": "りゃ",
         "r": "rya",
         "z": "像「ㄌㄧㄚ」快速合成一拍，舌尖輕彈",
         "o": "り＋小ゃ",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/rya.mp3"
+        }
       },
       {
         "k": "ぎゃ",
         "r": "gya",
         "z": "像「ㄍㄧㄚ」快速合成一拍，聲帶震動",
         "o": "ぎ＋小ゃ",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/gya.mp3"
+        }
       },
       {
         "k": "じゃ",
@@ -1625,21 +1868,30 @@
         "z": "像「ㄐㄧㄚ」合成一拍，聲帶震動",
         "o": "じ＋小ゃ",
         "ol": "由",
-        "ex": true
+        "ex": true,
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/ja.mp3"
+        }
       },
       {
         "k": "びゃ",
         "r": "bya",
         "z": "像「ㄅㄧㄚ」快速合成一拍，聲帶震動",
         "o": "び＋小ゃ",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/bya.mp3"
+        }
       },
       {
         "k": "ぴゃ",
         "r": "pya",
         "z": "像「ㄆㄧㄚ」快速合成一拍",
         "o": "ぴ＋小ゃ",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/pya.mp3"
+        }
       }
     ],
     "notes": [
@@ -1709,7 +1961,10 @@
         "r": "kyu",
         "z": "像「ㄎㄧㄨ」快速合成一拍",
         "o": "き＋小ゅ",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/kyu.mp3"
+        }
       },
       {
         "k": "しゅ",
@@ -1717,7 +1972,10 @@
         "z": "像「ㄒㄧㄨ」合成一拍",
         "o": "し＋小ゅ",
         "ol": "由",
-        "ex": true
+        "ex": true,
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/shu.mp3"
+        }
       },
       {
         "k": "ちゅ",
@@ -1725,42 +1983,60 @@
         "z": "像「ㄑㄧㄨ」合成一拍",
         "o": "ち＋小ゅ",
         "ol": "由",
-        "ex": true
+        "ex": true,
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/chu.mp3"
+        }
       },
       {
         "k": "にゅ",
         "r": "nyu",
         "z": "像「ㄋㄧㄨ」快速合成一拍",
         "o": "に＋小ゅ",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/nyu.mp3"
+        }
       },
       {
         "k": "ひゅ",
         "r": "hyu",
         "z": "像「ㄏㄧㄨ」快速合成一拍",
         "o": "ひ＋小ゅ",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/hyu.mp3"
+        }
       },
       {
         "k": "みゅ",
         "r": "myu",
         "z": "像「ㄇㄧㄨ」快速合成一拍",
         "o": "み＋小ゅ",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/myu.mp3"
+        }
       },
       {
         "k": "りゅ",
         "r": "ryu",
         "z": "像「ㄌㄧㄨ」快速合成一拍，舌尖輕彈",
         "o": "り＋小ゅ",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/ryu.mp3"
+        }
       },
       {
         "k": "ぎゅ",
         "r": "gyu",
         "z": "像「ㄍㄧㄨ」快速合成一拍，聲帶震動",
         "o": "ぎ＋小ゅ",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/gyu.mp3"
+        }
       },
       {
         "k": "じゅ",
@@ -1768,21 +2044,30 @@
         "z": "像「ㄐㄧㄨ」合成一拍，聲帶震動",
         "o": "じ＋小ゅ",
         "ol": "由",
-        "ex": true
+        "ex": true,
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/ju.mp3"
+        }
       },
       {
         "k": "びゅ",
         "r": "byu",
         "z": "像「ㄅㄧㄨ」快速合成一拍，聲帶震動",
         "o": "び＋小ゅ",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/byu.mp3"
+        }
       },
       {
         "k": "ぴゅ",
         "r": "pyu",
         "z": "像「ㄆㄧㄨ」快速合成一拍",
         "o": "ぴ＋小ゅ",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/pyu.mp3"
+        }
       }
     ],
     "notes": [
@@ -1851,7 +2136,10 @@
         "r": "kyo",
         "z": "像「ㄎㄧㄛ」快速合成一拍",
         "o": "き＋小ょ",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/kyo.mp3"
+        }
       },
       {
         "k": "しょ",
@@ -1859,7 +2147,10 @@
         "z": "像「ㄒㄧㄛ」合成一拍",
         "o": "し＋小ょ",
         "ol": "由",
-        "ex": true
+        "ex": true,
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/sho.mp3"
+        }
       },
       {
         "k": "ちょ",
@@ -1867,42 +2158,60 @@
         "z": "像「ㄑㄧㄛ」合成一拍",
         "o": "ち＋小ょ",
         "ol": "由",
-        "ex": true
+        "ex": true,
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/cho.mp3"
+        }
       },
       {
         "k": "にょ",
         "r": "nyo",
         "z": "像「ㄋㄧㄛ」快速合成一拍",
         "o": "に＋小ょ",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/nyo.mp3"
+        }
       },
       {
         "k": "ひょ",
         "r": "hyo",
         "z": "像「ㄏㄧㄛ」快速合成一拍",
         "o": "ひ＋小ょ",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/hyo.mp3"
+        }
       },
       {
         "k": "みょ",
         "r": "myo",
         "z": "像「ㄇㄧㄛ」快速合成一拍",
         "o": "み＋小ょ",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/myo.mp3"
+        }
       },
       {
         "k": "りょ",
         "r": "ryo",
         "z": "像「ㄌㄧㄛ」快速合成一拍，舌尖輕彈",
         "o": "り＋小ょ",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/ryo.mp3"
+        }
       },
       {
         "k": "ぎょ",
         "r": "gyo",
         "z": "像「ㄍㄧㄛ」快速合成一拍，聲帶震動",
         "o": "ぎ＋小ょ",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/gyo.mp3"
+        }
       },
       {
         "k": "じょ",
@@ -1910,21 +2219,30 @@
         "z": "像「ㄐㄧㄛ」合成一拍，聲帶震動",
         "o": "じ＋小ょ",
         "ol": "由",
-        "ex": true
+        "ex": true,
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/jo.mp3"
+        }
       },
       {
         "k": "びょ",
         "r": "byo",
         "z": "像「ㄅㄧㄛ」快速合成一拍，聲帶震動",
         "o": "び＋小ょ",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/byo.mp3"
+        }
       },
       {
         "k": "ぴょ",
         "r": "pyo",
         "z": "像「ㄆㄧㄛ」快速合成一拍",
         "o": "ぴ＋小ょ",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/hira/pyo.mp3"
+        }
       }
     ],
     "notes": [
@@ -1992,31 +2310,46 @@
         "k": "ア",
         "r": "a",
         "z": "跟 あ 同音",
-        "o": "阿"
+        "o": "阿",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/a.mp3"
+        }
       },
       {
         "k": "イ",
         "r": "i",
         "z": "跟 い 同音",
-        "o": "伊"
+        "o": "伊",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/i.mp3"
+        }
       },
       {
         "k": "ウ",
         "r": "u",
         "z": "跟 う 同音",
-        "o": "宇"
+        "o": "宇",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/u.mp3"
+        }
       },
       {
         "k": "エ",
         "r": "e",
         "z": "跟 え 同音",
-        "o": "江"
+        "o": "江",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/e.mp3"
+        }
       },
       {
         "k": "オ",
         "r": "o",
         "z": "跟 お 同音",
-        "o": "於"
+        "o": "於",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/o.mp3"
+        }
       }
     ],
     "notes": [
@@ -2040,31 +2373,46 @@
         "k": "カ",
         "r": "ka",
         "z": "跟 か 同音",
-        "o": "加"
+        "o": "加",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/ka.mp3"
+        }
       },
       {
         "k": "キ",
         "r": "ki",
         "z": "跟 き 同音",
-        "o": "幾"
+        "o": "幾",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/ki.mp3"
+        }
       },
       {
         "k": "ク",
         "r": "ku",
         "z": "跟 く 同音",
-        "o": "久"
+        "o": "久",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/ku.mp3"
+        }
       },
       {
         "k": "ケ",
         "r": "ke",
         "z": "跟 け 同音",
-        "o": "介"
+        "o": "介",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/ke.mp3"
+        }
       },
       {
         "k": "コ",
         "r": "ko",
         "z": "跟 こ 同音",
-        "o": "己"
+        "o": "己",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/ko.mp3"
+        }
       }
     ],
     "notes": [
@@ -2107,32 +2455,47 @@
         "k": "サ",
         "r": "sa",
         "z": "跟 さ 同音",
-        "o": "散"
+        "o": "散",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/sa.mp3"
+        }
       },
       {
         "k": "シ",
         "r": "shi",
         "z": "跟 し 同音",
         "o": "之",
-        "ex": true
+        "ex": true,
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/shi.mp3"
+        }
       },
       {
         "k": "ス",
         "r": "su",
         "z": "跟 す 同音",
-        "o": "須"
+        "o": "須",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/su.mp3"
+        }
       },
       {
         "k": "セ",
         "r": "se",
         "z": "跟 せ 同音",
-        "o": "世"
+        "o": "世",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/se.mp3"
+        }
       },
       {
         "k": "ソ",
         "r": "so",
         "z": "跟 そ 同音",
-        "o": "曽"
+        "o": "曽",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/so.mp3"
+        }
       }
     ],
     "notes": [
@@ -2185,33 +2548,48 @@
         "k": "タ",
         "r": "ta",
         "z": "跟 た 同音",
-        "o": "多"
+        "o": "多",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/ta.mp3"
+        }
       },
       {
         "k": "チ",
         "r": "chi",
         "z": "跟 ち 同音",
         "o": "千",
-        "ex": true
+        "ex": true,
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/chi.mp3"
+        }
       },
       {
         "k": "ツ",
         "r": "tsu",
         "z": "跟 つ 同音",
         "o": "川",
-        "ex": true
+        "ex": true,
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/tsu.mp3"
+        }
       },
       {
         "k": "テ",
         "r": "te",
         "z": "跟 て 同音",
-        "o": "天"
+        "o": "天",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/te.mp3"
+        }
       },
       {
         "k": "ト",
         "r": "to",
         "z": "跟 と 同音",
-        "o": "止"
+        "o": "止",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/to.mp3"
+        }
       }
     ],
     "notes": [
@@ -2271,31 +2649,46 @@
         "k": "ナ",
         "r": "na",
         "z": "跟 な 同音",
-        "o": "奈"
+        "o": "奈",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/na.mp3"
+        }
       },
       {
         "k": "ニ",
         "r": "ni",
         "z": "跟 に 同音",
-        "o": "仁"
+        "o": "仁",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/ni.mp3"
+        }
       },
       {
         "k": "ヌ",
         "r": "nu",
         "z": "跟 ぬ 同音",
-        "o": "奴"
+        "o": "奴",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/nu.mp3"
+        }
       },
       {
         "k": "ネ",
         "r": "ne",
         "z": "跟 ね 同音",
-        "o": "祢"
+        "o": "祢",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/ne.mp3"
+        }
       },
       {
         "k": "ノ",
         "r": "no",
         "z": "跟 の 同音",
-        "o": "乃"
+        "o": "乃",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/no.mp3"
+        }
       }
     ],
     "notes": [
@@ -2338,32 +2731,47 @@
         "k": "ハ",
         "r": "ha",
         "z": "跟 は 同音",
-        "o": "八"
+        "o": "八",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/ha.mp3"
+        }
       },
       {
         "k": "ヒ",
         "r": "hi",
         "z": "跟 ひ 同音",
-        "o": "比"
+        "o": "比",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/hi.mp3"
+        }
       },
       {
         "k": "フ",
         "r": "fu",
         "z": "跟 ふ 同音",
         "o": "不",
-        "ex": true
+        "ex": true,
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/fu.mp3"
+        }
       },
       {
         "k": "ヘ",
         "r": "he",
         "z": "跟 へ 同音",
-        "o": "部"
+        "o": "部",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/he.mp3"
+        }
       },
       {
         "k": "ホ",
         "r": "ho",
         "z": "跟 ほ 同音",
-        "o": "保"
+        "o": "保",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/ho.mp3"
+        }
       }
     ],
     "notes": [
@@ -2411,31 +2819,46 @@
         "k": "マ",
         "r": "ma",
         "z": "跟 ま 同音",
-        "o": "末"
+        "o": "末",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/ma.mp3"
+        }
       },
       {
         "k": "ミ",
         "r": "mi",
         "z": "跟 み 同音",
-        "o": "三"
+        "o": "三",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/mi.mp3"
+        }
       },
       {
         "k": "ム",
         "r": "mu",
         "z": "跟 む 同音",
-        "o": "牟"
+        "o": "牟",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/mu.mp3"
+        }
       },
       {
         "k": "メ",
         "r": "me",
         "z": "跟 め 同音",
-        "o": "女"
+        "o": "女",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/me.mp3"
+        }
       },
       {
         "k": "モ",
         "r": "mo",
         "z": "跟 も 同音",
-        "o": "毛"
+        "o": "毛",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/mo.mp3"
+        }
       }
     ],
     "notes": [
@@ -2494,19 +2917,28 @@
         "k": "ヤ",
         "r": "ya",
         "z": "跟 や 同音",
-        "o": "也"
+        "o": "也",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/ya.mp3"
+        }
       },
       {
         "k": "ユ",
         "r": "yu",
         "z": "跟 ゆ 同音",
-        "o": "由"
+        "o": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/yu.mp3"
+        }
       },
       {
         "k": "ヨ",
         "r": "yo",
         "z": "跟 よ 同音",
-        "o": "与"
+        "o": "与",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/yo.mp3"
+        }
       }
     ],
     "notes": [
@@ -2544,31 +2976,46 @@
         "k": "ラ",
         "r": "ra",
         "z": "跟 ら 同音",
-        "o": "良"
+        "o": "良",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/ra.mp3"
+        }
       },
       {
         "k": "リ",
         "r": "ri",
         "z": "跟 り 同音",
-        "o": "利"
+        "o": "利",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/ri.mp3"
+        }
       },
       {
         "k": "ル",
         "r": "ru",
         "z": "跟 る 同音",
-        "o": "流"
+        "o": "流",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/ru.mp3"
+        }
       },
       {
         "k": "レ",
         "r": "re",
         "z": "跟 れ 同音",
-        "o": "礼"
+        "o": "礼",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/re.mp3"
+        }
       },
       {
         "k": "ロ",
         "r": "ro",
         "z": "跟 ろ 同音",
-        "o": "呂"
+        "o": "呂",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/ro.mp3"
+        }
       }
     ],
     "notes": [
@@ -2627,7 +3074,10 @@
         "k": "ワ",
         "r": "wa",
         "z": "跟 わ 同音",
-        "o": "和"
+        "o": "和",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/wa.mp3"
+        }
       },
       {
         "k": "ヲ",
@@ -2635,13 +3085,19 @@
         "z": "跟 オ 同音，唸「ㄛ」，幾乎只當助詞用",
         "o": "乎",
         "ex": true,
-        "snd": "o"
+        "snd": "o",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/wo.mp3"
+        }
       },
       {
         "k": "ン",
         "r": "n",
         "z": "跟 ん 同音，鼻音。來源有不同說法",
-        "ex": true
+        "ex": true,
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/n.mp3"
+        }
       }
     ],
     "notes": [
@@ -2702,42 +3158,60 @@
         "r": "ga",
         "z": "跟 が 同音",
         "o": "カ＋゛",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/ga.mp3"
+        }
       },
       {
         "k": "ギ",
         "r": "gi",
         "z": "跟 ぎ 同音",
         "o": "キ＋゛",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/gi.mp3"
+        }
       },
       {
         "k": "グ",
         "r": "gu",
         "z": "跟 ぐ 同音",
         "o": "ク＋゛",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/gu.mp3"
+        }
       },
       {
         "k": "ゲ",
         "r": "ge",
         "z": "跟 げ 同音",
         "o": "ケ＋゛",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/ge.mp3"
+        }
       },
       {
         "k": "ゴ",
         "r": "go",
         "z": "跟 ご 同音",
         "o": "コ＋゛",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/go.mp3"
+        }
       },
       {
         "k": "ザ",
         "r": "za",
         "z": "跟 ざ 同音",
         "o": "サ＋゛",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/za.mp3"
+        }
       },
       {
         "k": "ジ",
@@ -2745,35 +3219,50 @@
         "z": "跟 じ 同音",
         "o": "シ＋゛",
         "ol": "由",
-        "ex": true
+        "ex": true,
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/ji.mp3"
+        }
       },
       {
         "k": "ズ",
         "r": "zu",
         "z": "跟 ず 同音",
         "o": "ス＋゛",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/zu.mp3"
+        }
       },
       {
         "k": "ゼ",
         "r": "ze",
         "z": "跟 ぜ 同音",
         "o": "セ＋゛",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/ze.mp3"
+        }
       },
       {
         "k": "ゾ",
         "r": "zo",
         "z": "跟 ぞ 同音",
         "o": "ソ＋゛",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/zo.mp3"
+        }
       },
       {
         "k": "ダ",
         "r": "da",
         "z": "跟 だ 同音",
         "o": "タ＋゛",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/da.mp3"
+        }
       },
       {
         "k": "ヂ",
@@ -2782,7 +3271,10 @@
         "o": "チ＋゛",
         "ol": "由",
         "ex": true,
-        "snd": "ji"
+        "snd": "ji",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/di.mp3"
+        }
       },
       {
         "k": "ヅ",
@@ -2791,21 +3283,30 @@
         "o": "ツ＋゛",
         "ol": "由",
         "ex": true,
-        "snd": "zu"
+        "snd": "zu",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/du.mp3"
+        }
       },
       {
         "k": "デ",
         "r": "de",
         "z": "跟 で 同音",
         "o": "テ＋゛",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/de.mp3"
+        }
       },
       {
         "k": "ド",
         "r": "do",
         "z": "跟 ど 同音",
         "o": "ト＋゛",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/do.mp3"
+        }
       }
     ],
     "notes": [
@@ -2870,70 +3371,100 @@
         "r": "ba",
         "z": "跟 ば 同音",
         "o": "ハ＋゛",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/ba.mp3"
+        }
       },
       {
         "k": "ビ",
         "r": "bi",
         "z": "跟 び 同音",
         "o": "ヒ＋゛",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/bi.mp3"
+        }
       },
       {
         "k": "ブ",
         "r": "bu",
         "z": "跟 ぶ 同音",
         "o": "フ＋゛",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/bu.mp3"
+        }
       },
       {
         "k": "ベ",
         "r": "be",
         "z": "跟 べ 同音",
         "o": "ヘ＋゛",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/be.mp3"
+        }
       },
       {
         "k": "ボ",
         "r": "bo",
         "z": "跟 ぼ 同音",
         "o": "ホ＋゛",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/bo.mp3"
+        }
       },
       {
         "k": "パ",
         "r": "pa",
         "z": "跟 ぱ 同音",
         "o": "ハ＋゜",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/pa.mp3"
+        }
       },
       {
         "k": "ピ",
         "r": "pi",
         "z": "跟 ぴ 同音",
         "o": "ヒ＋゜",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/pi.mp3"
+        }
       },
       {
         "k": "プ",
         "r": "pu",
         "z": "跟 ぷ 同音",
         "o": "フ＋゜",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/pu.mp3"
+        }
       },
       {
         "k": "ペ",
         "r": "pe",
         "z": "跟 ぺ 同音",
         "o": "ヘ＋゜",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/pe.mp3"
+        }
       },
       {
         "k": "ポ",
         "r": "po",
         "z": "跟 ぽ 同音",
         "o": "ホ＋゜",
-        "ol": "由"
+        "ol": "由",
+        "audio": {
+          "src": "audio/irodori/A1/kana/kata/po.mp3"
+        }
       }
     ],
     "notes": [
@@ -2999,7 +3530,12 @@
       {
         "k": "ベッド",
         "r": "beddo",
-        "z": "床。ッ 停一拍"
+        "z": "床。ッ 停一拍",
+        "audio": {
+          "src": "audio/irodori/A1/L02/02-30.mp3",
+          "start": 9.98,
+          "end": 10.76
+        }
       },
       {
         "k": "サッカー",
@@ -3014,7 +3550,12 @@
       {
         "k": "ジュース",
         "r": "juusu",
-        "z": "果汁"
+        "z": "果汁",
+        "audio": {
+          "src": "audio/irodori/A1/L02/02-29.mp3",
+          "start": 9.82,
+          "end": 10.66
+        }
       },
       {
         "k": "チョコ",

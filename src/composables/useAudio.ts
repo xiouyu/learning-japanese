@@ -3,6 +3,7 @@ import { speak } from './useSpeech';
 
 let player: HTMLAudioElement | null = null;
 let stopAt: number | null = null;
+let token = 0;
 
 function onTime() {
   if (player && stopAt !== null && player.currentTime >= stopAt) {
@@ -23,14 +24,32 @@ export function playAudio(ref: AudioRef, fallbackText?: string) {
   // 相對路徑：網站放在子路徑（例如 /learning-japanese/）也找得到
   if (!player.src.endsWith(ref.src)) player.src = ref.src;
   stopAt = ref.end ?? null;
-  const start = () => {
-    player!.currentTime = ref.start ?? 0;
-    player!.play().catch(() => {
-      if (fallbackText) speak(fallbackText);
-    });
+  const p = player;
+  const my = ++token;
+  const begin = ref.start ?? 0;
+  const fail = () => {
+    p.muted = false;
+    if (my === token && fallbackText) speak(fallbackText);
   };
-  if (player.readyState >= 1) start();
-  else player.addEventListener('loadedmetadata', start, { once: true });
+  if (p.readyState >= 1) {
+    p.muted = false;
+    p.currentTime = begin;
+    p.play().catch(fail);
+    return;
+  }
+  // 還沒載入：iPhone 只允許在點擊的當下呼叫 play()，等載入完才播會被擋掉。
+  // 所以先播放；要從中間開始的片段先靜音，跳到開始位置後再打開聲音。
+  p.muted = begin > 0;
+  p.addEventListener(
+    'loadedmetadata',
+    () => {
+      if (my !== token || begin === 0) return;
+      p.addEventListener('seeked', () => my === token && (p.muted = false), { once: true });
+      p.currentTime = begin;
+    },
+    { once: true },
+  );
+  p.play().catch(fail);
 }
 
 /** 有課本錄音就播錄音，沒有就用語音合成唸 */

@@ -1,5 +1,6 @@
 import { ref } from 'vue';
 import { Notify } from 'quasar';
+import { voiceScore } from '@/lib/voice';
 
 const supported = typeof window !== 'undefined' && 'speechSynthesis' in window;
 let jaVoice: SpeechSynthesisVoice | null = null;
@@ -11,7 +12,7 @@ export const voiceWarning = ref('');
 function pickVoice() {
   const vs = speechSynthesis.getVoices();
   const ja = vs.filter((v) => /^ja/i.test(v.lang));
-  jaVoice = ja.find((v) => /Google|Natural|Online/i.test(v.name)) ?? ja[0] ?? null;
+  jaVoice = ja.reduce<SpeechSynthesisVoice | null>((best, v) => (!best || voiceScore(v) > voiceScore(best) ? v : best), null);
   return vs.length;
 }
 

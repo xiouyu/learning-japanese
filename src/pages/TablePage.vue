@@ -39,9 +39,9 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useQuasar } from 'quasar';
-import { GOJUON } from '@/data';
+import { ALL_KANA, GOJUON } from '@/data';
 import { toKata } from '@/lib/kana';
-import { speak } from '@/composables/useSpeech';
+import { say } from '@/composables/useAudio';
 import { useProgressStore } from '@/stores/progress';
 
 defineOptions({ name: 'TablePage' });
@@ -52,7 +52,7 @@ const kata = computed(() => p.d.tmode === 'kata');
 const cv = (t: string) => (kata.value ? toKata(t) : t);
 
 function tap(ch: string, step: number) {
-  if (p.availSet.has(ch)) speak(ch);
+  if (p.availSet.has(ch)) say(ALL_KANA.find((k) => k.k === ch) ?? {}, ch);
   else $q.notify({ message: `第 ${step} 步會學到這個字` });
 }
 </script>
