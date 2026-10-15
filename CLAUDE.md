@@ -13,3 +13,4 @@
 - 學習紀錄格式和合併規則在 `src/lib/progress.ts`；改格式時 `normalize()` 要能讀舊資料
 - 自訂樣式在 `src/css/app.css`，class 名稱不要用 Quasar 已經用的工具類別（例如 `row`、`wrap`、`col`）
 - 部署：推到 `main` 會自動發布到 GitHub Pages
+- 課本原始教材（PDF、mp3）在私人專案 `xiouyu/learning-japanese-materials`，不要加進這個公開專案；網站只放壓縮過的音檔（`public/audio/`）

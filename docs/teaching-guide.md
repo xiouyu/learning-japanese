@@ -76,4 +76,4 @@
 
 之後每一課照課本的 Can-do 分成幾步，接在後面。下一課：第 2 課 すみません、よくわかりません。
 
-課本 PDF 在 `docs/日文教材/A1/`（`FT_X_L01.pdf` 是第 1 課），課本內容以 PDF 為準；課本句子的步驟用 `"kind": "phrase"`，會話放在 `dialogs`，出處寫在 `source`。
+課本 PDF 和原始音檔放在**私人專案** [xiouyu/learning-japanese-materials](https://github.com/xiouyu/learning-japanese-materials) 的 `A1/`（`FT_X_L01.pdf` 是第 1 課，`mp3/X_[01-02]_*.mp3` 是音檔 01-02），不要放進這個公開專案。做新的一課時，請使用者把私人專案加進對話。課本內容以 PDF 為準；網站用的音檔重新壓成 64 kbps 單聲道、拿掉封面圖片後放在 `public/audio/irodori/A1/Lxx/`；課本句子的步驟用 `"kind": "phrase"`，會話放在 `dialogs`，出處寫在 `source`。

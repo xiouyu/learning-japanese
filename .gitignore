@@ -32,3 +32,6 @@ yarn-error.log*
 
 # 備份腳本：這台電腦專用的設定、密碼、快照（不要 commit）
 /backup/local/
+
+# 課本原始教材放在私人專案 xiouyu/learning-japanese-materials，不要再加進這個公開專案
+/docs/日文教材/
