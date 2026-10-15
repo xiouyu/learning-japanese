@@ -101,6 +101,10 @@ docs/                   教學指南、Supabase 設定說明
 
 第一次使用要到 GitHub 專案的 **Settings › Pages**，把 **Source** 設成 **GitHub Actions**。要啟用登入同步，另外在 **Settings › Secrets and variables › Actions › Variables** 新增 `SUPABASE_URL` 和 `SUPABASE_ANON_KEY`。
 
+## 備份
+
+`backup/` 裡的 PowerShell 腳本每天把 Supabase 上的學習進度備份到家裡電腦的 SQL Server，也能從備份還原。第一次設定請用 Claude Code 打開專案，說「照 backup/CLAUDE-SETUP.md 幫我設定學習進度備份」。詳見 [backup/README.md](backup/README.md)。
+
 ## 字型
 
 假名用日本小學課本的「教科書體」：Windows 內建 UD デジタル教科書体，其他裝置（手機、Mac）沒有這個字型，改用 Google Fonts 的 BIZ UD明朝。

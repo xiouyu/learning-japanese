@@ -29,3 +29,6 @@ yarn-error.log*
 /src-pwa/manifest.temporary*
 /src-pwa/node_modules
 !.env.example
+
+# 備份腳本：這台電腦專用的設定、密碼、快照（不要 commit）
+/backup/local/
