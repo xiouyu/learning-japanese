@@ -45,7 +45,19 @@ export default defineConfig(() => {
       workboxMode: 'GenerateSW',
       extendPWAGenerateSWOptions(cfg) {
         // Google Fonts 第一次載入後快取起來，離線也能顯示手寫字型
+        // 課本音檔不預先下載（之後課數變多會很大），聽過的才存起來，離線也能再聽
+        cfg.globIgnores = [...(cfg.globIgnores ?? []), '**/audio/**'];
         cfg.runtimeCaching = [
+          {
+            urlPattern: /\/audio\/.+\.mp3$/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'lesson-audio',
+              rangeRequests: true,
+              cacheableResponse: { statuses: [0, 200] },
+              expiration: { maxEntries: 600 },
+            },
+          },
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\//,
             handler: 'StaleWhileRevalidate',

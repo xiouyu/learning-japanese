@@ -47,3 +47,19 @@ describe('出題', () => {
     }
   });
 });
+
+describe('課本音檔', () => {
+  it('資料裡用到的音檔都存在，剪輯的時間合理', async () => {
+    const { existsSync } = await import('node:fs');
+    const refs = STEPS.flatMap((s) => [
+      ...s.kana.map((k) => k.audio),
+      ...s.words.map((w) => w.audio),
+      ...(s.dialogs ?? []).map((d) => d.audio),
+    ]).filter((a) => a !== undefined);
+    expect(refs.length).toBeGreaterThan(0);
+    for (const a of refs) {
+      expect(existsSync(`public/${a.src}`), a.src).toBe(true);
+      if (a.end !== undefined) expect(a.end, a.src).toBeGreaterThan(a.start ?? 0);
+    }
+  });
+});
