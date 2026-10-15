@@ -42,7 +42,11 @@
 
     <!-- 題目 -->
     <div v-else-if="q" class="qbox">
-      <div class="counter">第 {{ i + 1 }} / {{ qs.length }} 題・答對 {{ score }}{{ unlock ? '・' + ask : '' }}</div>
+      <div class="qhead">
+        <div class="counter">第 {{ i + 1 }} / {{ qs.length }} 題・答對 {{ score }}{{ unlock ? '・' + ask : '' }}</div>
+        <!-- 放在右上角，跟下方的「下一題」離遠一點，避免連按時誤觸 -->
+        <button v-if="unlock" class="btn ghost quit-btn" @click="quit">離開測驗</button>
+      </div>
       <div class="qprompt">
         <span v-if="q.m === 'k2r'" class="kana" :style="{ fontSize: fitPx(q.a.k, 96, 440) }">{{ q.a.k }}</span>
         <span v-else-if="q.m === 'r2k'" class="mono">{{ q.a.r }}</span>
@@ -71,9 +75,6 @@
       <div v-if="answered" class="hrow">
         <button class="btn primary" @click="next">{{ i === qs.length - 1 ? '看結果' : '下一題' }} →</button>
       </div>
-      <div v-if="unlock && !answered" class="hrow">
-        <button class="btn ghost" @click="start(0)">離開解鎖測驗</button>
-      </div>
     </div>
   </section>
 </template>
@@ -81,6 +82,7 @@
 <script setup lang="ts">
 import { computed, onActivated, onDeactivated, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useQuasar } from 'quasar';
 import { ALL_KANA, ROADMAP, STEPS, stepLabel } from '@/data';
 import type { KanaItem } from '@/data/types';
 import { MODES, PASS, fitPx, makeQs, type Question, type QuizMode } from '@/lib/kana';
@@ -94,6 +96,7 @@ defineOptions({ name: 'QuizPage' });
 const p = useProgressStore();
 const route = useRoute();
 const router = useRouter();
+const $q = useQuasar();
 
 const qs = ref<Question[]>([]);
 const i = ref(0);
@@ -132,6 +135,18 @@ const resultMsg = computed(() => {
   if (nextR) return `通過了！第 ${id} 步完成。第 ${id + 1} 步的內容還沒加進網站，準備好再繼續。`;
   return '通過了！全部步驟都完成了。';
 });
+
+/** 離開解鎖測驗：已經開始作答就先確認，避免誤觸 */
+function quit() {
+  if (i.value === 0 && !answered.value) return start(0);
+  $q.dialog({
+    title: '離開解鎖測驗？',
+    message: '這次的作答不會保留，下次要從第 1 題重新開始。',
+    ok: { label: '離開', flat: true, noCaps: true, color: 'negative' },
+    cancel: { label: '繼續作答', unelevated: true, noCaps: true, color: 'primary' },
+    focus: 'cancel',
+  }).onOk(() => start(0));
+}
 
 function start(unlockId: number) {
   const u = unlockId;

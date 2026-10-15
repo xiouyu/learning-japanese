@@ -235,3 +235,5 @@ body,body.body--dark{background:var(--bg);color:var(--ink);font-family:var(--f-b
 .credit{font-size:12px}
 .voice-list{max-height:min(46vh,360px);overflow-y:auto}
 .voice-tip{font-size:13px}
+.qhead{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.quit-btn{font-size:13px;padding:6px 12px;flex:none}
