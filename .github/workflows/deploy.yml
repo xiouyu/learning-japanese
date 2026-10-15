@@ -23,11 +23,22 @@ jobs:
         with:
           node-version: 22
           cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            src-pwa/package-lock.json
       - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
       - run: npm run build
+        env:
+          # 網站放在 https://<帳號>.github.io/<專案名稱>/，專案改名也不用改這裡
+          PUBLIC_PATH: /${{ github.event.repository.name }}/
+          # 在 Settings › Secrets and variables › Actions › Variables 設定；沒設定就不啟用登入同步
+          QCLI_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          QCLI_SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: dist/pwa
 
   deploy:
     needs: build

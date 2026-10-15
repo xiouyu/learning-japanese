@@ -1,15 +1,38 @@
 {
   "name": "gojuon-renshucho",
-  "private": true,
-  "version": "1.0.0",
-  "description": "五十音練習帳：いろどり 入門 A1 前的假名基礎互動練習網站",
+  "version": "2.0.0",
+  "description": "五十音練習帳：いろどり 入門 A1 前的假名基礎互動練習",
+  "productName": "五十音練習帳",
   "type": "module",
+  "private": true,
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "dev": "quasar dev -m pwa",
+    "build": "quasar build -m pwa",
+    "build:spa": "quasar build",
+    "typecheck": "vue-tsc --noEmit",
+    "test": "vitest run",
+    "postinstall": "npm install --prefix src-pwa --no-audit --no-fund && quasar prepare --silent"
+  },
+  "dependencies": {
+    "@quasar/extras": "^2.1.0",
+    "@supabase/supabase-js": "^2.117.3",
+    "pinia": "^4.0.2",
+    "quasar": "^2.35.1",
+    "register-service-worker": "^1.7.2",
+    "vue": "^3.5.22",
+    "vue-router": "^5.0.6"
   },
   "devDependencies": {
-    "vite": "^6.3.5"
+    "@quasar/app-vite": "^3.10.3",
+    "@types/node": "^22.19.11",
+    "autoprefixer": "^10.4.27",
+    "postcss": "^8.5.8",
+    "typescript": "^6.0.0",
+    "vitest": "^5.0.4",
+    "vue-tsc": "^3.3.3",
+    "workbox-build": "^7.4.1"
+  },
+  "engines": {
+    "node": ">= 26 || ^24 || ^22.12"
   }
 }

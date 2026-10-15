@@ -13,25 +13,22 @@
   --shu-soft:#F8E4DF;
   --ok:#2F7A52;
   --ok-soft:#E0F0E6;
-  --f-kana:"Klee One","Hiragino Mincho ProN","Yu Mincho",serif;
+  /* 假名：Windows 內建的 UD デジタル教科書体（日本小學課本的字體，筆畫跟手寫一致），其他裝置用 BIZ UD明朝 */
+  --f-kana:"UD Digi Kyokasho N-R","UD デジタル 教科書体 N-R","UD Digi Kyokasho NK-R","BIZ UDMincho","Hiragino Mincho ProN","Yu Mincho",serif;
   --f-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
   --f-mono:"DM Mono",ui-monospace,Consolas,monospace;
+  --q-primary:#2C4F82;
 }
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --bg:#13171E; --surface:#1B212A; --ink:#E6E9EE; --muted:#9AA3B1; --line:#2E3643;
-    --accent:#8DAEE0; --accent-soft:#22314A; --on-accent:#0F1622; --grid:#5E3B35;
-    --shu:#F08B76; --shu-soft:#3A2420; --ok:#7FC79E; --ok-soft:#1D3328; color-scheme:dark;
-  }
-}
-:root[data-theme="dark"]{
+/* 深色主題：Quasar Dark 設成 auto，會跟著系統切換並在 body 加上 body--dark */
+body.body--dark{
   --bg:#13171E; --surface:#1B212A; --ink:#E6E9EE; --muted:#9AA3B1; --line:#2E3643;
   --accent:#8DAEE0; --accent-soft:#22314A; --on-accent:#0F1622; --grid:#5E3B35;
   --shu:#F08B76; --shu-soft:#3A2420; --ok:#7FC79E; --ok-soft:#1D3328; color-scheme:dark;
+  --q-primary:#8DAEE0; --q-dark-page:#13171E; --q-dark:#1B212A;
 }
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.7}
-.wrap{max-width:960px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.page-wrap{max-width:960px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 h1,h2,h3{text-wrap:balance;margin:0;line-height:1.3}
 p{margin:0}
 .kana{font-family:var(--f-kana)}
@@ -51,13 +48,16 @@ p{margin:0}
 
 /* tabs */
 .tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
-.tabs .wrap{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
-.tab{appearance:none;border:0;background:none;color:var(--muted);font:inherit;font-weight:500;padding:12px 14px;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap}
-.tab:hover{color:var(--ink)}
-.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
-button:focus-visible,.tab:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.tabbar{color:var(--muted);min-height:0}
+.tabbar .q-tab{padding:0 14px;min-height:48px;font-weight:500;border-bottom:2px solid transparent;opacity:1}
+.tabbar .q-tab__label{font-size:16px;font-weight:500;line-height:1.3}
+.tabbar .q-tab:hover{color:var(--ink)}
+.tabbar .q-tab.tab-active{color:var(--ink);border-bottom-color:var(--accent)}
+.tabbar .q-focus-helper{display:none}
+@media (max-width:480px){.tabbar .q-tab{padding:0 10px}}
+button:focus-visible,.q-tab:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
-main .wrap{padding-block:24px 72px}
+main .page-wrap{padding-block:24px 72px}
 .panel{display:grid;gap:28px}
 .sec{display:grid;gap:12px}
 .sec h3{font-size:15px;letter-spacing:.06em;color:var(--muted);font-weight:500}
@@ -69,7 +69,7 @@ main .wrap{padding-block:24px 72px}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
 .btn.ghost{background:transparent}
 .btn svg{width:16px;height:16px;flex:none}
-.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.hrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .chip{appearance:none;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:5px 14px;font:inherit;font-size:14px;cursor:pointer;display:inline-flex;gap:8px;align-items:baseline}
 .chip .kn{font-family:var(--f-kana);font-size:16px}
 .chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
@@ -187,3 +187,15 @@ canvas.pad{width:100%;aspect-ratio:1/1;max-width:100%;display:block;border-radiu
 .result.pass{border-color:var(--ok)}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:8px;font-size:14px;z-index:20;max-width:calc(100% - 32px)}
 @media (prefers-reduced-motion:reduce){.fc-in{transition:none}}
+
+/* Quasar 的 body 預設會蓋掉字級和行高，這裡再指定一次 */
+body,body.body--dark{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.7}
+.top-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.sync-btn{white-space:nowrap}
+.banner.offline{border-color:var(--accent);background:var(--accent-soft)}
+.account-card{width:min(420px,calc(100vw - 32px));background:var(--surface);color:var(--ink)}
+.account-title{font-size:20px;font-weight:700}
+.account-sub{font-size:14px;margin-top:4px}
+.account-body{display:grid;gap:10px;padding-top:0}
+.account-err{color:var(--shu);font-size:13px;word-break:break-word}
+.q-notification{font-family:var(--f-body)}
