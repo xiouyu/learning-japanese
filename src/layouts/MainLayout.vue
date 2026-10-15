@@ -9,6 +9,9 @@
               <q-icon :name="syncIcon" size="18px" />
               <span class="sync-text">{{ syncLabel }}</span>
             </button>
+            <button class="btn ghost icon-btn theme-btn" aria-label="朗讀語音" title="朗讀語音" @click="voice = true">
+              <q-icon name="record_voice_over" size="20px" />
+            </button>
             <button class="btn ghost icon-btn theme-btn" :aria-label="themeLabel" :title="themeLabel" @click="toggleTheme">
               <q-icon :name="$q.dark.isActive ? 'light_mode' : 'dark_mode'" size="20px" />
             </button>
@@ -42,6 +45,7 @@
     </main>
 
     <AccountDialog v-if="sync.enabled" v-model="account" />
+    <VoiceDialog v-model="voice" />
   </div>
 </template>
 
@@ -54,6 +58,7 @@ import { useSyncStore } from '@/stores/sync';
 import { saveTheme, type ThemePref } from '@/lib/theme';
 import ProgressStrip from '@/components/ProgressStrip.vue';
 import AccountDialog from '@/components/AccountDialog.vue';
+import VoiceDialog from '@/components/VoiceDialog.vue';
 
 const TABS = [
   { to: '/learn', label: '學習' },
@@ -66,6 +71,7 @@ const TABS = [
 const sync = useSyncStore();
 const $q = useQuasar();
 const account = ref(false);
+const voice = ref(false);
 
 // 點信裡的登入連結回來後，顯示登入結果
 watch(

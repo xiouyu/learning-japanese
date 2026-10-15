@@ -1,4 +1,4 @@
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { Notify } from 'quasar';
 import { voiceScore } from '@/lib/voice';
 
@@ -9,11 +9,50 @@ let started = false;
 /** 頁面上方的提示：不支援語音或找不到日文語音 */
 export const voiceWarning = ref('');
 
+/** iPhone / iPad：網頁指定語音時會蓋掉「設定 › 輔助使用 › 朗讀內容」裡選的語音 */
+export const isIOS =
+  typeof navigator !== 'undefined' &&
+  (/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1));
+
+/** 這台裝置的日文語音（分數高的在前面） */
+export const jaVoices = ref<SpeechSynthesisVoice[]>([]);
+
+/**
+ * 使用者選的語音：'auto' 自動（iPhone 跟著系統設定，其他裝置挑最自然的），
+ * 'system' 一律跟著系統設定，其他值是某個語音的 voiceURI。
+ * 每台裝置的語音不一樣，所以只存在這台裝置，不跟著登入同步。
+ */
+const VOICE_KEY = 'gojuon:voice';
+function loadChoice() {
+  try {
+    return localStorage.getItem(VOICE_KEY) || 'auto';
+  } catch {
+    return 'auto';
+  }
+}
+export const voiceChoice = ref(loadChoice());
+watch(voiceChoice, (v) => {
+  try {
+    localStorage.setItem(VOICE_KEY, v);
+  } catch {
+    /* 無痕模式等情況存不了，就只在這次有效 */
+  }
+});
+
 function pickVoice() {
   const vs = speechSynthesis.getVoices();
   const ja = vs.filter((v) => /^ja/i.test(v.lang));
-  jaVoice = ja.reduce<SpeechSynthesisVoice | null>((best, v) => (!best || voiceScore(v) > voiceScore(best) ? v : best), null);
+  jaVoices.value = [...ja].sort((a, b) => voiceScore(b) - voiceScore(a));
+  jaVoice = jaVoices.value[0] ?? null;
   return vs.length;
+}
+
+/** 實際要用的語音；null 表示不指定，交給系統 */
+function currentVoice(): SpeechSynthesisVoice | null {
+  const c = voiceChoice.value;
+  if (c === 'system') return null;
+  if (c === 'auto') return isIOS ? null : jaVoice;
+  return jaVoices.value.find((v) => v.voiceURI === c) ?? (isIOS ? null : jaVoice);
 }
 
 function checkVoices() {
@@ -46,7 +85,8 @@ export function speak(text: string) {
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
     u.lang = 'ja-JP';
-    if (jaVoice) u.voice = jaVoice;
+    const v = currentVoice();
+    if (v) u.voice = v;
     u.rate = 0.8;
     speechSynthesis.speak(u);
   } catch {
