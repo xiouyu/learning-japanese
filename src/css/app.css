@@ -237,3 +237,6 @@ body,body.body--dark{background:var(--bg);color:var(--ink);font-family:var(--f-b
 .voice-tip{font-size:13px}
 .qhead{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .quit-btn{font-size:13px;padding:6px 12px;flex:none}
+.exam-parts{list-style:none;margin:0;padding:0;display:grid;gap:4px;max-width:420px}
+.exam-parts li{display:flex;justify-content:space-between;gap:12px;padding:4px 0;border-bottom:1px solid var(--line)}
+.exam-parts li.weak b{color:var(--shu)}

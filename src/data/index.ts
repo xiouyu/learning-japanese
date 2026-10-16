@@ -33,6 +33,14 @@ export const ALL_KANA: KanaItem[] = STEPS.flatMap((s) => s.kana.map((k) => ({ ..
 export const BASE = new Set(GOJUON.flatMap((r) => r[1].filter((c) => c !== null).map((c) => c[0])));
 export const BASE_K = new Set([...BASE].map(toKata));
 
+/** 假名的最後一步：通過這一步後要先考五十音大會考，才會解鎖課本第 1 課 */
+export const KANA_LAST = Math.max(...STEPS.filter((s) => s.kind !== 'phrase').map((s) => s.id));
+
+/** 大會考的出題範圍：假名步驟依單元分組 */
+export const EXAM_GROUPS: { part: string; kana: KanaItem[] }[] = [
+  ...new Set(STEPS.filter((s) => s.id <= KANA_LAST).map((s) => s.part)),
+].map((part) => ({ part, kana: ALL_KANA.filter((k) => k.step <= KANA_LAST && STEPS[k.step - 1]!.part === part) }));
+
 export function stepLabel(n: number): string {
   const s = STEPS.find((x) => x.id === n);
   if (s) return s.row;

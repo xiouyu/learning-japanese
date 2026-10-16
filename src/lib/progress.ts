@@ -4,6 +4,8 @@ import type { QuizMode } from './kana';
 export interface ProgressData {
   /** 已經通過解鎖測驗的步數 */
   passed: number;
+  /** 通過五十音大會考了沒（通過才會解鎖課本第 1 課） */
+  exam: boolean;
   /** 學習頁正在看第幾步 */
   step: number;
   /** 字卡、測驗的練習範圍（步驟 id） */
@@ -20,6 +22,7 @@ export interface ProgressData {
 
 export const emptyProgress = (): ProgressData => ({
   passed: 0,
+  exam: false,
   step: 1,
   scope: [],
   lastU: 0,
@@ -49,8 +52,11 @@ function write(k: string, v: unknown) {
   }
 }
 
-/** 把任何來源（localStorage、雲端）的資料整理成合法的 ProgressData */
-export function normalize(raw: Partial<ProgressData> | null | undefined, maxStep: number): ProgressData {
+/**
+ * 把任何來源（localStorage、雲端）的資料整理成合法的 ProgressData。
+ * examAt 是大會考接在第幾步後面：舊資料沒有 exam，已經學到課本的人當作考過了。
+ */
+export function normalize(raw: Partial<ProgressData> | null | undefined, maxStep: number, examAt = 0): ProgressData {
   const d = emptyProgress();
   if (!raw) return d;
   const int = (v: unknown, lo: number, hi: number, dflt: number) => {
@@ -58,6 +64,7 @@ export function normalize(raw: Partial<ProgressData> | null | undefined, maxStep
     return Number.isFinite(n) ? Math.max(lo, Math.min(hi, n)) : dflt;
   };
   d.passed = int(raw.passed, 0, maxStep, 0);
+  d.exam = raw.exam === true || (examAt > 0 && d.passed > examAt);
   d.step = int(raw.step, 1, maxStep, 1);
   d.lastU = int(raw.lastU, 0, maxStep, 0);
   d.scope = Array.isArray(raw.scope)
@@ -76,7 +83,7 @@ export function normalize(raw: Partial<ProgressData> | null | undefined, maxStep
 }
 
 /** 讀取這台裝置上的紀錄（相容單一 HTML 版本留下的 key） */
-export function loadLocal(maxStep: number): ProgressData {
+export function loadLocal(maxStep: number, examAt = 0): ProgressData {
   let passed = read<number | null>('passed', null);
   if (passed === null) {
     const legacy = read('seen', 0); // 更早的版本：當時正在學第 seen 步
@@ -85,6 +92,7 @@ export function loadLocal(maxStep: number): ProgressData {
   return normalize(
     {
       passed,
+      exam: read('exam', false),
       step: read('step', 1),
       scope: read('scope', []),
       lastU: read('lastU', 0),
@@ -94,6 +102,7 @@ export function loadLocal(maxStep: number): ProgressData {
       updatedAt: read('updatedAt', 0),
     },
     maxStep,
+    examAt,
   );
 }
 
@@ -103,7 +112,7 @@ export function saveLocal(d: ProgressData) {
 
 /**
  * 合併兩台裝置的紀錄：
- * - 進度和熟練度只會增加，取兩邊較大的值，不會因為同步而倒退
+ * - 進度、大會考和熟練度只會增加，取兩邊較大的值，不會因為同步而倒退
  * - 練習範圍、測驗模式這類偏好，以最後修改的那一邊為準
  */
 export function mergeProgress(a: ProgressData, b: ProgressData): ProgressData {
@@ -112,6 +121,7 @@ export function mergeProgress(a: ProgressData, b: ProgressData): ProgressData {
   for (const [k, v] of Object.entries(b.mastery)) mastery[k] = Math.max(mastery[k] ?? 0, v);
   return {
     passed: Math.max(a.passed, b.passed),
+    exam: a.exam || b.exam,
     step: newer.step,
     scope: [...newer.scope],
     lastU: Math.max(a.lastU, b.lastU),

@@ -74,3 +74,25 @@ export function makeQs(P: KanaItem[], modeFn: () => QuizMode, D: KanaItem[] = P,
     return { a, m: modeFn(), opts: shuffle(opts) };
   });
 }
+
+/** 五十音大會考：學完假名、進入課本第 1 課前的總複習 */
+export const EXAM_N = 30;
+export const EXAM_PASS = 27;
+
+/**
+ * 大會考出題：groups 是每個單元的字（平假名、濁音、拗音、片假名…），
+ * 每個單元平均出題，干擾選項優先用同一個單元的字，不夠再從全部的字補。
+ */
+export function makeExam(groups: KanaItem[][], modeFn: () => QuizMode, n = EXAM_N): Question[] {
+  const all = groups.flat();
+  const qs: Question[] = [];
+  groups.forEach((g, i) => {
+    // 題數除不盡時，多的題目給前面的單元
+    const m = Math.floor(n / groups.length) + (i < n % groups.length ? 1 : 0);
+    if (m && g.length) qs.push(...makeQs(g, modeFn, all, m));
+  });
+  // 打散順序；同一個字連續出現就重新打散
+  let out = shuffle(qs);
+  for (let t = 0; t < 20 && out.some((x, i) => i > 0 && x.a.k === out[i - 1]!.a.k); t++) out = shuffle(qs);
+  return out;
+}

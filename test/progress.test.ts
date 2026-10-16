@@ -19,6 +19,13 @@ describe('normalize', () => {
   it('沒有資料時回傳初始值', () => {
     expect(normalize(null, MAX)).toEqual(emptyProgress());
   });
+
+  it('舊資料沒有大會考紀錄：已經學到課本的人當作考過，剛學完假名的人要考', () => {
+    expect(normalize({ passed: 40 }, 153, 33).exam).toBe(true);
+    expect(normalize({ passed: 33 }, 153, 33).exam).toBe(false);
+    expect(normalize({ passed: 33, exam: true }, 153, 33).exam).toBe(true);
+    expect(normalize({ passed: 33, exam: 'yes' as never }, 153, 33).exam).toBe(false);
+  });
 });
 
 describe('mergeProgress', () => {
@@ -38,6 +45,12 @@ describe('mergeProgress', () => {
     expect(m.qmode).toBe('a2k');
     expect(m.tmode).toBe('hira');
     expect(m.updatedAt).toBe(200);
+  });
+
+  it('任一邊通過大會考就算通過', () => {
+    expect(mergeProgress({ ...laptop, exam: true }, phone).exam).toBe(true);
+    expect(mergeProgress(laptop, { ...phone, exam: true }).exam).toBe(true);
+    expect(mergeProgress(laptop, phone).exam).toBe(false);
   });
 
   it('順序不影響結果', () => {

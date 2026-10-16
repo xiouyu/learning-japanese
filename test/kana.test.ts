@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { ALL_KANA, BASE, BASE_K, STEPS } from '@/data';
-import { makeQs, snd, toKata } from '@/lib/kana';
+import { ALL_KANA, BASE, BASE_K, EXAM_GROUPS, KANA_LAST, STEPS } from '@/data';
+import { EXAM_N, makeExam, makeQs, snd, toKata } from '@/lib/kana';
 
 describe('教材資料', () => {
   it('步驟 id 從 1 開始連續', () => {
@@ -60,6 +60,33 @@ describe('課本音檔', () => {
     for (const a of refs) {
       expect(existsSync(`public/${a.src}`), a.src).toBe(true);
       if (a.end !== undefined) expect(a.end, a.src).toBeGreaterThan(a.start ?? 0);
+    }
+  });
+});
+
+describe('五十音大會考', () => {
+  it('涵蓋所有假名步驟，分成 5 個單元', () => {
+    expect(KANA_LAST).toBe(33);
+    expect(EXAM_GROUPS.map((g) => g.part)).toEqual(['平假名', '濁音・半濁音', '長音・促音・拗音', '片假名', '片假名的濁音和小字']);
+    expect(EXAM_GROUPS.flatMap((g) => g.kana)).toHaveLength(ALL_KANA.filter((k) => k.step <= KANA_LAST).length);
+  });
+
+  it('出 30 題，每個單元 6 題，選項不同音，同一個字不會連續出現', () => {
+    for (let round = 0; round < 50; round++) {
+      const qs = makeExam(
+        EXAM_GROUPS.map((g) => g.kana),
+        () => 'a2k',
+      );
+      expect(qs).toHaveLength(EXAM_N);
+      for (const g of EXAM_GROUPS) {
+        const steps = new Set(g.kana.map((k) => k.step));
+        expect(qs.filter((q) => steps.has(q.a.step))).toHaveLength(6);
+      }
+      qs.forEach((q, i) => {
+        expect(q.opts).toHaveLength(4);
+        expect(new Set(q.opts.map(snd)).size).toBe(4);
+        if (i) expect(q.a.k).not.toBe(qs[i - 1]!.a.k);
+      });
     }
   });
 });
