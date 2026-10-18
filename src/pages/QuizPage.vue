@@ -19,15 +19,27 @@
       <div class="hrow" aria-label="題數">
         <span class="muted" style="font-size: 14px">題數</span>
         <button v-for="n in QN_OPTS" :key="n" class="chip" :aria-pressed="n === p.d.qn" @click="pickQn(n)">
-          {{ n ? `${n} 題` : `全部各一次（${poolSize} 題）` }}
+          {{ n === ENDLESS ? '不限，想停再停' : n ? `${n} 題` : `全部各一次（${poolSize} 題）` }}
         </button>
       </div>
+      <div class="hrow" aria-label="出題方式">
+        <span class="muted" style="font-size: 14px">出題</span>
+        <button class="chip" :aria-pressed="p.d.qpick === 'even'" @click="pickPick('even')">平均出題</button>
+        <button class="chip" :aria-pressed="p.d.qpick === 'weak'" @click="pickPick('weak')">常錯的優先</button>
+      </div>
+      <p v-if="p.d.qpick === 'weak' && !retry" class="muted lead">
+        <template v-if="weakTop.length">
+          常錯的會比較常出現：<span v-for="k in weakTop" :key="k.k" class="kn weak-k">{{ k.k }}</span>
+          <template v-if="p.d.qn === 0">（「全部各一次」時每個字都考一次，常錯的排在前面）</template>
+        </template>
+        <template v-else>這個範圍還沒有答錯的紀錄，先平均出題；考過幾次後就會針對常錯的字出題。</template>
+      </p>
       <p v-if="retry" class="muted lead">正在練習剛才答錯的 {{ qs.length }} 個，每個用答錯時的題型再考一次。</p>
     </template>
 
     <!-- 結果 -->
     <div v-if="done" class="result qbox" :class="{ pass: (unlock || exam) && ok }">
-      <div class="score">{{ score }} / {{ qs.length }}</div>
+      <div class="score">{{ score }} / {{ total }}</div>
       <p>{{ resultMsg }}</p>
       <div v-if="exam" class="sec">
         <h3>{{ exam.id === 'kana' ? '各單元的成績' : '各課的成績' }}</h3>
@@ -78,9 +90,12 @@
     <!-- 題目 -->
     <div v-else-if="q" class="qbox">
       <div class="qhead">
-        <div class="counter">第 {{ i + 1 }} / {{ qs.length }} 題・答對 {{ score }}{{ unlock || exam ? '・' + ask : '' }}</div>
+        <div class="counter">
+          第 {{ i + 1 }}{{ endlessRun ? '' : ` / ${qs.length}` }} 題・答對 {{ score }}{{ unlock || exam ? '・' + ask : '' }}
+        </div>
         <!-- 放在右上角，跟下方的「下一題」離遠一點，避免連按時誤觸 -->
         <button v-if="unlock || exam" class="btn ghost quit-btn" @click="quit">離開測驗</button>
+        <button v-else-if="endlessRun" class="btn ghost quit-btn" @click="ended = true">結束練習</button>
       </div>
       <div class="qprompt">
         <template v-if="q.m === 'k2r' || q.m === 'k2z'">
@@ -124,7 +139,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { ALL_KANA, EXAMS, ROADMAP, STEPS, stepLabel, type Exam } from '@/data';
 import type { KanaItem } from '@/data/types';
-import { MODES, PASS, QN_OPTS, fitPx, gist, glyphs, isListen, isMeaning, makeExam, makeQs, type Question, type QuizMode } from '@/lib/kana';
+import { ENDLESS, MODES, PASS, QN_OPTS, fitPx, weakWeight, gist, glyphs, isListen, isMeaning, makeExam, makeQs, type Question, type QuizMode, type QuizPick } from '@/lib/kana';
 import { say } from '@/composables/useAudio';
 import { useProgressStore } from '@/stores/progress';
 import ScopeChips from '@/components/ScopeChips.vue';
@@ -145,6 +160,9 @@ const wrong = ref<KanaItem[]>([]);
 const wrongMode = new Map<string, QuizMode>();
 /** 正在練習剛才答錯的 */
 const retry = ref(false);
+/** 不限題數：快做完時自動補題，按「結束練習」才看結果 */
+const endlessRun = ref(false);
+const ended = ref(false);
 /** 練答錯的之前是在考哪個解鎖測驗或大會考 */
 const back = ref<{ unlock?: number; exam?: string } | null>(null);
 const backExam = computed(() => EXAMS.find((e) => e.id === back.value?.exam) ?? null);
@@ -161,7 +179,9 @@ const optText = (o: KanaItem) => (q.value?.m === 'k2r' ? o.r : q.value && isMean
 const optClass = computed(() => (q.value?.m === 'k2r' ? 'r' : q.value && isMeaning(q.value.m) ? 'z' : 'k'));
 /** 選項有長句子時排成一欄 */
 const singleCol = computed(() => !!q.value && q.value.opts.some((o) => optText(o).length > 7));
-const done = computed(() => qs.value.length > 0 && i.value >= qs.value.length);
+const done = computed(() => qs.value.length > 0 && (ended.value || i.value >= qs.value.length));
+/** 結果的總題數：不限題數時是實際作答的題數 */
+const total = computed(() => (endlessRun.value ? i.value + (answered.value ? 1 : 0) : qs.value.length));
 const ok = computed(() => score.value >= (exam.value ? exam.value.pass : PASS));
 /** 剛通過的這一步後面接著大會考 */
 const dueExam = computed(() => EXAMS.find((e) => e.after === unlock.value && !p.examPassed(e.id)) ?? null);
@@ -181,6 +201,12 @@ const ASK: Record<QuizMode, string> = {
 const ask = computed(() => (q.value ? ASK[q.value.m] : ''));
 /** 練習範圍裡有幾個不同的字（句子） */
 const poolSize = computed(() => new Set(p.pool.map((k) => k.k)).size);
+/** 範圍裡最常錯的字 */
+const weakTop = computed(() =>
+  [...new Map(p.pool.filter((k) => p.d.weak[k.k]).map((k) => [k.k, k])).values()]
+    .sort((a, b) => p.d.weak[b.k]! - p.d.weak[a.k]!)
+    .slice(0, 10),
+);
 
 /** 大會考各單元答對幾題，方便知道要回去複習哪裡 */
 const partScores = computed(() =>
@@ -202,8 +228,11 @@ const resultMsg = computed(() => {
   const id = unlock.value;
   if (!id) {
     const s = score.value;
-    if (retry.value) return s === qs.value.length ? '剛才答錯的都會了！' : '還有幾個不熟，再練一次看看。';
-    return s === qs.value.length ? '全對，很穩！' : s >= qs.value.length * 0.8 ? '很不錯，把錯的再看一下。' : '再複習一下字卡，然後重新測一次。';
+    const n = total.value;
+    if (!n) return '這次還沒有作答。';
+    if (retry.value) return s === n ? '剛才答錯的都會了！' : '還有幾個不熟，再練一次看看。';
+    const head = endlessRun.value ? `這次練了 ${n} 題，答對率 ${Math.round((s / n) * 100)}%。` : '';
+    return head + (s === n ? '全對，很穩！' : s >= n * 0.8 ? '很不錯，把錯的再看一下。' : '再複習一下字卡，然後重新測一次。');
   }
   if (!ok.value) return `答對 ${score.value} 題，還差 ${PASS - score.value} 題。把答錯的字再練一下，隨時可以重考。`;
   const nextR = ROADMAP.find((r) => r.n === id + 1);
@@ -234,12 +263,29 @@ function start(unlockId: number) {
   const D = u ? ALL_KANA.filter((k) => k.step <= u && k.step >= u - 1) : P;
   const ids = MODES.map((m) => m.id);
   const modeFn = u ? () => ids[Math.floor(Math.random() * ids.length)]! : () => p.d.qmode;
-  // 一般測驗照選的題數；「全部」是範圍裡每個字各考一次
-  const n = u ? undefined : p.d.qn || new Set(P.map((k) => k.k)).size;
-  qs.value = P.length ? makeQs(P, modeFn, D, n) : [];
+  if (u) qs.value = P.length ? makeQs(P, modeFn, D) : [];
+  else qs.value = P.length ? practiceBatch(p.d.qn === ENDLESS ? 20 : p.d.qn) : [];
   reset();
   unlock.value = u;
+  endlessRun.value = !u && p.d.qn === ENDLESS;
   autoSpeak();
+}
+
+/**
+ * 一般測驗出題：n 題（0 = 範圍裡每個字各考一次）。
+ * 「常錯的優先」時依弱點分數抽題；「全部各一次」時每個字都考，但常錯的排前面。
+ */
+function practiceBatch(n: number): Question[] {
+  const P = p.pool;
+  const modeFn = () => p.d.qmode;
+  const weakOn = p.d.qpick === 'weak' && P.some((k) => p.d.weak[k.k]);
+  if (n === 0) {
+    const uniq = [...new Map(P.map((k) => [k.k, k])).values()];
+    const qs = makeQs(uniq, modeFn, P, uniq.length);
+    if (weakOn) qs.sort((a, b) => (p.d.weak[b.a.k] ?? 0) - (p.d.weak[a.a.k] ?? 0));
+    return qs;
+  }
+  return makeQs(P, modeFn, P, n, weakOn ? (a) => weakWeight(p.d.weak[a.k] ?? 0) : undefined);
 }
 
 function reset() {
@@ -252,6 +298,8 @@ function reset() {
   exam.value = null;
   retry.value = false;
   back.value = null;
+  endlessRun.value = false;
+  ended.value = false;
 }
 
 /** 只練剛才答錯的：每個用答錯時的題型考一次，干擾選項從同一步和練習範圍裡挑 */
@@ -299,9 +347,15 @@ function pickQn(n: number) {
   start(0);
 }
 
+function pickPick(m: QuizPick) {
+  p.setQpick(m);
+  start(0);
+}
+
 function answer(k: string) {
   if (answered.value || !q.value) return;
   answered.value = k;
+  p.recordAnswer(q.value.a.k, k === q.value.a.k);
   if (k === q.value.a.k) score.value++;
   else {
     wrong.value.push(q.value.a);
@@ -313,6 +367,13 @@ function answer(k: string) {
 function next() {
   i.value++;
   answered.value = null;
+  // 不限題數：做到最後一題前再補一批（依最新的弱點分數出題）
+  if (endlessRun.value && i.value >= qs.value.length - 1) {
+    const more = practiceBatch(20);
+    const last = qs.value[qs.value.length - 1];
+    if (last && more.length > 1 && more[0]!.a.k === last.a.k) more.push(more.shift()!);
+    qs.value = qs.value.concat(more);
+  }
   if (done.value && unlock.value && ok.value) p.pass(unlock.value);
   if (done.value && exam.value && ok.value) p.passExam(exam.value.id);
   autoSpeak();

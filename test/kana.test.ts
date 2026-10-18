@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { A1_LAST, ALL_KANA, BASE, BASE_K, EXAMS, KANA_LAST, STEPS } from '@/data';
-import { gist, isMeaning, makeExam, makeQs, snd, toKata } from '@/lib/kana';
+import { gist, isMeaning, makeExam, makeQs, pickWeighted, snd, toKata, weakWeight } from '@/lib/kana';
 
 describe('教材資料', () => {
   it('步驟 id 從 1 開始連續', () => {
@@ -114,4 +114,32 @@ describe('大會考', () => {
       }
     });
   }
+});
+
+describe('常錯的優先', () => {
+  const P = ALL_KANA.filter((k) => k.step <= 10);
+  const weak = P[7]!;
+
+  it('常錯的字比較常出，但不會連續出現，也不會一直出同一個', () => {
+    let hits = 0;
+    for (let round = 0; round < 200; round++) {
+      const qs = pickWeighted(P, 10, (a) => weakWeight(a === weak ? 2 : 0));
+      expect(qs).toHaveLength(10);
+      qs.forEach((x, i) => i && expect(x).not.toBe(qs[i - 1]));
+      const c = qs.filter((x) => x === weak).length;
+      expect(c).toBeLessThanOrEqual(3);
+      hits += c;
+    }
+    // 平均每 10 題出現超過 1 次（平均出題時大約 0.2 次）
+    expect(hits / 200).toBeGreaterThan(1);
+  });
+
+  it('makeQs 有權重時一樣出完整的題目和選項', () => {
+    const qs = makeQs(P, () => 'k2r', P, 50, (a) => weakWeight(a === weak ? 4 : 0));
+    expect(qs).toHaveLength(50);
+    for (const q of qs) {
+      expect(q.opts).toHaveLength(4);
+      expect(new Set(q.opts.map(snd)).size).toBe(4);
+    }
+  });
 });

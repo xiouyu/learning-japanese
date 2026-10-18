@@ -2,8 +2,46 @@ import type { KanaItem } from '@/data/types';
 
 export const PASS = 8; // 解鎖測驗：10 題答對 8 題
 export const QN = 10;
-/** 一般測驗可以選的題數；0 = 範圍裡的每個字（句子）各考一次 */
-export const QN_OPTS = [10, 20, 30, 50, 0] as const;
+/** 一般測驗可以選的題數；0 = 範圍裡的每個字（句子）各考一次，ENDLESS = 不限題數，想停再按結束 */
+export const ENDLESS = -1;
+export const QN_OPTS = [10, 20, 30, 50, 0, ENDLESS] as const;
+
+/** 出題方式：平均出題，或常錯的字優先 */
+export type QuizPick = 'even' | 'weak';
+/** 弱點分數：答錯 +2、答對 -1，最多 10 */
+export const WEAK_MISS = 2;
+export const WEAK_MAX = 10;
+/** 常錯的字被抽到的機率：弱點分數 2（錯一次）大約是一般字的 9 倍 */
+export const weakWeight = (w: number) => 1 + 4 * w;
+
+/**
+ * 依權重抽 n 題（可以重複），同一個字不會連續出現，
+ * 也不會一直抽同一個字（每個字最多出現 n / 範圍大小 + 2 次）。
+ */
+export function pickWeighted(P: KanaItem[], n: number, weight: (a: KanaItem) => number): KanaItem[] {
+  const cap = Math.ceil(n / P.length) + 2;
+  const count = new Map<KanaItem, number>();
+  const out: KanaItem[] = [];
+  while (out.length < n) {
+    const prev = out[out.length - 1];
+    let cand = P.filter((x) => x !== prev && (count.get(x) ?? 0) < cap);
+    if (!cand.length) cand = P.filter((x) => x !== prev);
+    if (!cand.length) cand = P;
+    const ws = cand.map(weight);
+    let r = Math.random() * ws.reduce((a, b) => a + b, 0);
+    let pick = cand[cand.length - 1]!;
+    for (let i = 0; i < cand.length; i++) {
+      r -= ws[i]!;
+      if (r < 0) {
+        pick = cand[i]!;
+        break;
+      }
+    }
+    out.push(pick);
+    count.set(pick, (count.get(pick) ?? 0) + 1);
+  }
+  return out;
+}
 
 export const shuffle = <T>(a: readonly T[]): T[] => {
   const b = a.slice();
@@ -69,9 +107,17 @@ export interface Question {
  * 出題：P 是出題範圍，D 是補干擾選項用的範圍（只有 3 個字的行，從前一行補）。
  * 連續兩題不會是同一個字；選項最多 4 個，而且彼此不同音（意思題的選項也不會有相同的意思）。
  * modeFn 決定每一題的題型，可以依題目的字決定（例如有錄音的句子才出聽力題）。
+ * 有 weight 時依權重抽題（常錯的字比較常出），沒有就每個字輪流出。
  */
-export function makeQs(P: KanaItem[], modeFn: (a: KanaItem) => QuizMode, D: KanaItem[] = P, n = QN): Question[] {
+export function makeQs(
+  P: KanaItem[],
+  modeFn: (a: KanaItem) => QuizMode,
+  D: KanaItem[] = P,
+  n = QN,
+  weight?: (a: KanaItem) => number,
+): Question[] {
   let qs: KanaItem[] = [];
+  if (weight) qs = pickWeighted(P, n, weight);
   while (qs.length < n) {
     const b = shuffle(P);
     if (qs.length && b.length > 1 && b[0]!.k === qs[qs.length - 1]!.k) b.push(b.shift()!);

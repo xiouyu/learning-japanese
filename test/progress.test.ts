@@ -23,6 +23,14 @@ describe('normalize', () => {
     expect(normalize({}, MAX).qn).toBe(10);
   });
 
+  it('弱點分數只留正整數、最多 10；出題方式不認得就用平均出題', () => {
+    const d = normalize({ weak: { あ: 3, い: 0, う: -2, え: 99, お: 'x' as never }, qpick: 'zz' as never }, MAX);
+    expect(d.weak).toEqual({ あ: 3, え: 10 });
+    expect(d.qpick).toBe('even');
+    expect(normalize({ qpick: 'weak' }, MAX).qpick).toBe('weak');
+    expect(normalize({ qn: -1 }, MAX).qn).toBe(-1);
+  });
+
   it('沒有資料時回傳初始值', () => {
     expect(normalize(null, MAX)).toEqual(emptyProgress());
   });
@@ -62,6 +70,12 @@ describe('mergeProgress', () => {
   it('任一邊通過的大會考都算通過', () => {
     expect(mergeProgress({ ...laptop, exams: ['kana'] }, { ...phone, exams: ['a1'] }).exams).toEqual(['a1', 'kana']);
     expect(mergeProgress(laptop, phone).exams).toEqual([]);
+  });
+
+  it('弱點分數和出題方式以最後修改的裝置為準', () => {
+    const m = mergeProgress({ ...laptop, weak: { あ: 4 }, qpick: 'weak' }, { ...phone, weak: { か: 2 } });
+    expect(m.weak).toEqual({ か: 2 });
+    expect(m.qpick).toBe('even');
   });
 
   it('順序不影響結果', () => {

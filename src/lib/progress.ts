@@ -1,4 +1,4 @@
-import { QN, QN_OPTS, type QuizMode } from './kana';
+import { QN, QN_OPTS, WEAK_MAX, type QuizMode, type QuizPick } from './kana';
 
 /** 要存起來、跨裝置同步的學習紀錄 */
 export interface ProgressData {
@@ -14,9 +14,12 @@ export interface ProgressData {
   lastU: number;
   /** 字卡按「記住了」的次數 */
   mastery: Record<string, number>;
+  /** 測驗的弱點分數（答錯 +2、答對 -1），常錯的字優先出題時用 */
+  weak: Record<string, number>;
   qmode: QuizMode;
   /** 一般測驗的題數（0 = 範圍裡的全部各考一次） */
   qn: number;
+  qpick: QuizPick;
   tmode: 'hira' | 'kata';
   /** 最後修改時間（毫秒），合併時用來決定偏好設定以哪一邊為準 */
   updatedAt: number;
@@ -29,8 +32,10 @@ export const emptyProgress = (): ProgressData => ({
   scope: [],
   lastU: 0,
   mastery: {},
+  weak: {},
   qmode: 'k2r',
   qn: QN,
+  qpick: 'even',
   tmode: 'hira',
   updatedAt: 0,
 });
@@ -91,8 +96,15 @@ export function normalize(raw: RawProgress | null | undefined, maxStep: number, 
       if (Number.isFinite(n) && n > 0) d.mastery[k] = n;
     }
   }
+  if (raw.weak && typeof raw.weak === 'object') {
+    for (const [k, v] of Object.entries(raw.weak)) {
+      const n = Math.floor(Number(v));
+      if (Number.isFinite(n) && n > 0) d.weak[k] = Math.min(n, WEAK_MAX);
+    }
+  }
   d.qmode = QMODES.includes(raw.qmode as QuizMode) ? (raw.qmode as QuizMode) : 'k2r';
   d.qn = (QN_OPTS as readonly number[]).includes(Number(raw.qn)) ? Number(raw.qn) : QN;
+  d.qpick = raw.qpick === 'weak' ? 'weak' : 'even';
   d.tmode = raw.tmode === 'kata' ? 'kata' : 'hira';
   d.updatedAt = Number(raw.updatedAt) || 0;
   return d;
@@ -114,8 +126,10 @@ export function loadLocal(maxStep: number, gates: Gate[] = []): ProgressData {
       scope: read('scope', []),
       lastU: read('lastU', 0),
       mastery: read('mastery', {}),
+      weak: read('weak', {}),
       qmode: read('qmode', 'k2r'),
       qn: read('qn', QN),
+      qpick: read('qpick', 'even'),
       tmode: read('tmode', 'hira'),
       updatedAt: read('updatedAt', 0),
     },
@@ -132,6 +146,7 @@ export function saveLocal(d: ProgressData) {
  * 合併兩台裝置的紀錄：
  * - 進度、大會考和熟練度只會增加，取兩邊較大的值，不會因為同步而倒退
  * - 練習範圍、測驗模式這類偏好，以最後修改的那一邊為準
+ * - 弱點分數答對會減少，所以也以最後修改的那一邊為準（取較大值的話，在一台練熟了，同步後又會變回常錯）
  */
 export function mergeProgress(a: ProgressData, b: ProgressData): ProgressData {
   const newer = b.updatedAt > a.updatedAt ? b : a;
@@ -144,8 +159,10 @@ export function mergeProgress(a: ProgressData, b: ProgressData): ProgressData {
     scope: [...newer.scope],
     lastU: Math.max(a.lastU, b.lastU),
     mastery,
+    weak: { ...newer.weak },
     qmode: newer.qmode,
     qn: newer.qn,
+    qpick: newer.qpick,
     tmode: newer.tmode,
     updatedAt: Math.max(a.updatedAt, b.updatedAt),
   };

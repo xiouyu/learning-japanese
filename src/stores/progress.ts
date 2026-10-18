@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { computed, ref, watch } from 'vue';
 import { ALL_KANA, EXAMS, STEPS } from '@/data';
-import type { QuizMode } from '@/lib/kana';
+import { WEAK_MAX, WEAK_MISS, type QuizMode, type QuizPick } from '@/lib/kana';
 import { loadLocal, saveLocal, type ProgressData } from '@/lib/progress';
 
 /**
@@ -84,6 +84,20 @@ export const useProgressStore = defineStore('progress', () => {
     touch();
   }
 
+  /** 記錄測驗的作答：答錯弱點分數 +2，答對 -1 */
+  function recordAnswer(k: string, right: boolean) {
+    const w = d.value.weak;
+    const v = Math.max(0, Math.min(WEAK_MAX, (w[k] ?? 0) + (right ? -1 : WEAK_MISS)));
+    if (v) w[k] = v;
+    else delete w[k];
+    touch();
+  }
+
+  function setQpick(m: QuizPick) {
+    d.value.qpick = m;
+    touch();
+  }
+
   function setQn(n: number) {
     d.value.qn = n;
     touch();
@@ -107,5 +121,5 @@ export const useProgressStore = defineStore('progress', () => {
   syncNew();
   watch(d, (v) => saveLocal(v), { deep: true, immediate: true });
 
-  return { d, curKana, curU, examPassed, examDue, availSet, pool, syncNew, setStep, pass, passExam, setScope, addMastery, setQmode, setQn, setTmode, replace, snapshot };
+  return { d, curKana, curU, examPassed, examDue, availSet, pool, syncNew, setStep, pass, passExam, setScope, addMastery, setQmode, setQn, setQpick, recordAnswer, setTmode, replace, snapshot };
 });
