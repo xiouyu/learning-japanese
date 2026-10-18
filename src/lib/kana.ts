@@ -2,6 +2,8 @@ import type { KanaItem } from '@/data/types';
 
 export const PASS = 8; // 解鎖測驗：10 題答對 8 題
 export const QN = 10;
+/** 一般測驗可以選的題數；0 = 範圍裡的每個字（句子）各考一次 */
+export const QN_OPTS = [10, 20, 30, 50, 0] as const;
 
 export const shuffle = <T>(a: readonly T[]): T[] => {
   const b = a.slice();

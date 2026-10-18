@@ -16,6 +16,13 @@ describe('normalize', () => {
     expect(d.qmode).toBe('k2r');
   });
 
+  it('測驗題數只接受可以選的值，舊資料沒有就用 10 題', () => {
+    expect(normalize({ qn: 30 }, MAX).qn).toBe(30);
+    expect(normalize({ qn: 0 }, MAX).qn).toBe(0);
+    expect(normalize({ qn: 7 }, MAX).qn).toBe(10);
+    expect(normalize({}, MAX).qn).toBe(10);
+  });
+
   it('沒有資料時回傳初始值', () => {
     expect(normalize(null, MAX)).toEqual(emptyProgress());
   });

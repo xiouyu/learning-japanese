@@ -84,6 +84,11 @@ export const useProgressStore = defineStore('progress', () => {
     touch();
   }
 
+  function setQn(n: number) {
+    d.value.qn = n;
+    touch();
+  }
+
   function setTmode(m: 'hira' | 'kata') {
     d.value.tmode = m;
     touch();
@@ -102,5 +107,5 @@ export const useProgressStore = defineStore('progress', () => {
   syncNew();
   watch(d, (v) => saveLocal(v), { deep: true, immediate: true });
 
-  return { d, curKana, curU, examPassed, examDue, availSet, pool, syncNew, setStep, pass, passExam, setScope, addMastery, setQmode, setTmode, replace, snapshot };
+  return { d, curKana, curU, examPassed, examDue, availSet, pool, syncNew, setStep, pass, passExam, setScope, addMastery, setQmode, setQn, setTmode, replace, snapshot };
 });

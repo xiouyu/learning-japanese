@@ -1,4 +1,4 @@
-import type { QuizMode } from './kana';
+import { QN, QN_OPTS, type QuizMode } from './kana';
 
 /** 要存起來、跨裝置同步的學習紀錄 */
 export interface ProgressData {
@@ -15,6 +15,8 @@ export interface ProgressData {
   /** 字卡按「記住了」的次數 */
   mastery: Record<string, number>;
   qmode: QuizMode;
+  /** 一般測驗的題數（0 = 範圍裡的全部各考一次） */
+  qn: number;
   tmode: 'hira' | 'kata';
   /** 最後修改時間（毫秒），合併時用來決定偏好設定以哪一邊為準 */
   updatedAt: number;
@@ -28,6 +30,7 @@ export const emptyProgress = (): ProgressData => ({
   lastU: 0,
   mastery: {},
   qmode: 'k2r',
+  qn: QN,
   tmode: 'hira',
   updatedAt: 0,
 });
@@ -89,6 +92,7 @@ export function normalize(raw: RawProgress | null | undefined, maxStep: number, 
     }
   }
   d.qmode = QMODES.includes(raw.qmode as QuizMode) ? (raw.qmode as QuizMode) : 'k2r';
+  d.qn = (QN_OPTS as readonly number[]).includes(Number(raw.qn)) ? Number(raw.qn) : QN;
   d.tmode = raw.tmode === 'kata' ? 'kata' : 'hira';
   d.updatedAt = Number(raw.updatedAt) || 0;
   return d;
@@ -111,6 +115,7 @@ export function loadLocal(maxStep: number, gates: Gate[] = []): ProgressData {
       lastU: read('lastU', 0),
       mastery: read('mastery', {}),
       qmode: read('qmode', 'k2r'),
+      qn: read('qn', QN),
       tmode: read('tmode', 'hira'),
       updatedAt: read('updatedAt', 0),
     },
@@ -140,6 +145,7 @@ export function mergeProgress(a: ProgressData, b: ProgressData): ProgressData {
     lastU: Math.max(a.lastU, b.lastU),
     mastery,
     qmode: newer.qmode,
+    qn: newer.qn,
     tmode: newer.tmode,
     updatedAt: Math.max(a.updatedAt, b.updatedAt),
   };

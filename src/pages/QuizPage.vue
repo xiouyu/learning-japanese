@@ -16,6 +16,13 @@
           {{ m.t }}
         </button>
       </div>
+      <div class="hrow" aria-label="題數">
+        <span class="muted" style="font-size: 14px">題數</span>
+        <button v-for="n in QN_OPTS" :key="n" class="chip" :aria-pressed="n === p.d.qn" @click="pickQn(n)">
+          {{ n ? `${n} 題` : `全部各一次（${poolSize} 題）` }}
+        </button>
+      </div>
+      <p v-if="retry" class="muted lead">正在練習剛才答錯的 {{ qs.length }} 個，每個用答錯時的題型再考一次。</p>
     </template>
 
     <!-- 結果 -->
@@ -42,10 +49,15 @@
         <template v-if="exam">
           <button v-if="ok && examNext" class="btn primary" @click="goLearn(exam.after + 1)">去學第 {{ exam.after + 1 }} 步 {{ stepLabel(exam.after + 1) }} →</button>
           <button v-else-if="!ok" class="btn primary" @click="startExam(exam.id)">重考{{ exam.title }}</button>
+          <button v-if="!ok" class="btn" @click="practiceWrong">先練答錯的 {{ wrongList.length }} 個</button>
           <button class="btn" @click="start(0)">回到一般測驗</button>
         </template>
         <template v-else-if="!unlock">
-          <button class="btn primary" @click="start(0)">再測一次</button>
+          <button v-if="wrongList.length" class="btn primary" @click="practiceWrong">只練答錯的 {{ wrongList.length }} 個</button>
+          <!-- 從解鎖測驗、大會考過來練答錯的：練完直接回去重考 -->
+          <button v-if="back?.unlock" class="btn" :class="{ primary: !wrongList.length }" @click="start(back.unlock)">重考第 {{ back.unlock }} 步解鎖測驗</button>
+          <button v-else-if="backExam" class="btn" :class="{ primary: !wrongList.length }" @click="startExam(backExam.id)">重考{{ backExam.title }}</button>
+          <button class="btn" :class="{ primary: !wrongList.length && !back }" @click="start(0)">{{ back ? '回到一般測驗' : '再測一次' }}</button>
         </template>
         <template v-else-if="ok && dueExam">
           <button class="btn primary" @click="startExam(dueExam.id)">開始{{ dueExam.title }} →</button>
@@ -57,6 +69,7 @@
         </template>
         <template v-else>
           <button class="btn primary" @click="start(unlock)">重考</button>
+          <button class="btn" @click="practiceWrong">先練答錯的 {{ wrongList.length }} 個</button>
           <button class="btn" @click="goLearn(unlock)">回去複習這一步</button>
         </template>
       </div>
@@ -111,7 +124,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { ALL_KANA, EXAMS, ROADMAP, STEPS, stepLabel, type Exam } from '@/data';
 import type { KanaItem } from '@/data/types';
-import { MODES, PASS, fitPx, gist, glyphs, isListen, isMeaning, makeExam, makeQs, type Question, type QuizMode } from '@/lib/kana';
+import { MODES, PASS, QN_OPTS, fitPx, gist, glyphs, isListen, isMeaning, makeExam, makeQs, type Question, type QuizMode } from '@/lib/kana';
 import { say } from '@/composables/useAudio';
 import { useProgressStore } from '@/stores/progress';
 import ScopeChips from '@/components/ScopeChips.vue';
@@ -128,6 +141,13 @@ const qs = ref<Question[]>([]);
 const i = ref(0);
 const score = ref(0);
 const wrong = ref<KanaItem[]>([]);
+/** 答錯時的題型，練習答錯的時候用同一種題型再考 */
+const wrongMode = new Map<string, QuizMode>();
+/** 正在練習剛才答錯的 */
+const retry = ref(false);
+/** 練答錯的之前是在考哪個解鎖測驗或大會考 */
+const back = ref<{ unlock?: number; exam?: string } | null>(null);
+const backExam = computed(() => EXAMS.find((e) => e.id === back.value?.exam) ?? null);
 const answered = ref<string | null>(null);
 /** 0 = 一般複習測驗；其他數字 = 第幾步的解鎖測驗 */
 const unlock = ref(0);
@@ -159,6 +179,8 @@ const ASK: Record<QuizMode, string> = {
   a2z: '聽錄音，選出意思',
 };
 const ask = computed(() => (q.value ? ASK[q.value.m] : ''));
+/** 練習範圍裡有幾個不同的字（句子） */
+const poolSize = computed(() => new Set(p.pool.map((k) => k.k)).size);
 
 /** 大會考各單元答對幾題，方便知道要回去複習哪裡 */
 const partScores = computed(() =>
@@ -180,7 +202,8 @@ const resultMsg = computed(() => {
   const id = unlock.value;
   if (!id) {
     const s = score.value;
-    return s === qs.value.length ? '全對，很穩！' : s >= 8 ? '很不錯，把錯的字再看一下。' : '再複習一下字卡，然後重新測一次。';
+    if (retry.value) return s === qs.value.length ? '剛才答錯的都會了！' : '還有幾個不熟，再練一次看看。';
+    return s === qs.value.length ? '全對，很穩！' : s >= qs.value.length * 0.8 ? '很不錯，把錯的再看一下。' : '再複習一下字卡，然後重新測一次。';
   }
   if (!ok.value) return `答對 ${score.value} 題，還差 ${PASS - score.value} 題。把答錯的字再練一下，隨時可以重考。`;
   const nextR = ROADMAP.find((r) => r.n === id + 1);
@@ -211,14 +234,40 @@ function start(unlockId: number) {
   const D = u ? ALL_KANA.filter((k) => k.step <= u && k.step >= u - 1) : P;
   const ids = MODES.map((m) => m.id);
   const modeFn = u ? () => ids[Math.floor(Math.random() * ids.length)]! : () => p.d.qmode;
-  qs.value = P.length ? makeQs(P, modeFn, D) : [];
+  // 一般測驗照選的題數；「全部」是範圍裡每個字各考一次
+  const n = u ? undefined : p.d.qn || new Set(P.map((k) => k.k)).size;
+  qs.value = P.length ? makeQs(P, modeFn, D, n) : [];
+  reset();
+  unlock.value = u;
+  autoSpeak();
+}
+
+function reset() {
   i.value = 0;
   score.value = 0;
   wrong.value = [];
+  wrongMode.clear();
   answered.value = null;
-  unlock.value = u;
+  unlock.value = 0;
   exam.value = null;
+  retry.value = false;
+  back.value = null;
+}
+
+/** 只練剛才答錯的：每個用答錯時的題型考一次，干擾選項從同一步和練習範圍裡挑 */
+function practiceWrong() {
+  const P = wrongList.value;
+  if (!P.length) return;
+  const modes = new Map(wrongMode);
+  const from = unlock.value ? { unlock: unlock.value } : exam.value ? { exam: exam.value.id } : retry.value ? back.value : null;
+  const steps = new Set(P.map((k) => k.step));
+  const D = ALL_KANA.filter((k) => steps.has(k.step)).concat(p.pool);
+  qs.value = makeQs(P, (a) => modes.get(a.k) ?? p.d.qmode, D, P.length);
+  reset();
+  retry.value = true;
+  back.value = from;
   autoSpeak();
+  window.scrollTo(0, 0);
 }
 
 /** 大會考：每個單元（每一課）平均出題，題型混在一起 */
@@ -230,11 +279,7 @@ function startExam(id: string) {
     e.mode,
     e.n,
   );
-  i.value = 0;
-  score.value = 0;
-  wrong.value = [];
-  answered.value = null;
-  unlock.value = 0;
+  reset();
   exam.value = e;
   autoSpeak();
   window.scrollTo(0, 0);
@@ -249,11 +294,19 @@ function pickMode(m: QuizMode) {
   start(0);
 }
 
+function pickQn(n: number) {
+  p.setQn(n);
+  start(0);
+}
+
 function answer(k: string) {
   if (answered.value || !q.value) return;
   answered.value = k;
   if (k === q.value.a.k) score.value++;
-  else wrong.value.push(q.value.a);
+  else {
+    wrong.value.push(q.value.a);
+    wrongMode.set(q.value.a.k, q.value.m);
+  }
   if (!isListen(q.value.m)) say(q.value.a, q.value.a.k);
 }
 
