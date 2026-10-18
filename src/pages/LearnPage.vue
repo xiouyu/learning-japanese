@@ -158,16 +158,18 @@
       </div>
     </div>
 
-    <!-- 假名的最後一步：通過後還要考五十音大會考，才會進入課本 -->
-    <div v-if="step.id === KANA_LAST && step.id <= p.d.passed" class="unlock" :class="{ passed: p.d.exam }">
-      <h3>五十音大會考{{ p.d.exam ? '・已通過' : '' }}</h3>
-      <p v-if="p.d.exam" class="muted">已經通過了。想確認自己還記得，可以隨時再考一次，成績不會影響進度。</p>
+    <!-- 大會考接在這一步後面：通過這一步後要再考大會考，才會解鎖下一步 -->
+    <div v-if="stepExam && step.id <= p.d.passed" class="unlock" :class="{ passed: p.examPassed(stepExam.id) }">
+      <h3>{{ stepExam.title }}{{ p.examPassed(stepExam.id) ? '・已通過' : '' }}</h3>
+      <p v-if="p.examPassed(stepExam.id)" class="muted">已經通過了。想確認自己還記得，可以隨時再考一次，成績不會影響進度。</p>
       <p v-else>
-        假名全部學完了！進入課本第 1 課前，先用大會考確認程度：平假名、濁音、長音・促音・拗音、片假名、片假名的濁音和小字，每個單元各考幾題，共
-        {{ EXAM_N }} 題，答對 {{ EXAM_PASS }} 題以上就解鎖課本第 1 課。沒通過可以一直重考。
+        {{ stepExam.done }}！先用大會考確認程度：{{ stepExam.scope }}，共 {{ stepExam.n }} 題，答對
+        {{ stepExam.pass }} 題以上{{ stepExam.reward }}。沒通過可以一直重考。
       </p>
       <div class="hrow">
-        <button class="btn" :class="{ primary: !p.d.exam }" @click="startExam">{{ p.d.exam ? '再考一次' : '開始大會考' }}</button>
+        <button class="btn" :class="{ primary: !p.examPassed(stepExam.id) }" @click="startExam(stepExam.id)">
+          {{ p.examPassed(stepExam.id) ? '再考一次' : '開始大會考' }}
+        </button>
       </div>
     </div>
 
@@ -177,13 +179,13 @@
       <h3>學習路線</h3>
       <ol class="road">
         <template v-for="(r, i) in ROADMAP" :key="r.n">
-          <li v-if="r.n === KANA_LAST + 1 && !r.ext">
+          <li v-for="e in EXAMS.filter((x) => x.after + 1 === r.n)" :key="e.id">
             <span class="n">大會考</span>
             <span>
-              <span class="t">五十音大會考</span>
-              <span class="muted" style="font-size: 13px"> ・通過才進入課本</span>
+              <span class="t">{{ e.title }}</span>
+              <span class="muted" style="font-size: 13px"> ・{{ e.road }}</span>
             </span>
-            <span class="pill" :class="examState.cls">{{ examState.label }}</span>
+            <span class="pill" :class="examState(e).cls">{{ examState(e).label }}</span>
           </li>
           <li v-if="i === 0 || ROADMAP[i - 1]!.part !== r.part" class="rgrp">{{ r.part }}</li>
           <li>
@@ -203,9 +205,9 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { KANA_LAST, ROADMAP, STEPS, stepLabel } from '@/data';
+import { EXAMS, ROADMAP, STEPS, stepLabel, type Exam } from '@/data';
 import type { Dialog, RoadmapItem } from '@/data/types';
-import { EXAM_N, EXAM_PASS, PASS, QN, sqFontSize } from '@/lib/kana';
+import { PASS, QN, sqFontSize } from '@/lib/kana';
 import { playAudio, say } from '@/composables/useAudio';
 import { speak } from '@/composables/useSpeech';
 import { useProgressStore } from '@/stores/progress';
@@ -225,11 +227,16 @@ const kana = computed(() => step.value.kana[p.curKana] ?? step.value.kana[0]!);
 const isPhrase = computed(() => step.value.kind === 'phrase');
 const next = computed(() => ROADMAP.find((r) => r.n === p.curU + 1));
 const lockMsg = computed(() =>
-  p.examDue ? '通過五十音大會考後解鎖' : p.curU > p.d.passed ? `通過第 ${p.curU} 步測驗後解鎖` : '內容準備中',
+  p.examDue ? `通過${p.examDue.title}後解鎖` : p.curU > p.d.passed ? `通過第 ${p.curU} 步測驗後解鎖` : '內容準備中',
 );
-const examState = computed(() =>
-  p.d.exam ? { cls: 'done', label: '已通過' } : p.examDue ? { cls: 'cur', label: '可以考了' } : { cls: '', label: '未解鎖' },
-);
+/** 接在這一步後面的大會考 */
+const stepExam = computed(() => EXAMS.find((e) => e.after === step.value.id));
+const examState = (e: Exam) =>
+  p.examPassed(e.id)
+    ? { cls: 'done', label: '已通過' }
+    : p.examDue?.id === e.id
+      ? { cls: 'cur', label: '可以考了' }
+      : { cls: '', label: '未解鎖' };
 const parts = computed(() => [...new Set(STEPS.filter((x) => x.id <= p.curU).map((x) => x.part))]);
 const partSteps = computed(() => STEPS.filter((x) => x.id <= p.curU && x.part === step.value.part));
 const srcLine = computed(() => {
@@ -267,8 +274,8 @@ function startUnlock() {
   window.scrollTo(0, 0);
 }
 
-function startExam() {
-  void router.push({ path: '/quiz', query: { exam: '1' } });
+function startExam(id: string) {
+  void router.push({ path: '/quiz', query: { exam: id } });
   window.scrollTo(0, 0);
 }
 

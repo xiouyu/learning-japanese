@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { ALL_KANA, BASE, BASE_K, EXAM_GROUPS, KANA_LAST, STEPS } from '@/data';
-import { EXAM_N, makeExam, makeQs, snd, toKata } from '@/lib/kana';
+import { A1_LAST, ALL_KANA, BASE, BASE_K, EXAMS, KANA_LAST, STEPS } from '@/data';
+import { gist, isMeaning, makeExam, makeQs, snd, toKata } from '@/lib/kana';
 
 describe('教材資料', () => {
   it('步驟 id 從 1 開始連續', () => {
@@ -64,29 +64,54 @@ describe('課本音檔', () => {
   });
 });
 
-describe('五十音大會考', () => {
-  it('涵蓋所有假名步驟，分成 5 個單元', () => {
+describe('大會考', () => {
+  const kana = EXAMS.find((e) => e.id === 'kana')!;
+  const a1 = EXAMS.find((e) => e.id === 'a1')!;
+
+  it('五十音大會考接在假名最後一步，分成 5 個單元', () => {
+    expect(kana.after).toBe(KANA_LAST);
     expect(KANA_LAST).toBe(33);
-    expect(EXAM_GROUPS.map((g) => g.part)).toEqual(['平假名', '濁音・半濁音', '長音・促音・拗音', '片假名', '片假名的濁音和小字']);
-    expect(EXAM_GROUPS.flatMap((g) => g.kana)).toHaveLength(ALL_KANA.filter((k) => k.step <= KANA_LAST).length);
+    expect(kana.groups.map((g) => g.part)).toEqual(['平假名', '濁音・半濁音', '長音・促音・拗音', '片假名', '片假名的濁音和小字']);
+    expect(kana.groups.flatMap((g) => g.kana)).toHaveLength(ALL_KANA.filter((k) => k.step <= KANA_LAST).length);
   });
 
-  it('出 30 題，每個單元 6 題，選項不同音，同一個字不會連續出現', () => {
-    for (let round = 0; round < 50; round++) {
-      const qs = makeExam(
-        EXAM_GROUPS.map((g) => g.kana),
-        () => 'a2k',
-      );
-      expect(qs).toHaveLength(EXAM_N);
-      for (const g of EXAM_GROUPS) {
-        const steps = new Set(g.kana.map((k) => k.step));
-        expect(qs.filter((q) => steps.has(q.a.step))).toHaveLength(6);
-      }
-      qs.forEach((q, i) => {
-        expect(q.opts).toHaveLength(4);
-        expect(new Set(q.opts.map(snd)).size).toBe(4);
-        if (i) expect(q.a.k).not.toBe(qs[i - 1]!.a.k);
-      });
-    }
+  it('入門大會考接在第 18 課最後一步，每一課一組', () => {
+    expect(a1.after).toBe(A1_LAST);
+    expect(a1.groups).toHaveLength(18);
+    expect(a1.groups[0]!.part).toMatch(/^第1課/);
+    expect(a1.groups[17]!.part).toMatch(/^第18課/);
+    expect(a1.groups.flatMap((g) => g.kana).every((k) => k.step > KANA_LAST && k.step <= A1_LAST)).toBe(true);
   });
+
+  it('gist 取中文說明的第一句', () => {
+    expect(gist('不用了，謝謝。（第 5 課學過）')).toBe('不用了，謝謝');
+    expect(gist('這個多少錢？「いくら」＝多少錢。')).toBe('這個多少錢？');
+    expect(gist('沒有句號')).toBe('沒有句號');
+  });
+
+  for (const e of EXAMS) {
+    it(`${e.title}：每個單元平均出題，選項不同音、意思題的選項意思不重複，同一題不會連續出現`, () => {
+      const per = e.n / e.groups.length;
+      for (let round = 0; round < 50; round++) {
+        const qs = makeExam(
+          e.groups.map((g) => g.kana),
+          e.mode,
+          e.n,
+        );
+        expect(qs).toHaveLength(e.n);
+        for (const g of e.groups) {
+          const steps = new Set(g.kana.map((k) => k.step));
+          expect(qs.filter((q) => steps.has(q.a.step))).toHaveLength(per);
+        }
+        qs.forEach((q, i) => {
+          expect(q.opts).toHaveLength(4);
+          expect(new Set(q.opts.map(snd)).size).toBe(4);
+          if (isMeaning(q.m)) expect(new Set(q.opts.map((o) => gist(o.z))).size).toBe(4);
+          // 聽力題只出有課本錄音的句子
+          if (e.id === 'a1' && (q.m === 'a2k' || q.m === 'a2z')) expect(q.a.audio).toBeTruthy();
+          if (i) expect(q.a.k).not.toBe(qs[i - 1]!.a.k);
+        });
+      }
+    });
+  }
 });

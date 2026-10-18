@@ -1,23 +1,25 @@
 import { defineStore } from 'pinia';
 import { computed, ref, watch } from 'vue';
-import { ALL_KANA, KANA_LAST, STEPS } from '@/data';
+import { ALL_KANA, EXAMS, STEPS } from '@/data';
 import type { QuizMode } from '@/lib/kana';
 import { loadLocal, saveLocal, type ProgressData } from '@/lib/progress';
 
 /**
  * 個人進度：存在這台裝置的 localStorage；登入後會跟雲端同步（見 stores/sync.ts）。
  * passed = 已經通過解鎖測驗的步數；curU = 目前能學到第幾步。
- * 假名學完（通過第 KANA_LAST 步）後要再通過五十音大會考（exam），才會解鎖課本第 1 課。
+ * 大會考（EXAMS）接在某一步後面：例如假名學完後要通過五十音大會考，才會解鎖課本第 1 課。
  */
 export const useProgressStore = defineStore('progress', () => {
   const MAX = STEPS.length;
-  const d = ref<ProgressData>(loadLocal(MAX, KANA_LAST));
+  const d = ref<ProgressData>(loadLocal(MAX, EXAMS));
   /** 學習頁目前選的字（不需要保存） */
   const curKana = ref(0);
 
-  const curU = computed(() => Math.min(d.value.passed + 1, d.value.exam ? MAX : KANA_LAST, MAX));
-  /** 假名都通過了，正在等五十音大會考 */
-  const examDue = computed(() => d.value.passed >= KANA_LAST && !d.value.exam);
+  const examPassed = (id: string) => d.value.exams.includes(id);
+  /** 還沒通過的大會考會擋住後面的步驟 */
+  const curU = computed(() => Math.min(d.value.passed + 1, MAX, ...EXAMS.filter((e) => !examPassed(e.id)).map((e) => e.after)));
+  /** 前面的步驟都通過了，正在等的大會考 */
+  const examDue = computed(() => EXAMS.find((e) => !examPassed(e.id) && d.value.passed >= e.after) ?? null);
   const availSet = computed(() => new Set(ALL_KANA.filter((k) => k.step <= curU.value).map((k) => k.k)));
   /** 字卡、測驗的出題範圍 */
   const pool = computed(() => ALL_KANA.filter((k) => d.value.scope.includes(k.step) && k.step <= curU.value));
@@ -59,10 +61,10 @@ export const useProgressStore = defineStore('progress', () => {
     syncNew();
   }
 
-  /** 通過五十音大會考 */
-  function passExam() {
-    if (d.value.exam) return;
-    d.value.exam = true;
+  /** 通過大會考 */
+  function passExam(id: string) {
+    if (examPassed(id)) return;
+    d.value.exams = [...d.value.exams, id].sort();
     touch();
     syncNew();
   }
@@ -100,5 +102,5 @@ export const useProgressStore = defineStore('progress', () => {
   syncNew();
   watch(d, (v) => saveLocal(v), { deep: true, immediate: true });
 
-  return { d, curKana, curU, examDue, availSet, pool, syncNew, setStep, pass, passExam, setScope, addMastery, setQmode, setTmode, replace, snapshot };
+  return { d, curKana, curU, examPassed, examDue, availSet, pool, syncNew, setStep, pass, passExam, setScope, addMastery, setQmode, setTmode, replace, snapshot };
 });

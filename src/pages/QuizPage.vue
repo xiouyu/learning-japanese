@@ -1,9 +1,9 @@
 <template>
   <section class="panel">
     <div v-if="exam" class="stephead">
-      <div class="eyebrow">五十音大會考・{{ EXAM_N }} 題答對 {{ EXAM_PASS }} 題以上通過</div>
-      <h2 style="font-size: 28px; letter-spacing: 0.08em">五十音大會考</h2>
-      <p class="lead muted">平假名、濁音、長音・促音・拗音、片假名、片假名的濁音和小字，每個單元都會考。通過後就能進入課本第 1 課。</p>
+      <div class="eyebrow">{{ exam.title }}・{{ exam.n }} 題答對 {{ exam.pass }} 題以上通過</div>
+      <h2 style="font-size: 28px; letter-spacing: 0.08em">{{ exam.title }}</h2>
+      <p class="lead muted">{{ exam.scope }}。通過{{ exam.reward }}。</p>
     </div>
     <div v-else-if="unlock" class="stephead">
       <div class="eyebrow">解鎖測驗・答對 {{ PASS }} 題以上通過</div>
@@ -23,7 +23,7 @@
       <div class="score">{{ score }} / {{ qs.length }}</div>
       <p>{{ resultMsg }}</p>
       <div v-if="exam" class="sec">
-        <h3>各單元的成績</h3>
+        <h3>{{ exam.id === 'kana' ? '各單元的成績' : '各課的成績' }}</h3>
         <ul class="exam-parts">
           <li v-for="g in partScores" :key="g.part" :class="{ weak: g.right < g.total }">
             <span>{{ g.part }}</span><b>{{ g.right }} / {{ g.total }}</b>
@@ -31,24 +31,24 @@
         </ul>
       </div>
       <div v-if="wrongList.length" class="sec">
-        <h3>答錯的字</h3>
+        <h3>{{ wrongPhrase ? '答錯的句子' : '答錯的字' }}</h3>
         <div class="hrow">
           <button v-for="k in wrongList" :key="k.k" class="chip" @click="say(k, k.k)">
-            <span class="kn">{{ k.k }}</span> {{ k.r }}
+            <span class="kn">{{ k.k }}</span> {{ wrongPhrase ? gist(k.z) : k.r }}
           </button>
         </div>
       </div>
       <div class="hrow">
         <template v-if="exam">
-          <button v-if="ok" class="btn primary" @click="goLearn(KANA_LAST + 1)">去學課本第 1 課 →</button>
-          <button v-else class="btn primary" @click="startExam">重考大會考</button>
+          <button v-if="ok && examNext" class="btn primary" @click="goLearn(exam.after + 1)">去學第 {{ exam.after + 1 }} 步 {{ stepLabel(exam.after + 1) }} →</button>
+          <button v-else-if="!ok" class="btn primary" @click="startExam(exam.id)">重考{{ exam.title }}</button>
           <button class="btn" @click="start(0)">回到一般測驗</button>
         </template>
         <template v-else-if="!unlock">
           <button class="btn primary" @click="start(0)">再測一次</button>
         </template>
-        <template v-else-if="ok && unlock === KANA_LAST && !p.d.exam">
-          <button class="btn primary" @click="startExam">開始五十音大會考 →</button>
+        <template v-else-if="ok && dueExam">
+          <button class="btn primary" @click="startExam(dueExam.id)">開始{{ dueExam.title }} →</button>
           <button class="btn" @click="start(0)">回到一般測驗</button>
         </template>
         <template v-else-if="ok">
@@ -70,7 +70,11 @@
         <button v-if="unlock || exam" class="btn ghost quit-btn" @click="quit">離開測驗</button>
       </div>
       <div class="qprompt">
-        <span v-if="q.m === 'k2r'" class="kana" :style="{ fontSize: fitPx(q.a.k, 96, 440) }">{{ q.a.k }}</span>
+        <template v-if="q.m === 'k2r' || q.m === 'k2z'">
+          <!-- 句子太長就換行顯示，不要縮到看不清楚 -->
+          <span v-if="glyphs(q.a.k) > 8" class="kana sent">{{ q.a.k }}</span>
+          <span v-else class="kana" :style="{ fontSize: fitPx(q.a.k, 96, 440) }">{{ q.a.k }}</span>
+        </template>
         <span v-else-if="q.m === 'r2k'" class="mono">{{ q.a.r }}</span>
         <button v-else class="btn primary" style="font-size: 16px; padding: 14px 22px" @click="say(q.a, q.a.k)">
           <SpeakerIcon /> {{ answered ? '再聽一次' : '播放發音' }}
@@ -81,11 +85,11 @@
           v-for="o in q.opts"
           :key="o.k"
           class="opt"
-          :class="[q.m === 'k2r' ? 'r' : 'k', answered && (o.k === q.a.k ? 'right' : o.k === answered ? 'wrong' : ''), { long: (q.m === 'k2r' ? o.r : o.k).length > 7 }]"
+          :class="[optClass, answered && (o.k === q.a.k ? 'right' : o.k === answered ? 'wrong' : ''), { long: optText(o).length > 7 }]"
           :disabled="!!answered"
           @click="answer(o.k)"
         >
-          {{ q.m === 'k2r' ? o.r : o.k }}
+          {{ optText(o) }}
         </button>
       </div>
       <div class="fb" :class="answered ? (answered === q.a.k ? 'good' : 'bad') : ''">
@@ -105,9 +109,9 @@
 import { computed, onActivated, onDeactivated, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
-import { ALL_KANA, EXAM_GROUPS, KANA_LAST, ROADMAP, STEPS, stepLabel } from '@/data';
+import { ALL_KANA, EXAMS, ROADMAP, STEPS, stepLabel, type Exam } from '@/data';
 import type { KanaItem } from '@/data/types';
-import { EXAM_N, EXAM_PASS, MODES, PASS, fitPx, makeExam, makeQs, type Question, type QuizMode } from '@/lib/kana';
+import { MODES, PASS, fitPx, gist, glyphs, isListen, isMeaning, makeExam, makeQs, type Question, type QuizMode } from '@/lib/kana';
 import { say } from '@/composables/useAudio';
 import { useProgressStore } from '@/stores/progress';
 import ScopeChips from '@/components/ScopeChips.vue';
@@ -127,28 +131,38 @@ const wrong = ref<KanaItem[]>([]);
 const answered = ref<string | null>(null);
 /** 0 = 一般複習測驗；其他數字 = 第幾步的解鎖測驗 */
 const unlock = ref(0);
-/** 五十音大會考 */
-const exam = ref(false);
+/** 正在考的大會考 */
+const exam = ref<Exam | null>(null);
 let active = false;
 
 const q = computed(() => qs.value[i.value]);
+/** 選項顯示的文字：拼音、中文意思或假名 */
+const optText = (o: KanaItem) => (q.value?.m === 'k2r' ? o.r : q.value && isMeaning(q.value.m) ? gist(o.z) : o.k);
+const optClass = computed(() => (q.value?.m === 'k2r' ? 'r' : q.value && isMeaning(q.value.m) ? 'z' : 'k'));
 /** 選項有長句子時排成一欄 */
-const singleCol = computed(() => {
-  const cur = q.value;
-  return !!cur && cur.opts.some((o) => (cur.m === 'k2r' ? o.r : o.k).length > 7);
-});
+const singleCol = computed(() => !!q.value && q.value.opts.some((o) => optText(o).length > 7));
 const done = computed(() => qs.value.length > 0 && i.value >= qs.value.length);
-const ok = computed(() => score.value >= (exam.value ? EXAM_PASS : PASS));
+const ok = computed(() => score.value >= (exam.value ? exam.value.pass : PASS));
+/** 剛通過的這一步後面接著大會考 */
+const dueExam = computed(() => EXAMS.find((e) => e.after === unlock.value && !p.examPassed(e.id)) ?? null);
+const examNext = computed(() => !!exam.value && STEPS.some((x) => x.id === exam.value!.after + 1));
+/** 答錯的是課本的句子（不是假名） */
+const wrongPhrase = computed(() => wrong.value.some((k) => STEPS[k.step - 1]?.kind === 'phrase'));
 const unlockStep = computed(() => STEPS.find((x) => x.id === unlock.value));
 const nextHas = computed(() => STEPS.some((x) => x.id === unlock.value + 1));
 const wrongList = computed(() => [...new Map(wrong.value.map((k) => [k.k, k])).values()]);
-const ask = computed(() =>
-  q.value?.m === 'k2r' ? '這個字怎麼唸？' : q.value?.m === 'r2k' ? '哪一個字是這個音？' : '聽發音，選出正確的字',
-);
+const ASK: Record<QuizMode, string> = {
+  k2r: '這個字怎麼唸？',
+  r2k: '哪一個字是這個音？',
+  a2k: '聽發音，選出正確的字',
+  k2z: '這句話是什麼意思？',
+  a2z: '聽錄音，選出意思',
+};
+const ask = computed(() => (q.value ? ASK[q.value.m] : ''));
 
 /** 大會考各單元答對幾題，方便知道要回去複習哪裡 */
 const partScores = computed(() =>
-  EXAM_GROUPS.map((g) => {
+  (exam.value?.groups ?? []).map((g) => {
     const steps = new Set(g.kana.map((k) => k.step));
     const total = qs.value.filter((x) => steps.has(x.a.step)).length;
     const miss = wrong.value.filter((k) => steps.has(k.step)).length;
@@ -157,9 +171,11 @@ const partScores = computed(() =>
 );
 
 const resultMsg = computed(() => {
-  if (exam.value) {
-    if (ok.value) return '恭喜通過五十音大會考！假名的基礎很穩了，可以開始學課本第 1 課。';
-    return `答對 ${score.value} 題，還差 ${EXAM_PASS - score.value} 題。看一下哪個單元錯比較多，回去用字卡複習，隨時可以重考。`;
+  const e = exam.value;
+  if (e) {
+    if (ok.value) return e.passMsg;
+    const where = e.id === 'kana' ? '哪個單元' : '哪幾課';
+    return `答對 ${score.value} 題，還差 ${e.pass - score.value} 題。看一下${where}錯比較多，回去複習，隨時可以重考。`;
   }
   const id = unlock.value;
   if (!id) {
@@ -168,7 +184,8 @@ const resultMsg = computed(() => {
   }
   if (!ok.value) return `答對 ${score.value} 題，還差 ${PASS - score.value} 題。把答錯的字再練一下，隨時可以重考。`;
   const nextR = ROADMAP.find((r) => r.n === id + 1);
-  if (id === KANA_LAST && !p.d.exam) return `通過了！假名全部學完。最後還有五十音大會考（${EXAM_N} 題答對 ${EXAM_PASS} 題），通過就能進入課本第 1 課。`;
+  const de = dueExam.value;
+  if (de) return `通過了！${de.done}。最後還有${de.title}（${de.n} 題答對 ${de.pass} 題），通過${de.reward}。`;
   if (nextHas.value) return `通過了！第 ${id + 1} 步 ${stepLabel(id + 1)} 已經解鎖。`;
   if (nextR?.ext) return `恭喜！目前的內容全部學完了。下一站是${nextR.t}，內容準備好就會加進來。`;
   if (nextR) return `通過了！第 ${id} 步完成。第 ${id + 1} 步的內容還沒加進網站，準備好再繼續。`;
@@ -200,29 +217,31 @@ function start(unlockId: number) {
   wrong.value = [];
   answered.value = null;
   unlock.value = u;
-  exam.value = false;
+  exam.value = null;
   autoSpeak();
 }
 
-/** 五十音大會考：每個假名單元平均出題，三種題型混在一起 */
-function startExam() {
-  const ids = MODES.map((m) => m.id);
+/** 大會考：每個單元（每一課）平均出題，題型混在一起 */
+function startExam(id: string) {
+  const e = EXAMS.find((x) => x.id === id);
+  if (!e) return;
   qs.value = makeExam(
-    EXAM_GROUPS.map((g) => g.kana),
-    () => ids[Math.floor(Math.random() * ids.length)]!,
+    e.groups.map((g) => g.kana),
+    e.mode,
+    e.n,
   );
   i.value = 0;
   score.value = 0;
   wrong.value = [];
   answered.value = null;
   unlock.value = 0;
-  exam.value = true;
+  exam.value = e;
   autoSpeak();
   window.scrollTo(0, 0);
 }
 
 function autoSpeak() {
-  if (active && q.value?.m === 'a2k') say(q.value.a, q.value.a.k);
+  if (active && q.value && isListen(q.value.m)) say(q.value.a, q.value.a.k);
 }
 
 function pickMode(m: QuizMode) {
@@ -235,14 +254,14 @@ function answer(k: string) {
   answered.value = k;
   if (k === q.value.a.k) score.value++;
   else wrong.value.push(q.value.a);
-  if (q.value.m !== 'a2k') say(q.value.a, q.value.a.k);
+  if (!isListen(q.value.m)) say(q.value.a, q.value.a.k);
 }
 
 function next() {
   i.value++;
   answered.value = null;
   if (done.value && unlock.value && ok.value) p.pass(unlock.value);
-  if (done.value && exam.value && ok.value) p.passExam();
+  if (done.value && exam.value && ok.value) p.passExam(exam.value.id);
   autoSpeak();
 }
 
@@ -253,13 +272,14 @@ function goLearn(id: number) {
   window.scrollTo(0, 0);
 }
 
-/** 從學習頁按「開始大會考」會帶 ?exam=1；假名都通過了才能考 */
+/** 從學習頁按「開始大會考」會帶 ?exam=大會考 id（舊版是 ?exam=1）；前面的步驟都通過了才能考 */
 watch(
   () => route.query.exam,
   (v) => {
     if (v === undefined) return;
     void router.replace({ path: '/quiz' });
-    if (p.d.passed >= KANA_LAST) startExam();
+    const e = EXAMS.find((x) => x.id === (v === '1' ? 'kana' : v));
+    if (e && p.d.passed >= e.after) startExam(e.id);
   },
   { immediate: true },
 );

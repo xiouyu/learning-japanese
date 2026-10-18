@@ -1,7 +1,7 @@
 /* ===== 教材資料：之後每學一步，在 steps.json 加一筆 ===== */
 import raw from './steps.json';
 import type { GojuonRow, KanaItem, RoadmapItem, Step } from './types';
-import { toKata } from '@/lib/kana';
+import { toKata, type QuizMode } from '@/lib/kana';
 
 export const STEPS = raw as Step[];
 
@@ -35,11 +35,72 @@ export const BASE_K = new Set([...BASE].map(toKata));
 
 /** 假名的最後一步：通過這一步後要先考五十音大會考，才會解鎖課本第 1 課 */
 export const KANA_LAST = Math.max(...STEPS.filter((s) => s.kind !== 'phrase').map((s) => s.id));
+/** 入門（A1）的最後一步：課本第 1～18 課的 part 是「第N課 …」 */
+const lessonNo = (s: Step) => Number(/^第(\d+)課/.exec(s.part)?.[1] ?? 0);
+export const A1_LAST = Math.max(...STEPS.filter((s) => lessonNo(s) >= 1 && lessonNo(s) <= 18).map((s) => s.id));
 
-/** 大會考的出題範圍：假名步驟依單元分組 */
-export const EXAM_GROUPS: { part: string; kana: KanaItem[] }[] = [
-  ...new Set(STEPS.filter((s) => s.id <= KANA_LAST).map((s) => s.part)),
-].map((part) => ({ part, kana: ALL_KANA.filter((k) => k.step <= KANA_LAST && STEPS[k.step - 1]!.part === part) }));
+/** 大會考：接在某一步後面，通過才會解鎖下一步 */
+export interface Exam {
+  id: string;
+  /** 接在第幾步後面 */
+  after: number;
+  title: string;
+  /** 考試範圍的說明 */
+  scope: string;
+  /** 「〜學完了」 */
+  done: string;
+  /** 通過後的好處，例如「就能進入課本第 1 課」 */
+  reward: string;
+  passMsg: string;
+  /** 學習路線上的註解 */
+  road: string;
+  n: number;
+  pass: number;
+  /** 依單元（或每一課）分組的出題範圍 */
+  groups: { part: string; kana: KanaItem[] }[];
+  /** 每一題的題型 */
+  mode: (a: KanaItem) => QuizMode;
+}
+
+const pick = <T>(a: readonly T[]) => a[Math.floor(Math.random() * a.length)]!;
+
+/** 第 from～to 步的題目，依 part 分組 */
+function groupsOf(from: number, to: number) {
+  const parts = [...new Set(STEPS.filter((s) => s.id >= from && s.id <= to).map((s) => s.part))];
+  return parts.map((part) => ({ part, kana: ALL_KANA.filter((k) => k.step >= from && k.step <= to && STEPS[k.step - 1]!.part === part) }));
+}
+
+export const EXAMS: Exam[] = [
+  {
+    id: 'kana',
+    after: KANA_LAST,
+    title: '五十音大會考',
+    scope: '平假名、濁音、長音・促音・拗音、片假名、片假名的濁音和小字，每個單元各考 6 題',
+    done: '假名全部學完了',
+    reward: '就能進入課本第 1 課',
+    passMsg: '恭喜通過五十音大會考！假名的基礎很穩了，可以開始學課本第 1 課。',
+    road: '通過才進入課本',
+    n: 30,
+    pass: 27,
+    groups: groupsOf(1, KANA_LAST),
+    mode: () => pick(['k2r', 'a2k', 'r2k'] as const),
+  },
+  {
+    id: 'a1',
+    after: A1_LAST,
+    title: '入門大會考',
+    scope: '課本第 1～18 課每一課各考 2 題：聽錄音選意思、看句子選意思、聽錄音選句子',
+    done: '入門 18 課全部學完了',
+    reward: '就完成《いろどり》入門（A1）',
+    passMsg: '恭喜通過入門大會考！《いろどり》入門（A1）結業了，生活中最基本的日文你都能聽、能說了。',
+    road: '通過就從入門結業',
+    n: 36,
+    pass: 32,
+    groups: groupsOf(KANA_LAST + 1, A1_LAST),
+    // 有課本錄音的句子才出聽力題
+    mode: (a) => (a.audio ? pick(['a2z', 'k2z', 'a2k'] as const) : 'k2z'),
+  },
+];
 
 export function stepLabel(n: number): string {
   const s = STEPS.find((x) => x.id === n);

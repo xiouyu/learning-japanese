@@ -4,8 +4,8 @@ import type { QuizMode } from './kana';
 export interface ProgressData {
   /** 已經通過解鎖測驗的步數 */
   passed: number;
-  /** 通過五十音大會考了沒（通過才會解鎖課本第 1 課） */
-  exam: boolean;
+  /** 通過的大會考（例如 'kana'：五十音大會考，'a1'：入門大會考） */
+  exams: string[];
   /** 學習頁正在看第幾步 */
   step: number;
   /** 字卡、測驗的練習範圍（步驟 id） */
@@ -22,7 +22,7 @@ export interface ProgressData {
 
 export const emptyProgress = (): ProgressData => ({
   passed: 0,
-  exam: false,
+  exams: [],
   step: 1,
   scope: [],
   lastU: 0,
@@ -52,11 +52,20 @@ function write(k: string, v: unknown) {
   }
 }
 
+/** 大會考：id 和接在第幾步後面 */
+export interface Gate {
+  id: string;
+  after: number;
+}
+
+/** 舊版的紀錄：exam: true 代表通過了五十音大會考 */
+type RawProgress = Partial<ProgressData> & { exam?: unknown };
+
 /**
  * 把任何來源（localStorage、雲端）的資料整理成合法的 ProgressData。
- * examAt 是大會考接在第幾步後面：舊資料沒有 exam，已經學到課本的人當作考過了。
+ * gates 是各個大會考接在第幾步後面：沒有紀錄但已經學過那一步之後的人，當作考過了。
  */
-export function normalize(raw: Partial<ProgressData> | null | undefined, maxStep: number, examAt = 0): ProgressData {
+export function normalize(raw: RawProgress | null | undefined, maxStep: number, gates: Gate[] = []): ProgressData {
   const d = emptyProgress();
   if (!raw) return d;
   const int = (v: unknown, lo: number, hi: number, dflt: number) => {
@@ -64,7 +73,10 @@ export function normalize(raw: Partial<ProgressData> | null | undefined, maxStep
     return Number.isFinite(n) ? Math.max(lo, Math.min(hi, n)) : dflt;
   };
   d.passed = int(raw.passed, 0, maxStep, 0);
-  d.exam = raw.exam === true || (examAt > 0 && d.passed > examAt);
+  const exams = new Set(Array.isArray(raw.exams) ? raw.exams.filter((x): x is string => typeof x === 'string' && x !== '') : []);
+  if (raw.exam === true) exams.add('kana');
+  for (const g of gates) if (d.passed > g.after) exams.add(g.id);
+  d.exams = [...exams].sort();
   d.step = int(raw.step, 1, maxStep, 1);
   d.lastU = int(raw.lastU, 0, maxStep, 0);
   d.scope = Array.isArray(raw.scope)
@@ -83,7 +95,7 @@ export function normalize(raw: Partial<ProgressData> | null | undefined, maxStep
 }
 
 /** 讀取這台裝置上的紀錄（相容單一 HTML 版本留下的 key） */
-export function loadLocal(maxStep: number, examAt = 0): ProgressData {
+export function loadLocal(maxStep: number, gates: Gate[] = []): ProgressData {
   let passed = read<number | null>('passed', null);
   if (passed === null) {
     const legacy = read('seen', 0); // 更早的版本：當時正在學第 seen 步
@@ -92,6 +104,7 @@ export function loadLocal(maxStep: number, examAt = 0): ProgressData {
   return normalize(
     {
       passed,
+      exams: read('exams', []),
       exam: read('exam', false),
       step: read('step', 1),
       scope: read('scope', []),
@@ -102,7 +115,7 @@ export function loadLocal(maxStep: number, examAt = 0): ProgressData {
       updatedAt: read('updatedAt', 0),
     },
     maxStep,
-    examAt,
+    gates,
   );
 }
 
@@ -121,7 +134,7 @@ export function mergeProgress(a: ProgressData, b: ProgressData): ProgressData {
   for (const [k, v] of Object.entries(b.mastery)) mastery[k] = Math.max(mastery[k] ?? 0, v);
   return {
     passed: Math.max(a.passed, b.passed),
-    exam: a.exam || b.exam,
+    exams: [...new Set([...a.exams, ...b.exams])].sort(),
     step: newer.step,
     scope: [...newer.scope],
     lastU: Math.max(a.lastU, b.lastU),

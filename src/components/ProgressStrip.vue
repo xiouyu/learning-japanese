@@ -38,11 +38,11 @@ const rows = computed(() =>
 
 const tail = computed(() => {
   const passed = p.d.passed;
+  if (p.examDue) return `${p.examDue.done}！下一關：${p.examDue.title}`;
   if (passed >= STEPS.length) {
     const nx = ROADMAP.find((r) => r.n === passed + 1);
     return nx?.ext ? `目前的內容全部學完了！下一站：${nx.row}（準備中）` : `第 ${passed + 1} 步內容準備中`;
   }
-  if (p.examDue) return '假名學完了！下一關：五十音大會考';
   return `正在學第 ${p.curU} 步・${stepLabel(p.curU)}`;
 });
 </script>

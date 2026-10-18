@@ -20,11 +20,16 @@ describe('normalize', () => {
     expect(normalize(null, MAX)).toEqual(emptyProgress());
   });
 
-  it('舊資料沒有大會考紀錄：已經學到課本的人當作考過，剛學完假名的人要考', () => {
-    expect(normalize({ passed: 40 }, 153, 33).exam).toBe(true);
-    expect(normalize({ passed: 33 }, 153, 33).exam).toBe(false);
-    expect(normalize({ passed: 33, exam: true }, 153, 33).exam).toBe(true);
-    expect(normalize({ passed: 33, exam: 'yes' as never }, 153, 33).exam).toBe(false);
+  it('大會考紀錄：讀得懂舊版的 exam，已經學過大會考之後步驟的人當作考過', () => {
+    const gates = [
+      { id: 'kana', after: 33 },
+      { id: 'a1', after: 153 },
+    ];
+    expect(normalize({ passed: 40 }, 153, gates).exams).toEqual(['kana']);
+    expect(normalize({ passed: 33 }, 153, gates).exams).toEqual([]);
+    expect(normalize({ passed: 33, exam: true } as never, 153, gates).exams).toEqual(['kana']);
+    expect(normalize({ passed: 33, exam: 'yes' } as never, 153, gates).exams).toEqual([]);
+    expect(normalize({ passed: 153, exams: ['a1', 'kana', 'a1', 3] as never }, 153, gates).exams).toEqual(['a1', 'kana']);
   });
 });
 
@@ -47,10 +52,9 @@ describe('mergeProgress', () => {
     expect(m.updatedAt).toBe(200);
   });
 
-  it('任一邊通過大會考就算通過', () => {
-    expect(mergeProgress({ ...laptop, exam: true }, phone).exam).toBe(true);
-    expect(mergeProgress(laptop, { ...phone, exam: true }).exam).toBe(true);
-    expect(mergeProgress(laptop, phone).exam).toBe(false);
+  it('任一邊通過的大會考都算通過', () => {
+    expect(mergeProgress({ ...laptop, exams: ['kana'] }, { ...phone, exams: ['a1'] }).exams).toEqual(['a1', 'kana']);
+    expect(mergeProgress(laptop, phone).exams).toEqual([]);
   });
 
   it('順序不影響結果', () => {
