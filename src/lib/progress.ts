@@ -22,6 +22,12 @@ export interface ProgressData {
   qpick: QuizPick;
   /** Can-do 自我檢核：第幾項 → 1～3 顆星 */
   cando: Record<string, number>;
+  /** 每天練了幾題（本地日期 → 題數），算連續學習天數用 */
+  daily: Record<string, number>;
+  /** 每個字（句子）最後一次在測驗裡答題是第幾天，今日複習挑很久沒練的用 */
+  seen: Record<string, number>;
+  /** 最後一次做完今日複習的日期 */
+  review: string;
   tmode: 'hira' | 'kata';
   /** 最後修改時間（毫秒），合併時用來決定偏好設定以哪一邊為準 */
   updatedAt: number;
@@ -39,6 +45,9 @@ export const emptyProgress = (): ProgressData => ({
   qn: QN,
   qpick: 'even',
   cando: {},
+  daily: {},
+  seen: {},
+  review: '',
   tmode: 'hira',
   updatedAt: 0,
 });
@@ -108,6 +117,12 @@ export function normalize(raw: RawProgress | null | undefined, maxStep: number, 
   d.qmode = QMODES.includes(raw.qmode as QuizMode) ? (raw.qmode as QuizMode) : 'k2r';
   d.qn = (QN_OPTS as readonly number[]).includes(Number(raw.qn)) ? Number(raw.qn) : QN;
   d.qpick = raw.qpick === 'weak' ? 'weak' : 'even';
+  d.daily = posInts(raw.daily, (k) => /^\d{4}-\d{2}-\d{2}$/.test(k));
+  // 只留最近 400 天
+  const days = Object.keys(d.daily).sort();
+  for (const k of days.slice(0, Math.max(0, days.length - 400))) delete d.daily[k];
+  d.seen = posInts(raw.seen, () => true);
+  d.review = typeof raw.review === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(raw.review) ? raw.review : '';
   if (raw.cando && typeof raw.cando === 'object') {
     for (const [k, v] of Object.entries(raw.cando)) {
       const n = Number(v);
@@ -117,6 +132,18 @@ export function normalize(raw: RawProgress | null | undefined, maxStep: number, 
   d.tmode = raw.tmode === 'kata' ? 'kata' : 'hira';
   d.updatedAt = Number(raw.updatedAt) || 0;
   return d;
+}
+
+/** 只留正整數的值（key 要通過 keyOk） */
+function posInts(raw: unknown, keyOk: (k: string) => boolean): Record<string, number> {
+  const out: Record<string, number> = {};
+  if (raw && typeof raw === 'object') {
+    for (const [k, v] of Object.entries(raw)) {
+      const n = Math.floor(Number(v));
+      if (keyOk(k) && Number.isFinite(n) && n > 0) out[k] = n;
+    }
+  }
+  return out;
 }
 
 /** 讀取這台裝置上的紀錄（相容單一 HTML 版本留下的 key） */
@@ -140,6 +167,9 @@ export function loadLocal(maxStep: number, gates: Gate[] = []): ProgressData {
       qn: read('qn', QN),
       qpick: read('qpick', 'even'),
       cando: read('cando', {}),
+      daily: read('daily', {}),
+      seen: read('seen', {}),
+      review: read('review', ''),
       tmode: read('tmode', 'hira'),
       updatedAt: read('updatedAt', 0),
     },
@@ -154,10 +184,16 @@ export function saveLocal(d: ProgressData) {
 
 /**
  * 合併兩台裝置的紀錄：
- * - 進度、大會考和熟練度只會增加，取兩邊較大的值，不會因為同步而倒退
+ * - 進度、大會考、熟練度、每天的題數、最後練習的日子只會增加，取兩邊較大的值，不會因為同步而倒退
  * - 練習範圍、測驗模式這類偏好，以最後修改的那一邊為準
  * - 弱點分數答對會減少，所以也以最後修改的那一邊為準（取較大值的話，在一台練熟了，同步後又會變回常錯）
  */
+function maxMerge(a: Record<string, number>, b: Record<string, number>): Record<string, number> {
+  const out = { ...a };
+  for (const [k, v] of Object.entries(b)) out[k] = Math.max(out[k] ?? 0, v);
+  return out;
+}
+
 export function mergeProgress(a: ProgressData, b: ProgressData): ProgressData {
   const newer = b.updatedAt > a.updatedAt ? b : a;
   const mastery: Record<string, number> = { ...a.mastery };
@@ -175,6 +211,9 @@ export function mergeProgress(a: ProgressData, b: ProgressData): ProgressData {
     qpick: newer.qpick,
     // 自我評價可以改高也可以改低，以最後修改的那一邊為準
     cando: { ...newer.cando },
+    daily: maxMerge(a.daily, b.daily),
+    seen: maxMerge(a.seen, b.seen),
+    review: a.review > b.review ? a.review : b.review,
     tmode: newer.tmode,
     updatedAt: Math.max(a.updatedAt, b.updatedAt),
   };

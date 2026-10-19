@@ -9,6 +9,9 @@
       </div>
     </div>
     <div class="lbl">平假名 {{ rows[0]!.done }} / {{ TOTAL }}・片假名 {{ rows[1]!.done }} / {{ TOTAL }}・{{ tail }}</div>
+    <div class="lbl lbl-day">
+      連續學習 <b>{{ p.streakN }}</b> 天・今天練了 <b>{{ p.todayN }}</b> 題{{ p.todayN >= DAILY_N ? '，達成每日目標 ✓' : `（目標 ${DAILY_N} 題）` }}
+    </div>
   </div>
 </template>
 
@@ -16,6 +19,7 @@
 import { computed } from 'vue';
 import { ALL_KANA, BASE, BASE_K, ROADMAP, STEPS, TOTAL, stepLabel } from '@/data';
 import { useProgressStore } from '@/stores/progress';
+import { DAILY_N } from '@/lib/daily';
 
 const p = useProgressStore();
 

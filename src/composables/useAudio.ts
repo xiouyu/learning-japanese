@@ -4,21 +4,40 @@ import { speak } from './useSpeech';
 let player: HTMLAudioElement | null = null;
 let stopAt: number | null = null;
 let token = 0;
+/** 這一段播完要做的事（角色扮演用）；換播別的就不會呼叫 */
+let doneCb: (() => void) | null = null;
+
+function finish() {
+  const cb = doneCb;
+  doneCb = null;
+  cb?.();
+}
 
 function onTime() {
   if (player && stopAt !== null && player.currentTime >= stopAt) {
     player.pause();
     stopAt = null;
+    finish();
   }
 }
 
-/** 播放課本音檔（可以只播其中一段）；播放失敗時退回語音合成 */
-export function playAudio(ref: AudioRef, fallbackText?: string) {
+/** 停止播放（不會呼叫播完的 callback） */
+export function stopAudio() {
+  doneCb = null;
+  token++;
+  player?.pause();
+  speechSynthesis?.cancel?.();
+}
+
+/** 播放課本音檔（可以只播其中一段）；播放失敗時退回語音合成。onDone：這一段播完時呼叫 */
+export function playAudio(ref: AudioRef, fallbackText?: string, onDone?: () => void) {
   if (!player) {
     player = new Audio();
     player.preload = 'auto';
     player.addEventListener('timeupdate', onTime);
+    player.addEventListener('ended', finish);
   }
+  doneCb = onDone ?? null;
   speechSynthesis?.cancel?.();
   player.pause();
   // 相對路徑：網站放在子路徑（例如 /learning-japanese/）也找得到
@@ -29,7 +48,9 @@ export function playAudio(ref: AudioRef, fallbackText?: string) {
   const begin = ref.start ?? 0;
   const fail = () => {
     p.muted = false;
-    if (my === token && fallbackText) speak(fallbackText);
+    if (my !== token) return;
+    if (fallbackText) speak(fallbackText);
+    finish();
   };
   if (p.readyState >= 1) {
     p.muted = false;

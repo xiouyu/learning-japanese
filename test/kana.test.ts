@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { A1_LAST, ALL_KANA, BASE, BASE_K, CANDO, EXAMS, KANA_LAST, STEPS, candoStep, lessonOf } from '@/data';
+import { A1_LAST, ALL_KANA, BASE, BASE_K, CANDO, CULTURE, EXAMS, KANA_LAST, STEPS, candoStep, lessonOf } from '@/data';
 import { checkTyped, gist, isMeaning, makeExam, makeQs, normRoma, pickWeighted, snd, toKata, weakWeight } from '@/lib/kana';
 
 describe('教材資料', () => {
@@ -197,5 +197,33 @@ describe('打字作答', () => {
 
   it('課本裡每一個字、每一句都能用自己的拼音答對', () => {
     for (const k of ALL_KANA) expect(checkTyped(k, k.r), k.k).toBe(true);
+  });
+});
+
+describe('文化專欄和角色扮演', () => {
+  it('第 1～18 課每課都有文化專欄，內容完整', () => {
+    expect(new Set(CULTURE.map((c) => c.lesson))).toEqual(new Set(Array.from({ length: 18 }, (_, i) => i + 1)));
+    for (const c of CULTURE) {
+      expect(c.zh && c.ja, String(c.id)).toBeTruthy();
+      expect(c.body.length, c.ja).toBeGreaterThan(0);
+      for (const w of c.words) expect(w).toHaveLength(3);
+    }
+  });
+
+  it('會話每一句的錄音時間在檔案範圍內、照順序、不重疊', () => {
+    let n = 0;
+    for (const s of STEPS)
+      for (const d of s.dialogs ?? []) {
+        const at = d.lines.map((l) => l.at);
+        if (!at.some(Boolean)) continue;
+        n++;
+        expect(at.every(Boolean), d.label).toBe(true);
+        at.forEach((t, i) => {
+          expect(t![0]).toBeLessThan(t![1]);
+          expect(t![0]).toBeGreaterThanOrEqual(d.audio?.start ?? 0);
+          if (i) expect(t![0], d.label).toBeGreaterThanOrEqual(at[i - 1]![1] - 0.3);
+        });
+      }
+    expect(n).toBeGreaterThan(200);
   });
 });

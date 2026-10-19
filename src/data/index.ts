@@ -1,7 +1,8 @@
 /* ===== 教材資料：之後每學一步，在 steps.json 加一筆 ===== */
 import raw from './steps.json';
 import rawCando from './cando.json';
-import type { CanDo, GojuonRow, KanaItem, RoadmapItem, Step } from './types';
+import rawCulture from './culture.json';
+import type { CanDo, Culture, GojuonRow, KanaItem, RoadmapItem, Step } from './types';
 import { toKata, type QuizMode } from '@/lib/kana';
 
 export const STEPS = raw as Step[];
@@ -114,6 +115,9 @@ export const EXAMS: Exam[] = [
     mode: (a) => (a.audio ? pick(['a2z', 'k2z', 'a2k'] as const) : 'k2z'),
   },
 ];
+
+/** 課本的生活文化專欄（第 1～18 課） */
+export const CULTURE = rawCulture as Culture[];
 
 /** 課本的 79 項 Can-do */
 export const CANDO = rawCando as CanDo[];

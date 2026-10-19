@@ -69,11 +69,12 @@
     <!-- 課本的會話 -->
     <div v-if="step.dialogs?.length" class="sec">
       <h3>聽會話</h3>
-      <p class="muted lead">先聽錄音，想想看他們在什麼場合說這些話，再看下面的句子確認。</p>
+      <p class="muted lead">先聽錄音，想想看他們在什麼場合說這些話，再看下面的句子確認。熟了之後按「角色扮演」，換你演其中一個人。</p>
       <div class="dlist">
         <div v-for="d in step.dialogs" :key="d.label" class="dcard">
           <div class="dhead">
             <span class="dlabel">{{ d.label }}</span>
+            <button v-if="canRolePlay(d)" class="btn ghost rp-btn" @click="openRolePlay(d)">角色扮演</button>
             <button class="btn icon-btn" :aria-label="`播放 ${d.label}`" @click="playDialog(d)"><SpeakerIcon /></button>
           </div>
           <div class="dbody">
@@ -129,6 +130,8 @@
       </div>
     </div>
 
+    <RolePlay v-if="rpDialog" v-model="rpOpen" :dialog="rpDialog" />
+
     <div class="sec">
       <h3>重點</h3>
       <ul class="notes">
@@ -159,6 +162,25 @@
     </div>
 
     <!-- 大會考接在這一步後面：通過這一步後要再考大會考，才會解鎖下一步 -->
+    <!-- 這一課的生活文化專欄（同一課的每一步都看得到，預設收起來） -->
+    <div v-if="culture.length" class="sec">
+      <h3>生活文化小知識・第 {{ lesson }} 課</h3>
+      <div class="cul-list">
+        <details v-for="c in culture" :key="c.id" class="cul">
+          <summary>
+            <span class="cul-zh">{{ c.zh }}</span>
+            <span class="kana muted cul-ja">{{ c.ja }}</span>
+          </summary>
+          <p v-for="(b, bi) in c.body" :key="bi">{{ b }}</p>
+          <div v-if="c.words.length" class="cul-words">
+            <button v-for="w in c.words" :key="w[0]" class="chip" :aria-label="`播放 ${w[0]}`" @click="speak(w[1])">
+              <span class="kn">{{ w[0] }}</span>{{ w[1] !== w[0] ? `（${w[1]}）` : '' }} {{ w[2] }}
+            </button>
+          </div>
+        </details>
+      </div>
+    </div>
+
     <div v-if="stepExam && step.id <= p.d.passed" class="unlock" :class="{ passed: p.examPassed(stepExam.id) }">
       <h3>{{ stepExam.title }}{{ p.examPassed(stepExam.id) ? '・已通過' : '' }}</h3>
       <p v-if="p.examPassed(stepExam.id)" class="muted">已經通過了。想確認自己還記得，可以隨時再考一次，成績不會影響進度。</p>
@@ -205,7 +227,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { EXAMS, ROADMAP, STEPS, stepLabel, type Exam } from '@/data';
+import { CULTURE, EXAMS, ROADMAP, STEPS, lessonOf, stepLabel, type Exam } from '@/data';
 import type { Dialog, RoadmapItem } from '@/data/types';
 import { PASS, QN, sqFontSize } from '@/lib/kana';
 import { playAudio, say } from '@/composables/useAudio';
@@ -214,6 +236,7 @@ import { useProgressStore } from '@/stores/progress';
 import WritingPad from '@/components/WritingPad.vue';
 import WordList from '@/components/WordList.vue';
 import SpeakerIcon from '@/components/SpeakerIcon.vue';
+import RolePlay from '@/components/RolePlay.vue';
 
 defineOptions({ name: 'LearnPage' });
 
@@ -229,6 +252,10 @@ const next = computed(() => ROADMAP.find((r) => r.n === p.curU + 1));
 const lockMsg = computed(() =>
   p.examDue ? `通過${p.examDue.title}後解鎖` : p.curU > p.d.passed ? `通過第 ${p.curU} 步測驗後解鎖` : '內容準備中',
 );
+/** 這一步屬於第幾課，和那一課的文化專欄（漢字總複習不重複顯示） */
+const lesson = computed(() => (step.value.part === '入門漢字總複習' ? 0 : lessonOf(step.value)));
+const culture = computed(() => CULTURE.filter((c) => c.lesson === lesson.value));
+
 /** 接在這一步後面的大會考 */
 const stepExam = computed(() => EXAMS.find((e) => e.after === step.value.id));
 const examState = (e: Exam) =>
@@ -262,6 +289,16 @@ const sayKana = () => say(kana.value, kana.value.k);
 function playDialog(d: Dialog) {
   if (d.audio) playAudio(d.audio);
   else speak(d.lines.map((l) => l.t).join('　'));
+}
+
+/** 每一句都切出錄音時間、而且至少兩個人說話的會話，才能角色扮演 */
+const canRolePlay = (d: Dialog) =>
+  !!d.audio && d.lines.every((l) => l.at && l.who) && new Set(d.lines.map((l) => l.who)).size >= 2;
+const rpOpen = ref(false);
+const rpDialog = ref<Dialog | null>(null);
+function openRolePlay(d: Dialog) {
+  rpDialog.value = d;
+  rpOpen.value = true;
 }
 
 function stepKana(delta: number) {

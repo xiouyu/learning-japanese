@@ -31,6 +31,13 @@ describe('normalize', () => {
     expect(normalize({ qn: -1 }, MAX).qn).toBe(-1);
   });
 
+  it('學習紀錄只留合法的日期和正整數', () => {
+    const d = normalize({ daily: { '2026-10-19': 3, bad: 2, '2026-10-18': 0 }, seen: { あ: 5, い: -1 }, review: 'x' as never }, MAX);
+    expect(d.daily).toEqual({ '2026-10-19': 3 });
+    expect(d.seen).toEqual({ あ: 5 });
+    expect(d.review).toBe('');
+  });
+
   it('Can-do 自我評價只留 1～3 顆星', () => {
     expect(normalize({ cando: { 1: 3, 2: 0, 3: 4, x: 2, 5: '2' as never } }, MAX).cando).toEqual({ 1: 3, 5: 2 });
   });
@@ -84,6 +91,16 @@ describe('mergeProgress', () => {
 
   it('Can-do 自我評價以最後修改的裝置為準（可以改高也可以改低）', () => {
     expect(mergeProgress({ ...laptop, cando: { 1: 1 } }, { ...phone, cando: { 1: 3, 2: 2 } }).cando).toEqual({ 1: 3, 2: 2 });
+  });
+
+  it('每天的題數和最後練習的日子取較大值，今日複習的日期取較新的', () => {
+    const m = mergeProgress(
+      { ...laptop, daily: { '2026-10-18': 5, '2026-10-19': 2 }, seen: { あ: 100 }, review: '2026-10-18' },
+      { ...phone, daily: { '2026-10-19': 7 }, seen: { あ: 90, い: 95 }, review: '2026-10-19' },
+    );
+    expect(m.daily).toEqual({ '2026-10-18': 5, '2026-10-19': 7 });
+    expect(m.seen).toEqual({ あ: 100, い: 95 });
+    expect(m.review).toBe('2026-10-19');
   });
 
   it('順序不影響結果', () => {

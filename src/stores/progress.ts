@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue';
 import { ALL_KANA, EXAMS, STEPS } from '@/data';
 import { WEAK_MAX, WEAK_MISS, type QuizMode, type QuizPick } from '@/lib/kana';
 import { loadLocal, saveLocal, type ProgressData } from '@/lib/progress';
+import { dayKey, dayNum, streak } from '@/lib/daily';
 
 /**
  * 個人進度：存在這台裝置的 localStorage；登入後會跟雲端同步（見 stores/sync.ts）。
@@ -74,8 +75,40 @@ export const useProgressStore = defineStore('progress', () => {
     touch();
   }
 
+  /** 今天又練了一題（測驗作答、字卡按「記住了」都算） */
+  function countToday() {
+    const t = dayKey();
+    d.value.daily[t] = (d.value.daily[t] ?? 0) + 1;
+  }
+  /** 學習紀錄：今天練了幾題、連續學習幾天（跨過午夜時，下次操作就會更新） */
+  const clock = ref(Date.now());
+  // 讀 clock 是為了日期變了會重新計算
+  const todayN = computed(() => {
+    void clock.value;
+    return d.value.daily[dayKey()] ?? 0;
+  });
+  const streakN = computed(() => {
+    void clock.value;
+    return streak(d.value.daily);
+  });
+  const reviewedToday = computed(() => {
+    void clock.value;
+    return d.value.review === dayKey();
+  });
+  // 頁面一直開著跨過午夜也會更新
+  setInterval(() => (clock.value = Date.now()), 60_000);
+
   function addMastery(k: string) {
     d.value.mastery[k] = (d.value.mastery[k] ?? 0) + 1;
+    countToday();
+    clock.value = Date.now();
+    touch();
+  }
+
+  /** 做完今日複習 */
+  function finishReview() {
+    d.value.review = dayKey();
+    clock.value = Date.now();
     touch();
   }
 
@@ -90,6 +123,9 @@ export const useProgressStore = defineStore('progress', () => {
     const v = Math.max(0, Math.min(WEAK_MAX, (w[k] ?? 0) + (right ? -1 : WEAK_MISS)));
     if (v) w[k] = v;
     else delete w[k];
+    d.value.seen[k] = dayNum();
+    countToday();
+    clock.value = Date.now();
     touch();
   }
 
@@ -129,5 +165,5 @@ export const useProgressStore = defineStore('progress', () => {
   syncNew();
   watch(d, (v) => saveLocal(v), { deep: true, immediate: true });
 
-  return { d, curKana, curU, examPassed, examDue, availSet, pool, syncNew, setStep, pass, passExam, setScope, addMastery, setQmode, setQn, setQpick, recordAnswer, rateCando, setTmode, replace, snapshot };
+  return { d, curKana, curU, examPassed, examDue, todayN, streakN, reviewedToday, finishReview, availSet, pool, syncNew, setStep, pass, passExam, setScope, addMastery, setQmode, setQn, setQpick, recordAnswer, rateCando, setTmode, replace, snapshot };
 });

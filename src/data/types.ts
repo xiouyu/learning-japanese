@@ -39,7 +39,8 @@ export interface Dialog {
   /** 標題，例如「① 01-02」 */
   label: string;
   audio?: AudioRef;
-  lines: { who?: string; t: string; r?: string; m?: string }[];
+  /** at：這一句在錄音裡的起訖秒數（角色扮演用，自動切出來的，切不準的會話就不標） */
+  lines: { who?: string; t: string; r?: string; m?: string; at?: [number, number] }[];
 }
 
 export interface Step {
@@ -72,6 +73,18 @@ export interface RoadmapItem {
 }
 
 export type KanaItem = Kana & { step: number };
+
+/** 課本每一課最後的生活文化專欄（改寫成台灣用語的中文） */
+export interface Culture {
+  id: number;
+  lesson: number;
+  /** 課本上的日文標題 */
+  ja: string;
+  zh: string;
+  body: string[];
+  /** [寫法, 唸法, 中文] */
+  words: [string, string, string][];
+}
 
 /** 課本的 Can-do（能做到的事），自我檢核用 */
 export interface CanDo {

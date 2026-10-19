@@ -9,7 +9,25 @@
       <div class="eyebrow">解鎖測驗・答對 {{ PASS }} 題以上通過</div>
       <h2 style="font-size: 28px; letter-spacing: 0.08em">第 {{ unlockStep!.id }} 步 {{ unlockStep!.title }}</h2>
     </div>
+    <div v-else-if="dailyRun" class="stephead">
+      <div class="eyebrow">今日複習・{{ qs.length }} 題</div>
+      <h2 style="font-size: 28px; letter-spacing: 0.08em">今日複習</h2>
+      <p class="lead muted">常錯的、很久沒練的、最近學的混在一起，三種題型都有。</p>
+    </div>
     <template v-else>
+      <div class="daily-card" :class="{ done: p.reviewedToday }">
+        <div>
+          <b>今日複習</b>・{{ DAILY_N }} 題：常錯的、很久沒練的、最近學的混在一起
+        </div>
+        <div class="muted">
+          連續學習 {{ p.streakN }} 天・今天練了 {{ p.todayN }} 題{{ p.reviewedToday ? '・今天的複習完成了 ✓' : '' }}
+        </div>
+        <div class="hrow">
+          <button class="btn" :class="{ primary: !p.reviewedToday }" @click="startDaily">
+            {{ p.reviewedToday ? '再做一次今日複習' : '開始今日複習' }}
+          </button>
+        </div>
+      </div>
       <ScopeChips @change="start(0)" />
       <div class="hrow" aria-label="測驗模式">
         <button v-for="m in MODES" :key="m.id" class="chip" :aria-pressed="m.id === p.d.qmode" @click="pickMode(m.id)">
@@ -91,7 +109,7 @@
     <div v-else-if="q" class="qbox">
       <div class="qhead">
         <div class="counter">
-          第 {{ i + 1 }}{{ endlessRun ? '' : ` / ${qs.length}` }} 題・答對 {{ score }}{{ unlock || exam ? '・' + ask : '' }}
+          第 {{ i + 1 }}{{ endlessRun ? '' : ` / ${qs.length}` }} 題・答對 {{ score }}{{ mixedModes ? '・' + ask : '' }}
         </div>
         <!-- 放在右上角，跟下方的「下一題」離遠一點，避免連按時誤觸 -->
         <button v-if="unlock || exam" class="btn ghost quit-btn" @click="quit">離開測驗</button>
@@ -183,6 +201,7 @@ import {
   type QuizPick,
 } from '@/lib/kana';
 import { say } from '@/composables/useAudio';
+import { DAILY_N, dayNum, pickDaily } from '@/lib/daily';
 import { useProgressStore } from '@/stores/progress';
 import ScopeChips from '@/components/ScopeChips.vue';
 import SpeakerIcon from '@/components/SpeakerIcon.vue';
@@ -200,6 +219,9 @@ const score = ref(0);
 const wrong = ref<KanaItem[]>([]);
 /** 答錯時的題型，練習答錯的時候用同一種題型再考 */
 const wrongMode = new Map<string, QuizMode>();
+/** 正在做今日複習 */
+const dailyRun = ref(false);
+
 /** 打字作答：輸入框的內容、送出時打的字 */
 const typed = ref('');
 const typedAnswer = ref('');
@@ -253,6 +275,8 @@ const ASK: Record<QuizMode, string> = {
   a2t: '聽發音，打出來',
 };
 const ask = computed(() => (q.value ? ASK[q.value.m] : ''));
+/** 題型混在一起的測驗（解鎖測驗、大會考、今日複習、練答錯的），每題都要說明在問什麼 */
+const mixedModes = computed(() => !!unlock.value || !!exam.value || dailyRun.value || retry.value);
 /** 練習範圍裡有幾個不同的字（句子） */
 const poolSize = computed(() => new Set(p.pool.map((k) => k.k)).size);
 /** 範圍裡最常錯的字 */
@@ -285,6 +309,7 @@ const resultMsg = computed(() => {
     const n = total.value;
     if (!n) return '這次還沒有作答。';
     if (retry.value) return s === n ? '剛才答錯的都會了！' : '還有幾個不熟，再練一次看看。';
+    if (dailyRun.value) return `今日複習完成！連續學習 ${p.streakN} 天，答對 ${s} / ${n} 題。${s < n ? '答錯的可以按「只練答錯的」再練一次。' : ''}`;
     const head = endlessRun.value ? `這次練了 ${n} 題，答對率 ${Math.round((s / n) * 100)}%。` : '';
     return head + (s === n ? '全對，很穩！' : s >= n * 0.8 ? '很不錯，把錯的再看一下。' : '再複習一下字卡，然後重新測一次。');
   }
@@ -354,6 +379,26 @@ function reset() {
   back.value = null;
   endlessRun.value = false;
   ended.value = false;
+  dailyRun.value = false;
+}
+
+/** 今日複習：從已經解鎖的字和句子挑題；句子多出看句子選意思、聽錄音選字 */
+function startDaily() {
+  const all = ALL_KANA.filter((k) => k.step <= p.curU);
+  const picked = pickDaily(all, {
+    weak: p.d.weak,
+    seen: p.d.seen,
+    recent: new Set([p.curU, p.curU - 1]),
+    today: dayNum(),
+  });
+  const pick = <T,>(a: readonly T[]) => a[Math.floor(Math.random() * a.length)]!;
+  const modeFn = (a: KanaItem): QuizMode =>
+    STEPS[a.step - 1]?.kind === 'phrase' ? pick(a.audio ? (['a2k', 'k2z', 'k2r'] as const) : (['k2z', 'k2r'] as const)) : pick(CHOICE_MODES);
+  qs.value = makeQs(picked, modeFn, all, picked.length);
+  reset();
+  dailyRun.value = true;
+  autoSpeak();
+  window.scrollTo(0, 0);
 }
 
 /** 只練剛才答錯的：每個用答錯時的題型考一次，干擾選項從同一步和練習範圍裡挑 */
@@ -437,6 +482,7 @@ function next() {
   }
   if (done.value && unlock.value && ok.value) p.pass(unlock.value);
   if (done.value && exam.value && ok.value) p.passExam(exam.value.id);
+  if (done.value && dailyRun.value) p.finishReview();
   autoSpeak();
 }
 
