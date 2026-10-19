@@ -39,8 +39,8 @@ export const KANA_LAST = Math.max(...STEPS.filter((s) => s.kind !== 'phrase').ma
 /** 這一步屬於課本第幾課（看 part 或出處的「第N課」）；假名的步驟是 0 */
 const LESSON_RE = /^第(\d+)課/;
 export const lessonOf = (s: Step) => Number(LESSON_RE.exec(s.part)?.[1] ?? LESSON_RE.exec(s.source ?? '')?.[1] ?? 0);
-/** 入門（A1）的最後一步：第 1～18 課，包括最後的漢字總複習 */
-export const A1_LAST = Math.max(...STEPS.filter((s) => lessonOf(s) >= 1 && lessonOf(s) <= 18).map((s) => s.id));
+/** 入門（A1）的最後一步：第 1～18 課，加上漢字總複習、教室の日本語；之後加的初級步驟 part 會以「初級」開頭 */
+export const A1_LAST = Math.max(...STEPS.filter((s) => !s.part.startsWith('初級')).map((s) => s.id));
 
 /** 大會考：接在某一步後面，通過才會解鎖下一步 */
 export interface Exam {

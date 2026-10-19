@@ -83,11 +83,13 @@ describe('大會考', () => {
     expect(a1.groups.flatMap((g) => g.kana).every((k) => k.step > KANA_LAST && k.step <= A1_LAST)).toBe(true);
   });
 
-  it('漢字總複習接在第 18 課後面，算在原本那一課，入門大會考接在最後', () => {
+  it('漢字總複習接在第 18 課後面，算在原本那一課；教室の日本語之後是入門大會考', () => {
     const review = STEPS.filter((s) => s.part === '入門漢字總複習');
     expect(review.map((s) => lessonOf(s))).toEqual([3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
     expect(review[0]!.id).toBe(154);
-    expect(A1_LAST).toBe(review[review.length - 1]!.id);
+    const cls = STEPS.find((s) => s.part === '教室の日本語')!;
+    expect(cls.id).toBe(review[review.length - 1]!.id + 1);
+    expect(A1_LAST).toBe(cls.id);
     // 漢字的字卡：k 是漢字，唸法放在 o，語音合成唸 y
     for (const k of review.flatMap((s) => s.kana)) {
       expect(k.y, k.k).toBeTruthy();
