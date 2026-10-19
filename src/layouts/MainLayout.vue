@@ -67,6 +67,7 @@ const TABS = [
   { to: '/words', label: '單字' },
   { to: '/table', label: '五十音' },
   { to: '/check', label: '檢核' },
+  { to: '/talk', label: '會話' },
 ];
 
 const sync = useSyncStore();
