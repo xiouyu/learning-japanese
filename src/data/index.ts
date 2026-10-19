@@ -1,6 +1,7 @@
 /* ===== 教材資料：之後每學一步，在 steps.json 加一筆 ===== */
 import raw from './steps.json';
-import type { GojuonRow, KanaItem, RoadmapItem, Step } from './types';
+import rawCando from './cando.json';
+import type { CanDo, GojuonRow, KanaItem, RoadmapItem, Step } from './types';
 import { toKata, type QuizMode } from '@/lib/kana';
 
 export const STEPS = raw as Step[];
@@ -113,6 +114,17 @@ export const EXAMS: Exam[] = [
     mode: (a) => (a.audio ? pick(['a2z', 'k2z', 'a2k'] as const) : 'k2z'),
   },
 ];
+
+/** 課本的 79 項 Can-do */
+export const CANDO = rawCando as CanDo[];
+
+/** 這項 Can-do 要回去複習哪一步：出處寫著同一個活動名稱的那一步，找不到就用那一課的第一步 */
+export function candoStep(c: CanDo): number {
+  const norm = (t: string) => t.replace(/\s/g, '');
+  const ofLesson = STEPS.filter((s) => lessonOf(s) === c.lesson && s.part !== '入門漢字總複習');
+  const hit = ofLesson.find((s) => norm(s.source ?? '').includes(norm(c.title)));
+  return (hit ?? ofLesson[0])!.id;
+}
 
 export function stepLabel(n: number): string {
   const s = STEPS.find((x) => x.id === n);

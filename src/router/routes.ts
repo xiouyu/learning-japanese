@@ -11,6 +11,7 @@ const routes: RouteRecordRaw[] = [
       { path: 'quiz', component: () => import('@/pages/QuizPage.vue') },
       { path: 'words', component: () => import('@/pages/WordsPage.vue') },
       { path: 'table', component: () => import('@/pages/TablePage.vue') },
+      { path: 'check', component: () => import('@/pages/CheckPage.vue') },
     ],
   },
   // 舊版網址（#learn、#quiz…）或打錯的網址都回到學習頁

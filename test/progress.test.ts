@@ -31,6 +31,10 @@ describe('normalize', () => {
     expect(normalize({ qn: -1 }, MAX).qn).toBe(-1);
   });
 
+  it('Can-do 自我評價只留 1～3 顆星', () => {
+    expect(normalize({ cando: { 1: 3, 2: 0, 3: 4, x: 2, 5: '2' as never } }, MAX).cando).toEqual({ 1: 3, 5: 2 });
+  });
+
   it('沒有資料時回傳初始值', () => {
     expect(normalize(null, MAX)).toEqual(emptyProgress());
   });
@@ -76,6 +80,10 @@ describe('mergeProgress', () => {
     const m = mergeProgress({ ...laptop, weak: { あ: 4 }, qpick: 'weak' }, { ...phone, weak: { か: 2 } });
     expect(m.weak).toEqual({ か: 2 });
     expect(m.qpick).toBe('even');
+  });
+
+  it('Can-do 自我評價以最後修改的裝置為準（可以改高也可以改低）', () => {
+    expect(mergeProgress({ ...laptop, cando: { 1: 1 } }, { ...phone, cando: { 1: 3, 2: 2 } }).cando).toEqual({ 1: 3, 2: 2 });
   });
 
   it('順序不影響結果', () => {

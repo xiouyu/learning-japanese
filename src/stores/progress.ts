@@ -93,6 +93,14 @@ export const useProgressStore = defineStore('progress', () => {
     touch();
   }
 
+  /** Can-do 自我評價：再按一次同樣的星數就取消 */
+  function rateCando(n: number, stars: number) {
+    const c = d.value.cando;
+    if (c[n] === stars) delete c[n];
+    else c[n] = stars;
+    touch();
+  }
+
   function setQpick(m: QuizPick) {
     d.value.qpick = m;
     touch();
@@ -121,5 +129,5 @@ export const useProgressStore = defineStore('progress', () => {
   syncNew();
   watch(d, (v) => saveLocal(v), { deep: true, immediate: true });
 
-  return { d, curKana, curU, examPassed, examDue, availSet, pool, syncNew, setStep, pass, passExam, setScope, addMastery, setQmode, setQn, setQpick, recordAnswer, setTmode, replace, snapshot };
+  return { d, curKana, curU, examPassed, examDue, availSet, pool, syncNew, setStep, pass, passExam, setScope, addMastery, setQmode, setQn, setQpick, recordAnswer, rateCando, setTmode, replace, snapshot };
 });

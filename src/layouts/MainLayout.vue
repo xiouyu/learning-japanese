@@ -65,7 +65,8 @@ const TABS = [
   { to: '/flash', label: '字卡' },
   { to: '/quiz', label: '測驗' },
   { to: '/words', label: '單字' },
-  { to: '/table', label: '五十音表' },
+  { to: '/table', label: '五十音' },
+  { to: '/check', label: '檢核' },
 ];
 
 const sync = useSyncStore();

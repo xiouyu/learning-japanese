@@ -73,5 +73,15 @@ export interface RoadmapItem {
 
 export type KanaItem = Kana & { step: number };
 
+/** 課本的 Can-do（能做到的事），自我檢核用 */
+export interface CanDo {
+  n: number;
+  lesson: number;
+  /** 課本上的活動名稱 */
+  title: string;
+  ja: string;
+  zh: string;
+}
+
 /** 五十音表的一行：[行名, 5 格（空格為 null）, 第幾步學到] */
 export type GojuonRow = [string, ([string, string] | null)[], number];

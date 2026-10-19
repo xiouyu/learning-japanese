@@ -9,7 +9,8 @@
 
 ## 慣例
 
-- 教材內容只放在 `src/data/steps.json`；新增一步就在最後加一筆，加完跑 `npm test`
+- 教材內容只放在 `src/data/steps.json`；新增一步就在最後加一筆，加完跑 `npm test`（步驟 id 要連續，不能插在中間，舊的學習紀錄靠 id 記進度）
+- Can-do 自我檢核的清單在 `src/data/cando.json`
 - 學習紀錄格式和合併規則在 `src/lib/progress.ts`；改格式時 `normalize()` 要能讀舊資料
 - 自訂樣式在 `src/css/app.css`，class 名稱不要用 Quasar 已經用的工具類別（例如 `row`、`wrap`、`col`）
 - 部署：推到 `main` 會自動發布到 GitHub Pages

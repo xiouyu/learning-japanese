@@ -20,6 +20,8 @@ export interface ProgressData {
   /** 一般測驗的題數（0 = 範圍裡的全部各考一次） */
   qn: number;
   qpick: QuizPick;
+  /** Can-do 自我檢核：第幾項 → 1～3 顆星 */
+  cando: Record<string, number>;
   tmode: 'hira' | 'kata';
   /** 最後修改時間（毫秒），合併時用來決定偏好設定以哪一邊為準 */
   updatedAt: number;
@@ -36,6 +38,7 @@ export const emptyProgress = (): ProgressData => ({
   qmode: 'k2r',
   qn: QN,
   qpick: 'even',
+  cando: {},
   tmode: 'hira',
   updatedAt: 0,
 });
@@ -105,6 +108,12 @@ export function normalize(raw: RawProgress | null | undefined, maxStep: number, 
   d.qmode = QMODES.includes(raw.qmode as QuizMode) ? (raw.qmode as QuizMode) : 'k2r';
   d.qn = (QN_OPTS as readonly number[]).includes(Number(raw.qn)) ? Number(raw.qn) : QN;
   d.qpick = raw.qpick === 'weak' ? 'weak' : 'even';
+  if (raw.cando && typeof raw.cando === 'object') {
+    for (const [k, v] of Object.entries(raw.cando)) {
+      const n = Number(v);
+      if (/^\d+$/.test(k) && [1, 2, 3].includes(n)) d.cando[k] = n;
+    }
+  }
   d.tmode = raw.tmode === 'kata' ? 'kata' : 'hira';
   d.updatedAt = Number(raw.updatedAt) || 0;
   return d;
@@ -130,6 +139,7 @@ export function loadLocal(maxStep: number, gates: Gate[] = []): ProgressData {
       qmode: read('qmode', 'k2r'),
       qn: read('qn', QN),
       qpick: read('qpick', 'even'),
+      cando: read('cando', {}),
       tmode: read('tmode', 'hira'),
       updatedAt: read('updatedAt', 0),
     },
@@ -163,6 +173,8 @@ export function mergeProgress(a: ProgressData, b: ProgressData): ProgressData {
     qmode: newer.qmode,
     qn: newer.qn,
     qpick: newer.qpick,
+    // 自我評價可以改高也可以改低，以最後修改的那一邊為準
+    cando: { ...newer.cando },
     tmode: newer.tmode,
     updatedAt: Math.max(a.updatedAt, b.updatedAt),
   };

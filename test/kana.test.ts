@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { A1_LAST, ALL_KANA, BASE, BASE_K, EXAMS, KANA_LAST, STEPS, lessonOf } from '@/data';
+import { A1_LAST, ALL_KANA, BASE, BASE_K, CANDO, EXAMS, KANA_LAST, STEPS, candoStep, lessonOf } from '@/data';
 import { gist, isMeaning, makeExam, makeQs, pickWeighted, snd, toKata, weakWeight } from '@/lib/kana';
 
 describe('教材資料', () => {
@@ -154,6 +154,16 @@ describe('常錯的優先', () => {
     for (const q of qs) {
       expect(q.opts).toHaveLength(4);
       expect(new Set(q.opts.map(snd)).size).toBe(4);
+    }
+  });
+});
+
+describe('Can-do 自我檢核', () => {
+  it('79 項，編號連續，每項都對應到那一課的步驟', () => {
+    expect(CANDO.map((c) => c.n)).toEqual(Array.from({ length: 79 }, (_, i) => i + 1));
+    for (const c of CANDO) {
+      const s = STEPS.find((x) => x.id === candoStep(c))!;
+      expect(lessonOf(s), `${c.n} ${c.title}`).toBe(c.lesson);
     }
   });
 });

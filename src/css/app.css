@@ -57,6 +57,8 @@ p{margin:0}
 .tabbar .q-tab.tab-active{color:var(--ink);border-bottom-color:var(--accent)}
 .tabbar .q-focus-helper{display:none}
 @media (max-width:480px){.tabbar .q-tab{padding:0 10px}}
+/* 手機上 6 個分頁要排得下 */
+@media (max-width:420px){.tabbar .q-tab{padding:0 6px}.tabbar .q-tab__label{font-size:15px}}
 button:focus-visible,.q-tab:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
 main .page-wrap{padding-block:24px 72px}
@@ -245,3 +247,20 @@ body,body.body--dark{background:var(--bg);color:var(--ink);font-family:var(--f-b
 .weak-k{display:inline-block;margin:0 4px;font-size:18px;color:var(--shu)}
 .word.sent{grid-column:1/-1}
 .word.sent .w{font-size:22px;line-height:1.5;letter-spacing:.02em}
+.cd-sum{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:grid;gap:4px;max-width:640px}
+.cd-sum b{font-size:22px}
+.cd-sum p{margin:4px 0 0}
+.cd-list{list-style:none;margin:0;padding:0;display:grid;gap:10px;max-width:640px}
+.cd-item{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;gap:4px}
+.cd-item.locked{opacity:.55}
+.cd-head{display:flex;gap:10px;align-items:baseline}
+.cd-n{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;min-width:1.6em}
+.cd-t{font-size:18px}
+.cd-zh{margin:0;font-size:15px}
+.cd-ja{margin:0;font-size:13px}
+.cd-stars{display:flex;align-items:center;gap:2px;flex:1}
+.cd-star{appearance:none;background:none;border:0;padding:4px 3px;font-size:26px;line-height:1;color:var(--line);cursor:pointer}
+.cd-star.on{color:var(--accent)}
+.cd-star:disabled{cursor:default}
+.cd-lbl{font-size:13px;margin-left:8px}
+.cd-go{padding:5px 12px;font-size:13px}
