@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { A1_LAST, ALL_KANA, BASE, BASE_K, EXAMS, KANA_LAST, STEPS } from '@/data';
+import { A1_LAST, ALL_KANA, BASE, BASE_K, EXAMS, KANA_LAST, STEPS, lessonOf } from '@/data';
 import { gist, isMeaning, makeExam, makeQs, pickWeighted, snd, toKata, weakWeight } from '@/lib/kana';
 
 describe('教材資料', () => {
@@ -81,6 +81,20 @@ describe('大會考', () => {
     expect(a1.groups[0]!.part).toMatch(/^第1課/);
     expect(a1.groups[17]!.part).toMatch(/^第18課/);
     expect(a1.groups.flatMap((g) => g.kana).every((k) => k.step > KANA_LAST && k.step <= A1_LAST)).toBe(true);
+  });
+
+  it('漢字總複習接在第 18 課後面，算在原本那一課，入門大會考接在最後', () => {
+    const review = STEPS.filter((s) => s.part === '入門漢字總複習');
+    expect(review.map((s) => lessonOf(s))).toEqual([3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
+    expect(review[0]!.id).toBe(154);
+    expect(A1_LAST).toBe(review[review.length - 1]!.id);
+    // 漢字的字卡：k 是漢字，唸法放在 o，語音合成唸 y
+    for (const k of review.flatMap((s) => s.kana)) {
+      expect(k.y, k.k).toBeTruthy();
+      expect(k.o).toBe(k.y);
+    }
+    // 第 9 課那一組包括星期的漢字
+    expect(a1.groups[8]!.kana.some((k) => k.k === '水曜日')).toBe(true);
   });
 
   it('gist 取中文說明的第一句', () => {

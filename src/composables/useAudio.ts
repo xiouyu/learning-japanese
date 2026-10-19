@@ -52,8 +52,9 @@ export function playAudio(ref: AudioRef, fallbackText?: string) {
   p.play().catch(fail);
 }
 
-/** 有課本錄音就播錄音，沒有就用語音合成唸 */
-export function say(item: { audio?: AudioRef | undefined }, text: string) {
-  if (item.audio) playAudio(item.audio, text);
-  else speak(text);
+/** 有課本錄音就播錄音，沒有就用語音合成唸（有填唸法 y 就唸 y） */
+export function say(item: { audio?: AudioRef | undefined; y?: string | undefined }, text: string) {
+  const t = item.y ?? text;
+  if (item.audio) playAudio(item.audio, t);
+  else speak(t);
 }

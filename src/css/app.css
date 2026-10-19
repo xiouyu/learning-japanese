@@ -243,3 +243,5 @@ body,body.body--dark{background:var(--bg);color:var(--ink);font-family:var(--f-b
 .qprompt .kana.sent{font-size:clamp(24px,6vw,32px);line-height:1.5;text-align:center;overflow-wrap:anywhere}
 .opt.z{font-size:18px;line-height:1.4;text-align:left}
 .weak-k{display:inline-block;margin:0 4px;font-size:18px;color:var(--shu)}
+.word.sent{grid-column:1/-1}
+.word.sent .w{font-size:22px;line-height:1.5;letter-spacing:.02em}

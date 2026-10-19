@@ -127,11 +127,14 @@ export function makeQs(
     const m = modeFn(a);
     const used = new Set([snd(a)]);
     const usedZ = new Set([gist(a.z)]);
+    // 不同步驟可能有同一個字（例如第 5 課的「水」みず、第 9 課的「水曜日」），選項的字也不重複
+    const usedK = new Set([a.k]);
     const opts = [a];
     for (const x of shuffle(P).concat(shuffle(D))) {
       if (opts.length >= 4) break;
-      if (opts.includes(x) || used.has(snd(x)) || (isMeaning(m) && usedZ.has(gist(x.z)))) continue;
+      if (opts.includes(x) || used.has(snd(x)) || usedK.has(x.k) || (isMeaning(m) && usedZ.has(gist(x.z)))) continue;
       used.add(snd(x));
+      usedK.add(x.k);
       usedZ.add(gist(x.z));
       opts.push(x);
     }

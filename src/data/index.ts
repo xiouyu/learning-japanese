@@ -35,9 +35,11 @@ export const BASE_K = new Set([...BASE].map(toKata));
 
 /** 假名的最後一步：通過這一步後要先考五十音大會考，才會解鎖課本第 1 課 */
 export const KANA_LAST = Math.max(...STEPS.filter((s) => s.kind !== 'phrase').map((s) => s.id));
-/** 入門（A1）的最後一步：課本第 1～18 課的 part 是「第N課 …」 */
-const lessonNo = (s: Step) => Number(/^第(\d+)課/.exec(s.part)?.[1] ?? 0);
-export const A1_LAST = Math.max(...STEPS.filter((s) => lessonNo(s) >= 1 && lessonNo(s) <= 18).map((s) => s.id));
+/** 這一步屬於課本第幾課（看 part 或出處的「第N課」）；假名的步驟是 0 */
+const LESSON_RE = /^第(\d+)課/;
+export const lessonOf = (s: Step) => Number(LESSON_RE.exec(s.part)?.[1] ?? LESSON_RE.exec(s.source ?? '')?.[1] ?? 0);
+/** 入門（A1）的最後一步：第 1～18 課，包括最後的漢字總複習 */
+export const A1_LAST = Math.max(...STEPS.filter((s) => lessonOf(s) >= 1 && lessonOf(s) <= 18).map((s) => s.id));
 
 /** 大會考：接在某一步後面，通過才會解鎖下一步 */
 export interface Exam {
@@ -64,6 +66,16 @@ export interface Exam {
 
 const pick = <T>(a: readonly T[]) => a[Math.floor(Math.random() * a.length)]!;
 
+/** 課本第 1～18 課的題目，每一課一組（漢字總複習的步驟算在原本那一課） */
+function lessonGroups() {
+  return Array.from({ length: 18 }, (_, i) => {
+    const n = i + 1;
+    const ids = new Set(STEPS.filter((s) => lessonOf(s) === n).map((s) => s.id));
+    const part = STEPS.find((s) => LESSON_RE.exec(s.part)?.[1] === String(n))?.part ?? `第${n}課`;
+    return { part, kana: ALL_KANA.filter((k) => ids.has(k.step)) };
+  });
+}
+
 /** 第 from～to 步的題目，依 part 分組 */
 function groupsOf(from: number, to: number) {
   const parts = [...new Set(STEPS.filter((s) => s.id >= from && s.id <= to).map((s) => s.part))];
@@ -89,14 +101,14 @@ export const EXAMS: Exam[] = [
     id: 'a1',
     after: A1_LAST,
     title: '入門大會考',
-    scope: '課本第 1～18 課每一課各考 2 題：聽錄音選意思、看句子選意思、聽錄音選句子',
+    scope: '課本第 1～18 課（包括漢字）每一課各考 2 題：聽錄音選意思、看句子或漢字選意思、聽錄音選句子',
     done: '入門 18 課全部學完了',
     reward: '就完成《いろどり》入門（A1）',
     passMsg: '恭喜通過入門大會考！《いろどり》入門（A1）結業了，生活中最基本的日文你都能聽、能說了。',
     road: '通過就從入門結業',
     n: 36,
     pass: 32,
-    groups: groupsOf(KANA_LAST + 1, A1_LAST),
+    groups: lessonGroups(),
     // 有課本錄音的句子才出聽力題
     mode: (a) => (a.audio ? pick(['a2z', 'k2z', 'a2k'] as const) : 'k2z'),
   },

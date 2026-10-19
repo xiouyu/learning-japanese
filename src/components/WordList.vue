@@ -1,6 +1,7 @@
 <template>
   <div class="words">
-    <div v-for="w in words" :key="w.w" class="word">
+    <!-- 句子比較長：佔滿一整列、字小一點 -->
+    <div v-for="w in words" :key="w.w" class="word" :class="{ sent: [...w.w].length > 8 }">
       <div class="w">{{ w.w }}</div>
       <div v-show="isShown(w.w)" class="ans"><span class="mono">{{ w.r }}</span>{{ w.m }}</div>
       <div class="ctl">

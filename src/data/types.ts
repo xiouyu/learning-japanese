@@ -23,6 +23,8 @@ export interface Kana {
   snd?: string;
   /** 課本的真人錄音；沒有就用瀏覽器的語音合成 */
   audio?: AudioRef;
+  /** 語音合成要唸的文字：k 是漢字時填唸法，避免唸錯（例如「四」） */
+  y?: string;
 }
 
 export interface Word {
