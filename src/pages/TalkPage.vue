@@ -45,6 +45,8 @@
         <li><b>只能在裝了 Ollama 的那台電腦上用。</b>手機、平板連不到電腦裡的 Ollama（除非你自己幫 Ollama 加上 HTTPS 和遠端連線）。</li>
         <li><b>瀏覽器：</b>建議用 Chrome 或 Edge。Safari 可能會擋住網站連到本機，連不上時請換瀏覽器。</li>
         <li><b>AI 會出錯：</b>AI 的日文偶爾會不自然、太難，或講評說錯。以課本和真人錄音為準，AI 只當成練習對象。</li>
+        <li><b>模型太小會重複你的話：</b>3B 以下的小模型常常只是把你說的話再說一次，或答非所問。網站發現 AI 只是在重複時，會自動請它重答一次；還是這樣的話，請換 7B 以上的模型。</li>
+        <li><b>繁體中文：</b>Qwen 等模型常常回簡體字，網站會把翻譯、提示和講評的中文自動轉成台灣繁體（日文的部分不轉）。第一次開這個頁面會多下載約 1 MB 的轉換字典。</li>
         <li><b>速度看電腦：</b>沒有獨立顯示卡時，一句話可能要等十幾秒。模型越大越慢、但日文越好。</li>
         <li><b>對話不會存檔：</b>對話只在這個頁面，重新整理或關掉網站就沒了，也不會跟著登入同步。連線設定只存在這台電腦。</li>
         <li><b>語音輸入：</b>麥克風按鈕用的是瀏覽器的語音辨識（Chrome 會把聲音送到 Google 辨識，不是在你電腦上處理）。不想送出聲音就用打字。</li>
@@ -104,7 +106,7 @@
         <div v-for="(m, mi) in shown" :key="mi" class="talk-msg" :class="m.role">
           <template v-if="m.role === 'assistant'">
             <div class="kana talk-ja">{{ splitReply(m.content).ja || '…' }}</div>
-            <div v-if="openZh.has(mi) && splitReply(m.content).zh" class="talk-zh">{{ splitReply(m.content).zh }}</div>
+            <div v-if="openZh.has(mi) && splitReply(m.content).zh" class="talk-zh">{{ tw(splitReply(m.content).zh) }}</div>
             <div class="talk-tools">
               <button class="btn icon-btn" aria-label="聽發音" @click="speak(splitReply(m.content).ja)"><SpeakerIcon /></button>
               <button v-if="splitReply(m.content).zh" class="btn ghost talk-mini" @click="toggleZh(mi)">{{ openZh.has(mi) ? '隱藏中文' : '中文' }}</button>
@@ -113,6 +115,7 @@
           <div v-else class="kana talk-ja">{{ m.content }}</div>
         </div>
         <p v-if="busy && !streaming" class="muted">AI 正在想…（電腦比較慢時要等一下）</p>
+        <p v-if="retrying" class="muted">AI 剛剛只是重複你的話，已經請它重新回答…</p>
       </div>
 
       <p v-if="err" class="talk-warn">{{ err }}</p>
@@ -140,11 +143,11 @@
 
       <div v-if="hint" class="talk-box talk-out">
         <b>提示</b>
-        <div class="talk-pre">{{ hint }}</div>
+        <div class="talk-pre">{{ tw(hint) }}</div>
       </div>
       <div v-if="feedback" class="talk-box talk-out">
         <b>講評</b>
-        <div class="talk-pre">{{ feedback }}</div>
+        <div class="talk-pre">{{ tw(feedback) }}</div>
         <div class="hrow">
           <button class="btn primary" @click="begin(scene)">同一個情境再練一次</button>
           <button class="btn" @click="leave">換情境</button>
@@ -162,18 +165,22 @@ import { speak } from '@/composables/useSpeech';
 import { useProgressStore } from '@/stores/progress';
 import SpeakerIcon from '@/components/SpeakerIcon.vue';
 import {
+  ECHO_NUDGE,
   START_MSG,
   TalkError,
   chatStream,
   feedbackPrompt,
   hintPrompt,
+  isEcho,
   listModels,
+  loadTaiwanConverter,
   loadSettings,
   mixedContentBlocked,
   originCommands,
   saveSettings,
   scenePrompt,
   splitReply,
+  toTaiwan,
   transcript,
   type ChatMsg,
   type TalkScene,
@@ -240,6 +247,16 @@ const feedback = ref('');
 const openZh = reactive(new Set<number>());
 let ctrl: AbortController | null = null;
 const autoSpeak = ref(true);
+const retrying = ref(false);
+
+/** 中文的部分轉成台灣繁體（模型常回簡體）；轉換器還沒載入時先顯示原文 */
+const conv = ref<((s: string) => string) | null>(null);
+loadTaiwanConverter()
+  .then((c) => (conv.value = c))
+  .catch(() => {
+    /* 載入失敗就顯示原文 */
+  });
+const tw = (t: string) => (conv.value ? toTaiwan(t, conv.value) : t);
 
 function toggleZh(i: number) {
   if (openZh.has(i)) openZh.delete(i);
@@ -251,26 +268,40 @@ async function reply() {
   busy.value = true;
   err.value = '';
   ctrl = new AbortController();
-  const out: ChatMsg = { role: 'assistant', content: '' };
-  let added = false;
+  const lastUser = [...msgs.value].reverse().find((m) => m.role === 'user' && m.content !== START_MSG)?.content ?? '';
   try {
-    for await (const t of chatStream(settings.base, settings.model, msgs.value, ctrl.signal)) {
-      if (!added) {
-        msgs.value.push(out);
-        added = true;
-        streaming.value = true;
-      }
-      msgs.value[msgs.value.length - 1] = { ...out, content: t };
+    let text = await streamInto(msgs.value);
+    // 小模型有時只是重複學習者的話：發現的話，請它重新回答一次（這次的回覆不留在對話裡）
+    if (text && lastUser && isEcho(splitReply(text).ja, lastUser)) {
+      retrying.value = true;
+      msgs.value.pop();
+      text = await streamInto([...msgs.value, { role: 'system', content: ECHO_NUDGE }]);
     }
-    const last = msgs.value[msgs.value.length - 1];
-    if (added && last && autoSpeak.value) speak(splitReply(last.content).ja);
+    if (text && autoSpeak.value) speak(splitReply(text).ja);
   } catch (e) {
     err.value = e instanceof TalkError ? e.message : String(e);
   } finally {
     busy.value = false;
     streaming.value = false;
+    retrying.value = false;
     ctrl = null;
   }
+}
+
+/** 把模型的回覆一邊收一邊加進對話的最後一句，回傳完整的文字 */
+async function streamInto(messages: ChatMsg[]): Promise<string> {
+  let added = false;
+  let text = '';
+  for await (const t of chatStream(settings.base, settings.model, messages, ctrl?.signal)) {
+    if (!added) {
+      msgs.value.push({ role: 'assistant', content: '' });
+      added = true;
+      streaming.value = true;
+    }
+    text = t;
+    msgs.value[msgs.value.length - 1] = { role: 'assistant', content: t };
+  }
+  return text;
 }
 
 function begin(s: TalkScene) {

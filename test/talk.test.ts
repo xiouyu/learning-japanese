@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import scenes from '@/data/talk.json';
-import { START_MSG, mixedContentBlocked, ndjson, scenePrompt, splitReply, stripThink, transcript, type ChatMsg, type TalkScene } from '@/lib/talk';
+import { Converter } from 'opencc-js/cn2t';
+import { START_MSG, isEcho, mixedContentBlocked, toTaiwan, ndjson, scenePrompt, splitReply, stripThink, transcript, type ChatMsg, type TalkScene } from '@/lib/talk';
 
 describe('AI 會話', () => {
   it('回覆拆成日文和中文翻譯', () => {
@@ -53,5 +54,21 @@ describe('AI 會話', () => {
       expect(prompt).toContain('【中文】');
     }
     expect(new Set((scenes as TalkScene[]).map((s) => s.id)).size).toBe(scenes.length);
+  });
+
+  it('分得出 AI 只是在重複學習者的話', () => {
+    expect(isEcho('チーズバーガーとコーヒー、ください。', 'チーズバーガーとコーヒー、ください')).toBe(true);
+    expect(isEcho('チーズバーガーとコーヒーですね。', 'チーズバーガーとコーヒー')).toBe(true);
+    expect(isEcho('はい。こちらでおめしあがりですか？', 'チーズバーガーとコーヒー、ください')).toBe(false);
+    expect(isEcho('いいですね。何の映画を見ましたか？', '週末、映画を見ました')).toBe(false);
+    expect(isEcho('はい', 'はい')).toBe(false); // 太短的不算
+  });
+
+  it('中文轉台灣繁體，日文的漢字不動', () => {
+    const conv = Converter({ from: 'cn', to: 'twp' });
+    expect(toTaiwan('这个软件的信息很重要', conv)).toBe('這個軟體的資訊很重要');
+    // 日文句子裡的「会」「体」不能變成「會」「體」
+    expect(toTaiwan('会社に行きます。体はだいじょうぶですか？', conv)).toBe('会社に行きます。体はだいじょうぶですか？');
+    expect(toTaiwan('コーヒーください → コーヒーをください（这样比较自然）', conv)).toBe('コーヒーください → コーヒーをください（這樣比較自然）');
   });
 });
