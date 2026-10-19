@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { A1_LAST, ALL_KANA, BASE, BASE_K, CANDO, EXAMS, KANA_LAST, STEPS, candoStep, lessonOf } from '@/data';
-import { gist, isMeaning, makeExam, makeQs, pickWeighted, snd, toKata, weakWeight } from '@/lib/kana';
+import { checkTyped, gist, isMeaning, makeExam, makeQs, normRoma, pickWeighted, snd, toKata, weakWeight } from '@/lib/kana';
 
 describe('教材資料', () => {
   it('步驟 id 從 1 開始連續', () => {
@@ -167,5 +167,35 @@ describe('Can-do 自我檢核', () => {
       const s = STEPS.find((x) => x.id === candoStep(c))!;
       expect(lessonOf(s), `${c.n} ${c.title}`).toBe(c.lesson);
     }
+  });
+});
+
+describe('打字作答', () => {
+  const item = (k: string, r: string, o?: string, y?: string) => ({ k, r, o, y });
+
+  it('拼音不分大小寫、空白、標點，長音和訓令式的寫法都算對', () => {
+    expect(normRoma('Arigatou gozaimasu.')).toBe(normRoma('arigatoo gozaimasu'));
+    expect(normRoma('sensee')).toBe(normRoma('sensei'));
+    expect(normRoma('Tōkyō')).toBe(normRoma('tookyoo'));
+    expect(normRoma('sinbun')).toBe(normRoma('shimbun'));
+    expect(normRoma('tyotto')).toBe(normRoma('chotto'));
+    expect(normRoma('shuumai')).toBe('shuumai'); // shu 不會被當成 fu
+    expect(checkTyped(item('すし', 'sushi'), 'susi')).toBe(true);
+    expect(checkTyped(item('すし', 'sushi'), 'sashi')).toBe(false);
+  });
+
+  it('也可以打假名或課本的漢字寫法', () => {
+    const a = item('ともだちが ひろしまに すんでいます', 'tomodachi ga hiroshima ni sunde imasu', '友だちが広島に住んでいます');
+    expect(checkTyped(a, 'ともだちがひろしまにすんでいます')).toBe(true);
+    expect(checkTyped(a, '友だちが広島に住んでいます。')).toBe(true);
+    expect(checkTyped(a, 'ともだちが')).toBe(false);
+    // 漢字的字卡：唸法在 y
+    expect(checkTyped(item('水曜日', 'suiyoobi', 'すいようび', 'すいようび'), 'すいようび')).toBe(true);
+    expect(checkTyped(item('水曜日', 'suiyoobi', 'すいようび', 'すいようび'), 'suiyoubi')).toBe(true);
+    expect(checkTyped(item('あ', 'a'), '')).toBe(false);
+  });
+
+  it('課本裡每一個字、每一句都能用自己的拼音答對', () => {
+    for (const k of ALL_KANA) expect(checkTyped(k, k.r), k.k).toBe(true);
   });
 });

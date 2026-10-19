@@ -77,13 +77,60 @@ export const fitPx = (t: string, base: number, room: number) =>
 /** 同音的字（例如 じ／ぢ、お／を、あ／ア）不會出現在同一題 */
 export const snd = (k: KanaItem) => k.snd || k.r;
 
-/** k2z、a2z（看句子／聽錄音選中文意思）只用在入門大會考 */
-export type QuizMode = 'k2r' | 'a2k' | 'r2k' | 'k2z' | 'a2z';
+/**
+ * k2z、a2z（看句子／聽錄音選中文意思）只用在入門大會考；
+ * t2r、a2t 是打字作答（看字打拼音、聽音打字），只用在一般測驗。
+ */
+export type QuizMode = 'k2r' | 'a2k' | 'r2k' | 'k2z' | 'a2z' | 't2r' | 'a2t';
 
 /** 這種題型的選項是中文意思 */
 export const isMeaning = (m: QuizMode) => m === 'k2z' || m === 'a2z';
 /** 這種題型要先聽發音 */
-export const isListen = (m: QuizMode) => m === 'a2k' || m === 'a2z';
+export const isListen = (m: QuizMode) => m === 'a2k' || m === 'a2z' || m === 'a2t';
+/** 打字作答的題型 */
+export const isTyped = (m: QuizMode) => m === 't2r' || m === 'a2t';
+
+/**
+ * 把拼音整理成可以比對的樣子：不分大小寫、去掉空白和標點，
+ * 長音（ō、ou、ei）、訓令式（si、tu、hu、zi、sya…）、を（wo）、shimbun 的 m 都當成一樣。
+ */
+export function normRoma(t: string): string {
+  let s = t
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/([aiueo])\u0304/g, '$1$1') // ā → aa（長音符號）
+    .replace(/\u0302/g, '') // ô 之類
+    .replace(/[^a-z]/g, '');
+  const rules: [RegExp, string][] = [
+    [/ou/g, 'oo'],
+    [/ei/g, 'ee'],
+    [/wo/g, 'o'],
+    [/m(?=[bpm])/g, 'n'],
+    [/sy([auo])/g, 'sh$1'],
+    [/ty([auo])|cy([auo])/g, 'ch$1$2'],
+    [/zy([auo])|jy([auo])/g, 'j$1$2'],
+    [/si/g, 'shi'],
+    [/ti/g, 'chi'],
+    [/tu/g, 'tsu'],
+    [/(?<![sc])hu/g, 'fu'], // shu、chu 不算
+    [/zi|di/g, 'ji'],
+    [/du/g, 'zu'],
+  ];
+  for (const [re, to] of rules) s = s.replace(re, to);
+  return s;
+}
+
+/** 把假名或漢字的答案整理成可以比對的樣子：去掉空白和標點 */
+export const normKana = (t: string) => t.replace(/[\s　、。，,.？?！!…・「」『』～~-]/g, '');
+
+/** 打字作答對不對：拼音、假名、課本的漢字寫法都可以 */
+export function checkTyped(a: { k: string; r: string; o?: string | undefined; y?: string | undefined }, input: string): boolean {
+  const t = input.trim();
+  if (!t) return false;
+  if (/[a-zA-Zāīūēō]/.test(t) && normRoma(t) === normRoma(a.r)) return true;
+  const n = normKana(t);
+  return [a.k, a.y, a.o].some((x) => x && normKana(x) === n);
+}
 
 /** 中文說明的第一句（例如「不用了，謝謝。（第 5 課學過）」→「不用了，謝謝」），當作意思題的選項 */
 export function gist(z: string): string {
@@ -91,11 +138,15 @@ export function gist(z: string): string {
   return t.endsWith('。') ? t.slice(0, -1) : t;
 }
 
+/** 一般測驗可以選的題型（解鎖測驗只用前三種選擇題） */
 export const MODES: { id: QuizMode; t: string }[] = [
   { id: 'k2r', t: '看字選拼音' },
   { id: 'a2k', t: '聽音選字' },
   { id: 'r2k', t: '看拼音選字' },
+  { id: 't2r', t: '看字打拼音' },
+  { id: 'a2t', t: '聽音打字' },
 ];
+export const CHOICE_MODES: QuizMode[] = ['k2r', 'a2k', 'r2k'];
 
 export interface Question {
   a: KanaItem;

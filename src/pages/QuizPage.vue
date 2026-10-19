@@ -98,7 +98,7 @@
         <button v-else-if="endlessRun" class="btn ghost quit-btn" @click="ended = true">結束練習</button>
       </div>
       <div class="qprompt">
-        <template v-if="q.m === 'k2r' || q.m === 'k2z'">
+        <template v-if="q.m === 'k2r' || q.m === 'k2z' || q.m === 't2r'">
           <!-- 句子太長就換行顯示，不要縮到看不清楚 -->
           <span v-if="glyphs(q.a.k) > 8" class="kana sent">{{ q.a.k }}</span>
           <span v-else class="kana" :style="{ fontSize: fitPx(q.a.k, 96, 440) }">{{ q.a.k }}</span>
@@ -108,7 +108,29 @@
           <SpeakerIcon /> {{ answered ? '再聽一次' : '播放發音' }}
         </button>
       </div>
-      <div class="opts" :class="{ single: singleCol }">
+      <!-- 打字作答：拼音、假名、課本的漢字寫法都算對 -->
+      <form v-if="isTyped(q.m)" class="typed" @submit.prevent="submitTyped">
+        <input
+          ref="typedEl"
+          v-model="typed"
+          class="typed-in"
+          :class="answered && (answered === q.a.k ? 'right' : 'wrong')"
+          :disabled="!!answered"
+          :aria-label="ask"
+          :placeholder="q.m === 't2r' ? '打拼音，例如 sakana' : '打拼音或假名'"
+          autocomplete="off"
+          autocapitalize="off"
+          autocorrect="off"
+          spellcheck="false"
+          enterkeyhint="done"
+          @keydown.enter.stop
+        />
+        <button class="btn primary" :disabled="!!answered || !typed.trim()">確定</button>
+      </form>
+      <p v-if="isTyped(q.m) && !answered" class="muted typed-tip">
+        拼音用平文式（shi、chi、tsu、fu），長音打兩個母音（oo、ee，或 ou、ei 都可以），空白和標點不用打。也可以直接打假名。
+      </p>
+      <div v-if="!isTyped(q.m)" class="opts" :class="{ single: singleCol }">
         <button
           v-for="o in q.opts"
           :key="o.k"
@@ -124,6 +146,7 @@
         <template v-if="answered">
           {{ answered === q.a.k ? '答對了' : '答錯了' }}：<span class="kana" style="font-size: 20px">{{ q.a.k }}</span> ＝
           <span class="mono">{{ q.a.r }}</span>，{{ q.a.z }}
+          <span v-if="isTyped(q.m) && answered !== q.a.k" class="typed-you">你打的是「{{ typedAnswer }}」</span>
         </template>
       </div>
       <div v-if="answered" class="hrow">
@@ -134,12 +157,31 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onActivated, onDeactivated, ref, watch } from 'vue';
+import { computed, nextTick, onActivated, onDeactivated, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { ALL_KANA, EXAMS, ROADMAP, STEPS, stepLabel, type Exam } from '@/data';
 import type { KanaItem } from '@/data/types';
-import { ENDLESS, MODES, PASS, QN_OPTS, fitPx, weakWeight, gist, glyphs, isListen, isMeaning, makeExam, makeQs, type Question, type QuizMode, type QuizPick } from '@/lib/kana';
+import {
+  CHOICE_MODES,
+  ENDLESS,
+  MODES,
+  PASS,
+  QN_OPTS,
+  checkTyped,
+  fitPx,
+  gist,
+  glyphs,
+  isListen,
+  isMeaning,
+  isTyped,
+  makeExam,
+  makeQs,
+  weakWeight,
+  type Question,
+  type QuizMode,
+  type QuizPick,
+} from '@/lib/kana';
 import { say } from '@/composables/useAudio';
 import { useProgressStore } from '@/stores/progress';
 import ScopeChips from '@/components/ScopeChips.vue';
@@ -158,6 +200,11 @@ const score = ref(0);
 const wrong = ref<KanaItem[]>([]);
 /** 答錯時的題型，練習答錯的時候用同一種題型再考 */
 const wrongMode = new Map<string, QuizMode>();
+/** 打字作答：輸入框的內容、送出時打的字 */
+const typed = ref('');
+const typedAnswer = ref('');
+const typedEl = ref<HTMLInputElement | null>(null);
+
 /** 正在練習剛才答錯的 */
 const retry = ref(false);
 /** 不限題數：快做完時自動補題，按「結束練習」才看結果 */
@@ -174,6 +221,11 @@ const exam = ref<Exam | null>(null);
 let active = false;
 
 const q = computed(() => qs.value[i.value]);
+/** 換題時清空輸入框；打字題自動把游標放進輸入框 */
+watch(q, (cur) => {
+  typed.value = '';
+  if (cur && isTyped(cur.m)) void nextTick(() => typedEl.value?.focus());
+});
 /** 選項顯示的文字：拼音、中文意思或假名 */
 const optText = (o: KanaItem) => (q.value?.m === 'k2r' ? o.r : q.value && isMeaning(q.value.m) ? gist(o.z) : o.k);
 const optClass = computed(() => (q.value?.m === 'k2r' ? 'r' : q.value && isMeaning(q.value.m) ? 'z' : 'k'));
@@ -197,6 +249,8 @@ const ASK: Record<QuizMode, string> = {
   a2k: '聽發音，選出正確的字',
   k2z: '這句話是什麼意思？',
   a2z: '聽錄音，選出意思',
+  t2r: '打出這個字的唸法',
+  a2t: '聽發音，打出來',
 };
 const ask = computed(() => (q.value ? ASK[q.value.m] : ''));
 /** 練習範圍裡有幾個不同的字（句子） */
@@ -261,7 +315,7 @@ function start(unlockId: number) {
   const P = u ? ALL_KANA.filter((k) => k.step === u) : p.pool;
   // 只有 3 個字的行，從前一行補干擾選項
   const D = u ? ALL_KANA.filter((k) => k.step <= u && k.step >= u - 1) : P;
-  const ids = MODES.map((m) => m.id);
+  const ids = CHOICE_MODES;
   const modeFn = u ? () => ids[Math.floor(Math.random() * ids.length)]! : () => p.d.qmode;
   if (u) qs.value = P.length ? makeQs(P, modeFn, D) : [];
   else qs.value = P.length ? practiceBatch(p.d.qn === ENDLESS ? 20 : p.d.qn) : [];
@@ -362,6 +416,13 @@ function answer(k: string) {
     wrongMode.set(q.value.a.k, q.value.m);
   }
   if (!isListen(q.value.m)) say(q.value.a, q.value.a.k);
+}
+
+/** 打字作答送出：對的話當成選了正確答案，錯的話記下打了什麼 */
+function submitTyped() {
+  if (answered.value || !q.value || !typed.value.trim()) return;
+  typedAnswer.value = typed.value.trim();
+  answer(checkTyped(q.value.a, typed.value) ? q.value.a.k : '\u0000');
 }
 
 function next() {

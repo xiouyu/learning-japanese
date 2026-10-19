@@ -264,3 +264,10 @@ body,body.body--dark{background:var(--bg);color:var(--ink);font-family:var(--f-b
 .cd-star:disabled{cursor:default}
 .cd-lbl{font-size:13px;margin-left:8px}
 .cd-go{padding:5px 12px;font-size:13px}
+.typed{display:flex;gap:8px}
+.typed-in{flex:1;min-width:0;font-size:20px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font-family:var(--f-kana)}
+.typed-in:focus{outline:2px solid var(--accent);outline-offset:1px}
+.typed-in.right{border-color:var(--ok);background:var(--ok-soft);color:var(--ok)}
+.typed-in.wrong{border-color:var(--shu);background:var(--shu-soft);color:var(--shu)}
+.typed-tip{font-size:13px;margin:0}
+.typed-you{display:block;margin-top:4px}
