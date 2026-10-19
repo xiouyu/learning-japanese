@@ -120,8 +120,11 @@ export function normRoma(t: string): string {
   return s;
 }
 
-/** 把假名或漢字的答案整理成可以比對的樣子：去掉空白和標點 */
-export const normKana = (t: string) => t.replace(/[\s　、。，,.？?！!…・「」『』～~-]/g, '');
+/** 片假名轉成平假名 */
+export const toHira = (t: string) => t.replace(/[ァ-ヶ]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0x60));
+
+/** 把假名或漢字的答案整理成可以比對的樣子：去掉空白和標點，片假名當成平假名（打「あ」或「ア」都算對） */
+export const normKana = (t: string) => toHira(t.replace(/[\s　、。，,.？?！!…・「」『』～~-]/g, ''));
 
 /** 打字作答對不對：拼音、假名、課本的漢字寫法都可以 */
 export function checkTyped(a: { k: string; r: string; o?: string | undefined; y?: string | undefined }, input: string): boolean {

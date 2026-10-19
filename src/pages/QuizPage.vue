@@ -146,7 +146,7 @@
         <button class="btn primary" :disabled="!!answered || !typed.trim()">確定</button>
       </form>
       <p v-if="isTyped(q.m) && !answered" class="muted typed-tip">
-        拼音用平文式（shi、chi、tsu、fu），長音打兩個母音（oo、ee，或 ou、ei 都可以），空白和標點不用打。也可以直接打假名。
+        拼音用平文式（shi、chi、tsu、fu），長音打兩個母音（oo、ee，或 ou、ei 都可以），空白和標點不用打。也可以直接打假名，平假名、片假名都算對。
       </p>
       <div v-if="!isTyped(q.m)" class="opts" :class="{ single: singleCol }">
         <button

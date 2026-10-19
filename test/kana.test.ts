@@ -193,6 +193,11 @@ describe('打字作答', () => {
     expect(checkTyped(item('水曜日', 'suiyoobi', 'すいようび', 'すいようび'), 'すいようび')).toBe(true);
     expect(checkTyped(item('水曜日', 'suiyoobi', 'すいようび', 'すいようび'), 'suiyoubi')).toBe(true);
     expect(checkTyped(item('あ', 'a'), '')).toBe(false);
+    // 平假名、片假名都算對
+    expect(checkTyped(item('ア', 'a'), 'あ')).toBe(true);
+    expect(checkTyped(item('あ', 'a'), 'ア')).toBe(true);
+    expect(checkTyped(item('コーヒー', 'koohii'), 'こーひー')).toBe(true);
+    expect(checkTyped(item('ア', 'a'), 'い')).toBe(false);
   });
 
   it('課本裡每一個字、每一句都能用自己的拼音答對', () => {
