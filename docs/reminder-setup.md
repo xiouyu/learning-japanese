@@ -15,9 +15,18 @@ GitHub Actions（每天 19:30）
 
 照下面的步驟設定一次，大約 10 分鐘。
 
+| 要去的地方 | 網址 |
+|---|---|
+| Supabase SQL Editor（第 1 步） | <https://supabase.com/dashboard/project/hweyprfnmxgbzhhilzru/sql/new> |
+| Supabase 連線資訊（第 2 步） | <https://supabase.com/dashboard/project/hweyprfnmxgbzhhilzru?showConnect=true> |
+| Gmail 應用程式密碼（第 3 步） | <https://myaccount.google.com/apppasswords> |
+| GitHub Variables（第 4 步） | <https://github.com/xiouyu/learning-japanese/settings/variables/actions/new> |
+| GitHub Secrets（第 4 步） | <https://github.com/xiouyu/learning-japanese/settings/secrets/actions/new> |
+| 寄測試信（第 5 步） | <https://github.com/xiouyu/learning-japanese/actions/workflows/reminder.yml> |
+
 ## 1. 在 Supabase 建立唯讀帳號
 
-1. 打開 Supabase 專案，左側選 **SQL Editor** › **New query**。
+1. 打開 [Supabase SQL Editor](https://supabase.com/dashboard/project/hweyprfnmxgbzhhilzru/sql/new)（或專案左側選 **SQL Editor** › **New query**）。
 2. 把 [`scripts/reminder/setup.sql`](../scripts/reminder/setup.sql) 的內容整段貼上，按 **Run**。
 3. 下方結果會顯示一組 48 個字的隨機密碼（欄位名稱是「REMINDER_DB_PASSWORD（複製這個）」），**複製起來**，第 4 步會用到。這組密碼不要給別人。
 
@@ -25,7 +34,7 @@ GitHub Actions（每天 19:30）
 
 ## 2. 查連線用的 host
 
-1. Supabase 專案最上方按 **Connect**。
+1. 打開 [Supabase 連線資訊](https://supabase.com/dashboard/project/hweyprfnmxgbzhhilzru?showConnect=true)（或專案最上方按 **Connect**）。
 2. 選 **Session pooler**（不要選 Direct connection，GitHub 的機器連不到它的 IPv6）。
 3. 記下連線資訊裡的 **host**，長得像 `aws-0-ap-northeast-1.pooler.supabase.com`。
 
@@ -40,7 +49,7 @@ GitHub Actions（每天 19:30）
 
 ## 4. 填到 GitHub
 
-打開 GitHub 專案的 **Settings › Secrets and variables › Actions**。
+打開 GitHub 專案的 **Settings › Secrets and variables › Actions**：[Variables](https://github.com/xiouyu/learning-japanese/settings/variables/actions)、[Secrets](https://github.com/xiouyu/learning-japanese/settings/secrets/actions)。
 
 **Variables** 分頁按 **New repository variable**：
 
@@ -67,7 +76,7 @@ GitHub Actions（每天 19:30）
 
 ## 5. 寄一封測試信
 
-1. GitHub 專案上方選 **Actions** › 左側 **每日學習提醒** › 右邊 **Run workflow**。
+1. 打開 [Actions › 每日學習提醒](https://github.com/xiouyu/learning-japanese/actions/workflows/reminder.yml)，按右邊的 **Run workflow**。
 2. 勾選「今天練過也寄一封（測試寄信用）」，按綠色的 **Run workflow**。
 3. 大約 30 秒後執行完成（綠色勾勾），到 Gmail 收信。今天已經練過的話，主旨會有「【測試】」。
 
@@ -90,7 +99,7 @@ GitHub Actions（每天 19:30）
 
 ## 不想收提醒了
 
-到 **Actions › 每日學習提醒**，右上角 **⋯** › **Disable workflow**。要完全移除的話，再到 Supabase SQL Editor 執行：
+到 [Actions › 每日學習提醒](https://github.com/xiouyu/learning-japanese/actions/workflows/reminder.yml)，右上角 **⋯** › **Disable workflow**。要完全移除的話，再到 Supabase SQL Editor 執行：
 
 ```sql
 drop function if exists reminder.daily_of(text);
