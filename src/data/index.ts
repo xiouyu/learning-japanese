@@ -10,7 +10,7 @@ export const STEPS = raw as Step[];
 export const ROADMAP: RoadmapItem[] = [
   ...STEPS.map((s) => ({ n: s.id, t: s.title, row: s.row, note: s.note, part: s.part })),
   // 還沒加進網站的下一課：學習路線最後顯示「下一站」
-  { n: STEPS.length + 1, t: '初級1 第 1 課 レストランで働いています', row: '初級1', note: '準備中', part: '下一站', ext: true },
+  { n: STEPS.length + 1, t: '初級1 第 2 課 ゲームをするのが好きです', row: '初級1第2課', note: '準備中', part: '下一站', ext: true },
 ];
 
 export const GOJUON: GojuonRow[] = [
@@ -56,6 +56,12 @@ export const BASE_K = new Set([...BASE].map(toKata));
 
 /** 假名的最後一步：通過這一步後要先考五十音大會考，才會解鎖課本第 1 課 */
 export const KANA_LAST = Math.max(...STEPS.filter((s) => s.kind !== 'phrase').map((s) => s.id));
+/** 這一步屬於哪一本、第幾課：初級的 part 是「初級1 第1課 …」；入門照 lessonOf；假名的步驟是 0 */
+export function bookLesson(s: Step): { book: string; n: number } {
+  const m = /^(初級\d)\s*第(\d+)課/.exec(s.part);
+  return m ? { book: m[1]!, n: Number(m[2]) } : { book: '入門', n: lessonOf(s) };
+}
+
 /** 這一步屬於課本第幾課（看 part 或出處的「第N課」）；假名的步驟是 0 */
 const LESSON_RE = /^第(\d+)課/;
 export const lessonOf = (s: Step) => Number(LESSON_RE.exec(s.part)?.[1] ?? LESSON_RE.exec(s.source ?? '')?.[1] ?? 0);

@@ -78,6 +78,8 @@ export type KanaItem = Kana & { step: number; v?: boolean };
 /** 課本每一課最後的生活文化專欄（改寫成台灣用語的中文） */
 export interface Culture {
   id: number;
+  /** 哪一本：沒填是《入門》，初級的寫「初級1」 */
+  book?: string;
   lesson: number;
   /** 課本上的日文標題 */
   ja: string;

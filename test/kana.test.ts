@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { A1_LAST, ALL_KANA, BASE, BASE_K, CANDO, CULTURE, EXAMS, KANA_LAST, STEPS, VOCAB, candoStep, lessonOf } from '@/data';
+import { A1_LAST, ALL_KANA, BASE, BASE_K, CANDO, CULTURE, EXAMS, KANA_LAST, STEPS, VOCAB, bookLesson, candoStep, lessonOf } from '@/data';
 import { checkTyped, gist, isMeaning, vocabModes, makeExam, makeQs, normRoma, pickWeighted, snd, toKata, weakWeight } from '@/lib/kana';
 
 describe('教材資料', () => {
@@ -207,7 +207,7 @@ describe('打字作答', () => {
 
 describe('文化專欄和角色扮演', () => {
   it('第 1～18 課每課都有文化專欄，內容完整', () => {
-    expect(new Set(CULTURE.map((c) => c.lesson))).toEqual(new Set(Array.from({ length: 18 }, (_, i) => i + 1)));
+    expect(new Set(CULTURE.filter((c) => !c.book).map((c) => c.lesson))).toEqual(new Set(Array.from({ length: 18 }, (_, i) => i + 1)));
     for (const c of CULTURE) {
       expect(c.zh && c.ja, String(c.id)).toBeTruthy();
       expect(c.body.length, c.ja).toBeGreaterThan(0);
@@ -269,5 +269,26 @@ describe('單字意思題', () => {
   it('有錄音的才出聽力題', () => {
     expect(vocabModes({ k: 'x', r: 'x', z: 'x', step: 40 })).not.toContain('a2k');
     expect(vocabModes({ k: 'x', r: 'x', z: 'x', step: 40, audio: { src: 'a.mp3' } })).toContain('a2k');
+  });
+});
+
+describe('初級1', () => {
+  const b1 = STEPS.filter((s) => s.part.startsWith('初級1'));
+
+  it('初級1 的步驟接在入門大會考後面，不會被算進入門的課', () => {
+    expect(b1[0]!.id).toBe(A1_LAST + 1);
+    for (const s of b1) {
+      expect(lessonOf(s), s.title).toBe(0);
+      expect(bookLesson(s).book).toBe('初級1');
+    }
+    const a1 = EXAMS.find((e) => e.id === 'a1')!;
+    expect(a1.groups.flatMap((g) => g.kana).some((k) => k.step > A1_LAST)).toBe(false);
+  });
+
+  it('第 1 課有文化專欄，音檔路徑在 A2-1', () => {
+    expect(CULTURE.filter((c) => c.book === '初級1' && c.lesson === 1).length).toBeGreaterThan(0);
+    const srcs = b1.flatMap((s) => s.kana.map((k) => k.audio?.src).filter(Boolean));
+    expect(srcs.length).toBeGreaterThan(30);
+    expect(srcs.every((x) => x!.startsWith('audio/irodori/A2-1/L01/'))).toBe(true);
   });
 });

@@ -164,7 +164,7 @@
     <!-- 大會考接在這一步後面：通過這一步後要再考大會考，才會解鎖下一步 -->
     <!-- 這一課的生活文化專欄（同一課的每一步都看得到，預設收起來） -->
     <div v-if="culture.length" class="sec">
-      <h3>生活文化小知識・第 {{ lesson }} 課</h3>
+      <h3>生活文化小知識・{{ bl.book === '入門' ? '' : bl.book + ' ' }}第 {{ lesson }} 課</h3>
       <div class="cul-list">
         <details v-for="c in culture" :key="c.id" class="cul">
           <summary>
@@ -227,7 +227,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { CULTURE, EXAMS, ROADMAP, STEPS, lessonOf, stepLabel, type Exam } from '@/data';
+import { CULTURE, EXAMS, ROADMAP, STEPS, bookLesson, stepLabel, type Exam } from '@/data';
 import type { Dialog, RoadmapItem } from '@/data/types';
 import { PASS, QN, sqFontSize } from '@/lib/kana';
 import { playAudio, say } from '@/composables/useAudio';
@@ -253,8 +253,9 @@ const lockMsg = computed(() =>
   p.examDue ? `通過${p.examDue.title}後解鎖` : p.curU > p.d.passed ? `通過第 ${p.curU} 步測驗後解鎖` : '內容準備中',
 );
 /** 這一步屬於第幾課，和那一課的文化專欄（漢字總複習不重複顯示） */
-const lesson = computed(() => (step.value.part === '入門漢字總複習' ? 0 : lessonOf(step.value)));
-const culture = computed(() => CULTURE.filter((c) => c.lesson === lesson.value));
+const bl = computed(() => (step.value.part === '入門漢字總複習' ? { book: '入門', n: 0 } : bookLesson(step.value)));
+const lesson = computed(() => bl.value.n);
+const culture = computed(() => CULTURE.filter((c) => c.lesson === lesson.value && (c.book ?? '入門') === bl.value.book));
 
 /** 接在這一步後面的大會考 */
 const stepExam = computed(() => EXAMS.find((e) => e.after === step.value.id));
