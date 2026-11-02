@@ -115,6 +115,7 @@
         <button v-if="unlock || exam" class="btn ghost quit-btn" @click="quit">離開測驗</button>
         <button v-else-if="endlessRun" class="btn ghost quit-btn" @click="ended = true">結束練習</button>
       </div>
+      <div v-if="!endlessRun" class="qbar" aria-hidden="true"><i :style="{ width: `${((i + (answered ? 1 : 0)) / qs.length) * 100}%` }" /></div>
       <div class="qprompt">
         <template v-if="q.m === 'k2r' || q.m === 'k2z' || q.m === 't2r'">
           <!-- 句子太長就換行顯示，不要縮到看不清楚 -->
@@ -153,14 +154,14 @@
       </p>
       <div v-if="!isTyped(q.m)" class="opts" :class="{ single: singleCol }">
         <button
-          v-for="o in q.opts"
+          v-for="(o, oi) in q.opts"
           :key="o.k"
           class="opt"
           :class="[optClass, answered && (o.k === q.a.k ? 'right' : o.k === answered ? 'wrong' : ''), { long: optText(o).length > 7 }]"
           :disabled="!!answered"
           @click="answer(o.k)"
         >
-          {{ optText(o) }}
+          <span v-if="oi < 9" class="okey" aria-hidden="true">{{ oi + 1 }}</span>{{ optText(o) }}
         </button>
       </div>
       <div class="fb" :class="answered ? (answered === q.a.k ? 'good' : 'bad') : ''">
@@ -540,6 +541,15 @@ function onKey(e: KeyboardEvent) {
   if (e.key === 'Enter' && answered.value && !done.value) {
     e.preventDefault();
     next();
+    return;
+  }
+  // 選擇題可以直接按數字鍵作答（打字作答時不攔截）
+  if (answered.value || done.value || !q.value || isTyped(q.value.m) || e.ctrlKey || e.metaKey || e.altKey) return;
+  if ((e.target as HTMLElement | null)?.closest('input,textarea')) return;
+  const o = q.value.opts[Number(e.key) - 1];
+  if (/^[1-9]$/.test(e.key) && o) {
+    e.preventDefault();
+    answer(o.k);
   }
 }
 

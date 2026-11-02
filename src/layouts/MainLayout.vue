@@ -17,7 +17,7 @@
             </button>
           </div>
         </div>
-        <p class="sub">
+        <p v-if="p.d.passed === 0" class="sub">
           跟著《いろどり 生活の日本語》入門（A1）一步一步學：先打好五十音基礎，再學課本內容。共 {{ STEPS.length }} 步，通過每一步的解鎖測驗，才會開放下一步。
         </p>
         <ProgressStrip />
@@ -32,6 +32,14 @@
           <q-route-tab v-for="t in TABS" :key="t.to" :to="t.to" :label="t.label" :ripple="false" />
         </q-tabs>
       </div>
+    </nav>
+
+    <!-- 手機：分頁改放在畫面底部，大拇指比較好按 -->
+    <nav class="bnav" aria-label="功能">
+      <router-link v-for="t in TABS" :key="t.to" :to="t.to" class="bnav-i" active-class="on">
+        <q-icon :name="t.icon" size="22px" />
+        <span>{{ t.label }}</span>
+      </router-link>
     </nav>
 
     <main>
@@ -55,22 +63,24 @@ import { useQuasar } from 'quasar';
 import { STEPS } from '@/data';
 import { initSpeech, voiceWarning } from '@/composables/useSpeech';
 import { useSyncStore } from '@/stores/sync';
+import { useProgressStore } from '@/stores/progress';
 import { saveTheme, type ThemePref } from '@/lib/theme';
 import ProgressStrip from '@/components/ProgressStrip.vue';
 import AccountDialog from '@/components/AccountDialog.vue';
 import VoiceDialog from '@/components/VoiceDialog.vue';
 
 const TABS = [
-  { to: '/learn', label: '學習' },
-  { to: '/flash', label: '字卡' },
-  { to: '/quiz', label: '測驗' },
-  { to: '/words', label: '單字' },
-  { to: '/table', label: '五十音' },
-  { to: '/check', label: '檢核' },
-  { to: '/talk', label: '會話' },
+  { to: '/learn', label: '學習', icon: 'menu_book' },
+  { to: '/flash', label: '字卡', icon: 'style' },
+  { to: '/quiz', label: '測驗', icon: 'quiz' },
+  { to: '/words', label: '單字', icon: 'translate' },
+  { to: '/table', label: '五十音', icon: 'grid_view' },
+  { to: '/check', label: '檢核', icon: 'task_alt' },
+  { to: '/talk', label: '會話', icon: 'forum' },
 ];
 
 const sync = useSyncStore();
+const p = useProgressStore();
 const $q = useQuasar();
 const account = ref(false);
 const voice = ref(false);

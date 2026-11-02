@@ -9,8 +9,14 @@
       </div>
     </div>
     <div class="lbl">平假名 {{ rows[0]!.done }} / {{ TOTAL }}・片假名 {{ rows[1]!.done }} / {{ TOTAL }}・{{ tail }}</div>
-    <div class="lbl lbl-day">
-      連續學習 <b>{{ p.streakN }}</b> 天・今天練了 <b>{{ p.todayN }}</b> 題{{ p.todayN >= DAILY_N ? '，達成每日目標 ✓' : `（目標 ${DAILY_N} 題）` }}
+    <div class="day-stats">
+      <span class="stat" :class="{ hot: p.streakN > 0 }" :title="`連續學習 ${p.streakN} 天`">
+        <q-icon name="local_fire_department" size="18px" />連續 <b>{{ p.streakN }}</b> 天
+      </span>
+      <span class="stat" :class="{ met: goalMet }" :title="`每日目標 ${DAILY_N} 題`">
+        <span class="goal-bar" role="progressbar" :aria-valuenow="Math.min(p.todayN, DAILY_N)" aria-valuemin="0" :aria-valuemax="DAILY_N" aria-label="每日目標"><i :style="{ width: `${goalPct}%` }" /></span>
+        今天 <b>{{ p.todayN }}</b> / {{ DAILY_N }} 題{{ goalMet ? '・達成 ✓' : '' }}
+      </span>
     </div>
   </div>
 </template>
@@ -39,6 +45,9 @@ const rows = computed(() =>
     return { label, done, cur };
   }),
 );
+
+const goalMet = computed(() => p.todayN >= DAILY_N);
+const goalPct = computed(() => Math.min(100, (p.todayN / DAILY_N) * 100));
 
 const tail = computed(() => {
   const passed = p.d.passed;

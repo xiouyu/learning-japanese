@@ -199,27 +199,26 @@
 
     <div class="sec">
       <h3>學習路線</h3>
-      <ol class="road">
-        <template v-for="(r, i) in ROADMAP" :key="r.n">
-          <li v-for="e in EXAMS.filter((x) => x.after + 1 === r.n)" :key="e.id">
-            <span class="n">大會考</span>
-            <span>
-              <span class="t">{{ e.title }}</span>
-              <span class="muted" style="font-size: 13px"> ・{{ e.road }}</span>
-            </span>
-            <span class="pill" :class="examState(e).cls">{{ examState(e).label }}</span>
-          </li>
-          <li v-if="i === 0 || ROADMAP[i - 1]!.part !== r.part" class="rgrp">{{ r.part }}</li>
-          <li>
-            <span class="n">{{ r.ext ? '下一站' : `第 ${r.n} 步` }}</span>
-            <span>
-              <span class="t">{{ r.t }}</span>
-              <span v-if="r.note" class="muted" style="font-size: 13px"> ・{{ r.note }}</span>
-            </span>
-            <span class="pill" :class="roadState(r).cls">{{ roadState(r).label }}</span>
-          </li>
-        </template>
-      </ol>
+      <p class="muted lead">點單元名稱可以展開或收起，正在學的單元會自動打開。</p>
+      <div class="road-groups">
+        <details v-for="g in roadGroups" :key="g.part" class="road-grp" :class="{ cur: g.cur, done: g.done === g.total }" :open="g.cur">
+          <summary>
+            <span class="rg-t">{{ g.part }}</span>
+            <span class="rg-bar" aria-hidden="true"><i :style="{ width: `${(g.done / g.total) * 100}%` }" /></span>
+            <span class="rg-n">{{ g.ext ? '準備中' : `${g.done} / ${g.total}` }}</span>
+          </summary>
+          <ol class="road">
+            <li v-for="x in g.items" :key="x.key">
+              <span class="n">{{ x.n }}</span>
+              <span>
+                <span class="t">{{ x.t }}</span>
+                <span v-if="x.note" class="muted rnote"> ・{{ x.note }}</span>
+              </span>
+              <span class="pill" :class="x.state.cls">{{ x.state.label }}</span>
+            </li>
+          </ol>
+        </details>
+      </div>
     </div>
   </section>
 </template>
@@ -316,6 +315,37 @@ function startExam(id: string) {
   void router.push({ path: '/quiz', query: { exam: id } });
   window.scrollTo(0, 0);
 }
+
+/** 學習路線依單元分組，大會考排在它考的那個單元最後面 */
+const roadGroups = computed(() => {
+  const groups: {
+    part: string;
+    ext: boolean;
+    cur: boolean;
+    done: number;
+    total: number;
+    items: { key: string; n: string; t: string; note?: string | undefined; state: { cls: string; label: string } }[];
+  }[] = [];
+  for (const r of ROADMAP) {
+    let g = groups[groups.length - 1];
+    // 大會考接在前一個單元的最後面
+    for (const e of g ? EXAMS.filter((x) => x.after + 1 === r.n) : []) {
+      const st = examState(e);
+      g!.items.push({ key: e.id, n: '大會考', t: e.title, note: e.road, state: st });
+      if (st.cls === 'cur') g!.cur = true;
+    }
+    if (!g || g.part !== r.part) {
+      g = { part: r.part, ext: !!r.ext, cur: false, done: 0, total: 0, items: [] };
+      groups.push(g);
+    }
+    const st = roadState(r);
+    g.items.push({ key: `s${r.n}`, n: r.ext ? '下一站' : `第 ${r.n} 步`, t: r.t, note: r.note, state: st });
+    g.total++;
+    if (st.cls === 'done') g.done++;
+    if (!r.ext && r.n === p.curU) g.cur = true;
+  }
+  return groups;
+});
 
 function roadState(r: RoadmapItem): { cls: string; label: string } {
   if (r.ext) {

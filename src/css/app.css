@@ -20,6 +20,8 @@
   /* 描字板範本：硬筆字（像鉛筆、原子筆寫的字），不用毛筆粗細變化的字型 */
   --f-pad:"Klee One","UD Digi Kyokasho N-R","BIZ UDMincho",serif;
   --q-primary:#2C4F82;
+  --shadow:0 1px 2px rgba(29,39,54,.05),0 2px 8px rgba(29,39,54,.04);
+  --shadow-hi:0 2px 4px rgba(29,39,54,.06),0 8px 20px rgba(29,39,54,.08);
 }
 /* 深色主題：Quasar Dark 設成 auto，會跟著系統切換並在 body 加上 body--dark */
 body.body--dark{
@@ -27,6 +29,7 @@ body.body--dark{
   --accent:#8DAEE0; --accent-soft:#22314A; --on-accent:#0F1622; --grid:#5E3B35;
   --shu:#F08B76; --shu-soft:#3A2420; --ok:#7FC79E; --ok-soft:#1D3328; color-scheme:dark;
   --q-primary:#8DAEE0; --q-dark-page:#13171E; --q-dark:#1B212A;
+  --shadow:0 1px 2px rgba(0,0,0,.3); --shadow-hi:0 4px 16px rgba(0,0,0,.4);
 }
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.7}
@@ -295,7 +298,6 @@ body,body.body--dark{background:var(--bg);color:var(--ink);font-family:var(--f-b
 .cul p{margin:8px 0;line-height:1.75}
 .cul-words{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 4px}
 .cul-words .chip{cursor:pointer;font-size:13px}
-.lbl-day{margin-top:2px}
 .talk-box{min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 16px;max-width:720px;margin-top:12px}
 .talk-box>summary{cursor:pointer;font-weight:700;padding:2px 0}
 .talk-steps,.talk-limits{margin:10px 0;padding-left:1.4em;display:grid;gap:8px;line-height:1.7}
@@ -320,7 +322,7 @@ body,body.body--dark{background:var(--bg);color:var(--ink);font-family:var(--f-b
 .talk-goals{margin:8px 0 12px;padding-left:1.3em;color:var(--muted);font-size:14px}
 .talk-log{display:grid;gap:10px;max-width:720px}
 .talk-msg{max-width:88%;padding:10px 14px;border-radius:14px;border:1px solid var(--line);background:var(--surface)}
-.talk-msg.user{justify-self:end;background:var(--accent);border-color:var(--accent);color:#fff}
+.talk-msg.user{justify-self:end;background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
 .talk-ja{font-size:18px;line-height:1.6;white-space:pre-wrap}
 .talk-zh{margin-top:4px;font-size:14px;color:var(--muted);white-space:pre-wrap}
 .talk-tools{display:flex;gap:6px;margin-top:6px;align-items:center}
@@ -331,3 +333,76 @@ body,body.body--dark{background:var(--bg);color:var(--ink);font-family:var(--f-b
 .qprompt{grid-auto-flow:row;gap:6px}
 .q-org{font-size:22px}
 .q-zh{font-size:clamp(22px,6vw,30px);line-height:1.5;text-align:center;font-weight:500}
+
+/* ---- 每日目標、連續天數 ---- */
+.day-stats{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.stat{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px 12px 3px 8px;font-variant-numeric:tabular-nums}
+.stat b{color:var(--ink)}
+.stat .q-icon{color:var(--line)}
+.stat.hot .q-icon{color:var(--shu)}
+.stat.met{border-color:var(--ok)}
+.goal-bar{display:inline-block;width:56px;height:6px;border-radius:999px;background:var(--line);overflow:hidden}
+.goal-bar i,.qbar i,.rg-bar i{display:block;height:100%;border-radius:inherit;background:var(--accent);transition:width .35s ease}
+.stat.met .goal-bar i{background:var(--ok)}
+
+/* ---- 學習路線：依單元收合 ---- */
+.road-groups{display:grid;gap:8px;max-width:640px}
+.road-grp{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:0 14px}
+.road-grp.cur{border-color:var(--accent)}
+.road-grp>summary{cursor:pointer;list-style:none;display:grid;grid-template-columns:minmax(0,1fr) 72px auto 10px;gap:12px;align-items:center;padding:12px 0}
+.road-grp>summary::-webkit-details-marker{display:none}
+.road-grp>summary::after{content:"";width:8px;height:8px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg) translateY(-3px);transition:transform .2s}
+.road-grp[open]>summary::after{transform:rotate(-135deg) translateY(-1px)}
+.rg-t{font-weight:700;font-size:15px}
+.road-grp.cur .rg-t{color:var(--accent)}
+.rg-bar{height:6px;border-radius:999px;background:var(--line);overflow:hidden}
+.road-grp.done .rg-bar i{background:var(--ok)}
+.rg-n{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.road-grp .road{max-width:none;padding-bottom:6px}
+.road-grp .road li:last-child{border-bottom:0}
+.rnote{font-size:13px}
+
+/* ---- 測驗：上方進度條、數字鍵提示、答對答錯的回饋 ---- */
+.qbar{height:8px;border-radius:999px;background:var(--line);overflow:hidden}
+.opt{position:relative}
+.okey{display:none}
+@media (hover:hover) and (pointer:fine){
+  .okey{display:block;position:absolute;top:6px;left:8px;font-family:var(--f-mono);font-size:11px;line-height:1;color:var(--muted);opacity:.7}
+}
+/* Quasar 會把所有 disabled 按鈕調淡，答完後正確答案要清楚，只淡化其他選項 */
+.opt:disabled{opacity:1 !important;cursor:default !important}
+.opt:disabled:not(.right):not(.wrong){opacity:.5 !important}
+.opt.right{animation:pop .32s ease}
+.opt.wrong{animation:shake .36s ease}
+@keyframes pop{40%{transform:scale(1.04)}}
+@keyframes shake{20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
+
+/* ---- 卡片和按鈕：淡淡的陰影、按下去有回饋 ---- */
+.kcard,.pcard,.word,.dcard,.qprompt,.face,.result,.unlock,.shadow,.daily-card,.cd-item,.cd-sum,.talk-scene,.cul{box-shadow:var(--shadow)}
+.btn,.chip,.seg,.opt,.kcard,.pcard,.gc,.talk-scene,.cd-star{transition:background-color .15s,border-color .15s,color .15s,box-shadow .15s,transform .12s}
+.btn:active:not(:disabled),.chip:active:not(.locked),.opt:active:not(:disabled),.gc:active,.cd-star:active{transform:scale(.96)}
+.btn.primary{box-shadow:0 2px 0 color-mix(in srgb,var(--accent) 65%,#000)}
+.btn.primary:hover{filter:brightness(1.08)}
+.kcard:hover,.pcard:hover,.talk-scene:hover:not(:disabled){box-shadow:var(--shadow-hi);transform:translateY(-2px)}
+.chip:hover:not(.locked):not([aria-pressed="true"]){border-color:var(--accent)}
+
+/* ---- 手機：底部導覽列 ---- */
+.bnav{display:none}
+@media (max-width:600px){
+  .tabs{display:none}
+  .bnav{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--surface);border-top:1px solid var(--line);padding:4px max(4px,env(safe-area-inset-left,0px)) calc(4px + env(safe-area-inset-bottom,0px));box-shadow:0 -2px 12px rgba(0,0,0,.06)}
+  .bnav-i{display:grid;justify-items:center;gap:1px;padding:6px 0 4px;border-radius:10px;color:var(--muted);text-decoration:none;font-size:11px;line-height:1.2;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+  .bnav-i.on{color:var(--accent);font-weight:700}
+  .bnav-i.on .q-icon{background:var(--accent-soft);border-radius:999px;padding:2px 14px;box-sizing:content-box}
+  .bnav-i:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+  main .page-wrap{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+  .toast{bottom:calc(80px + env(safe-area-inset-bottom,0px))}
+  .q-notifications__list--bottom{bottom:calc(64px + env(safe-area-inset-bottom,0px))}
+  .top{padding-block:20px 14px}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .opt.right,.opt.wrong{animation:none}
+  .btn,.chip,.seg,.opt,.kcard,.pcard,.gc,.talk-scene,.cd-star,.goal-bar i,.qbar i,.rg-bar i{transition:none}
+  .kcard:hover,.pcard:hover,.talk-scene:hover:not(:disabled),.btn:active:not(:disabled),.chip:active:not(.locked),.opt:active:not(:disabled),.gc:active,.cd-star:active{transform:none}
+}
