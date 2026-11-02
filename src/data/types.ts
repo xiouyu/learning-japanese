@@ -62,6 +62,11 @@ export interface Step {
   source?: string;
 }
 
+/** 建置時拆出去、用到才載入的部分（見 build/steps-split.ts） */
+export type StepDetail = Pick<Step, 'notes' | 'dialogs'>;
+/** 跟著主程式一起載入的部分 */
+export type StepCore = Omit<Step, 'notes' | 'dialogs'>;
+
 export interface RoadmapItem {
   n: number;
   t: string;

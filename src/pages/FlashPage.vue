@@ -10,7 +10,19 @@
 
     <div v-else class="fcbox">
       <div class="counter">剩下 {{ deck.length + 1 }} 張・記住 {{ known }}</div>
-      <button class="fc" :class="{ flipped }" aria-label="字卡，點一下翻面" @click="flip">
+      <button
+        class="fc"
+        :class="{ flipped, dragging: dx !== 0 }"
+        :style="dx ? { transform: `translateX(${dx}px) rotate(${dx / 24}deg)` } : undefined"
+        aria-label="字卡，點一下翻面"
+        @click="onClick"
+        @pointerdown="down"
+        @pointermove="move"
+        @pointerup="up"
+        @pointercancel="cancel"
+      >
+        <span v-if="flipped" class="swipe-tag no" :style="{ opacity: Math.min(1, Math.max(0, -dx) / SWIPE) }" aria-hidden="true">不熟</span>
+        <span v-if="flipped" class="swipe-tag yes" :style="{ opacity: Math.min(1, Math.max(0, dx) / SWIPE) }" aria-hidden="true">記住了</span>
         <div class="fc-in">
           <div class="face front">
             <span class="kana" :style="{ fontSize: fitPx(cur.k, 120, 250) }">{{ cur.k }}</span>
@@ -32,7 +44,7 @@
         </template>
         <button v-else class="btn primary" @click="flip">翻面</button>
       </div>
-      <p class="muted" style="font-size: 13px">鍵盤：空白鍵翻面・1 不熟・2 記住了</p>
+      <p class="muted fc-tip">翻面後可以往右滑「記住了」、往左滑「不熟」・鍵盤：空白鍵翻面、1 不熟、2 記住了</p>
     </div>
   </section>
 </template>
@@ -86,6 +98,46 @@ function know() {
   known.value++;
   p.addMastery(cur.value.k);
   nextCard();
+}
+
+/** 翻面後左右滑：右滑記住了、左滑不熟（像 Anki 和 Duolingo 的字卡） */
+const SWIPE = 90;
+const dx = ref(0);
+let x0: number | null = null;
+let dragged = false;
+
+function down(e: PointerEvent) {
+  dragged = false;
+  if (!flipped.value || e.button !== 0) return;
+  x0 = e.clientX;
+}
+function move(e: PointerEvent) {
+  if (x0 === null) return;
+  const d = e.clientX - x0;
+  if (!dragged && Math.abs(d) < 8) return;
+  if (!dragged) (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
+  dragged = true;
+  dx.value = d;
+}
+function up() {
+  if (x0 === null) return;
+  x0 = null;
+  const d = dx.value;
+  dx.value = 0;
+  if (d >= SWIPE) know();
+  else if (d <= -SWIPE) again();
+}
+function cancel() {
+  x0 = null;
+  dx.value = 0;
+}
+/** 拖曳過就不算點一下（不翻面） */
+function onClick() {
+  if (dragged) {
+    dragged = false;
+    return;
+  }
+  flip();
 }
 
 function onKey(e: KeyboardEvent) {

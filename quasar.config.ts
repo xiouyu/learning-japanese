@@ -1,7 +1,9 @@
 // Configuration for your app
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file
 
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from '#q-app';
+import stepsSplit from './build/steps-split';
 
 export default defineConfig(() => {
   return {
@@ -24,6 +26,11 @@ export default defineConfig(() => {
 
       // 部署到 GitHub Pages 的子路徑時由 workflow 設定 PUBLIC_PATH=/richard/
       publicPath: process.env.PUBLIC_PATH || '/',
+
+      // steps.json 拆成核心資料和依單元載入的會話、重點（見 build/steps-split.ts）
+      extendViteConf(viteConf) {
+        viteConf.plugins = [...(viteConf.plugins ?? []), stepsSplit(fileURLToPath(new URL('./src/data/steps.json', import.meta.url)))];
+      },
     },
 
     devServer: {

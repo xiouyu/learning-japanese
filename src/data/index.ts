@@ -1,11 +1,10 @@
 /* ===== 教材資料：之後每學一步，在 steps.json 加一筆 ===== */
-import raw from './steps.json';
-import rawCando from './cando.json';
-import rawCulture from './culture.json';
-import type { CanDo, Culture, GojuonRow, KanaItem, RoadmapItem, Step, Word } from './types';
+// steps.json 在建置時拆開：這裡只有核心資料，會話和重點說明見 detail.ts
+import raw from 'virtual:steps-core';
+import type { GojuonRow, KanaItem, RoadmapItem, StepCore, Word } from './types';
 import { toKata, type QuizMode } from '@/lib/kana';
 
-export const STEPS = raw as Step[];
+export const STEPS: StepCore[] = raw;
 
 export const ROADMAP: RoadmapItem[] = [
   ...STEPS.map((s) => ({ n: s.id, t: s.title, row: s.row, note: s.note, part: s.part })),
@@ -57,14 +56,14 @@ export const BASE_K = new Set([...BASE].map(toKata));
 /** 假名的最後一步：通過這一步後要先考五十音大會考，才會解鎖課本第 1 課 */
 export const KANA_LAST = Math.max(...STEPS.filter((s) => s.kind !== 'phrase').map((s) => s.id));
 /** 這一步屬於哪一本、第幾課：初級的 part 是「初級1 第1課 …」；入門照 lessonOf；假名的步驟是 0 */
-export function bookLesson(s: Step): { book: string; n: number } {
+export function bookLesson(s: StepCore): { book: string; n: number } {
   const m = /^(初級\d)\s*第(\d+)課/.exec(s.part);
   return m ? { book: m[1]!, n: Number(m[2]) } : { book: '入門', n: lessonOf(s) };
 }
 
 /** 這一步屬於課本第幾課（看 part 或出處的「第N課」）；假名的步驟是 0 */
 const LESSON_RE = /^第(\d+)課/;
-export const lessonOf = (s: Step) => Number(LESSON_RE.exec(s.part)?.[1] ?? LESSON_RE.exec(s.source ?? '')?.[1] ?? 0);
+export const lessonOf = (s: StepCore) => Number(LESSON_RE.exec(s.part)?.[1] ?? LESSON_RE.exec(s.source ?? '')?.[1] ?? 0);
 /** 入門（A1）的最後一步：第 1～18 課，加上漢字總複習、教室の日本語；之後加的初級步驟 part 會以「初級」開頭 */
 export const A1_LAST = Math.max(...STEPS.filter((s) => !s.part.startsWith('初級')).map((s) => s.id));
 
@@ -140,20 +139,6 @@ export const EXAMS: Exam[] = [
     mode: (a) => (a.audio ? pick(['a2z', 'k2z', 'z2k', 'a2k'] as const) : pick(['k2z', 'z2k'] as const)),
   },
 ];
-
-/** 課本的生活文化專欄（第 1～18 課） */
-export const CULTURE = rawCulture as Culture[];
-
-/** 課本的 79 項 Can-do */
-export const CANDO = rawCando as CanDo[];
-
-/** 這項 Can-do 要回去複習哪一步：出處寫著同一個活動名稱的那一步，找不到就用那一課的第一步 */
-export function candoStep(c: CanDo): number {
-  const norm = (t: string) => t.replace(/\s/g, '');
-  const ofLesson = STEPS.filter((s) => lessonOf(s) === c.lesson && s.part !== '入門漢字總複習');
-  const hit = ofLesson.find((s) => norm(s.source ?? '').includes(norm(c.title)));
-  return (hit ?? ofLesson[0])!.id;
-}
 
 export function stepLabel(n: number): string {
   const s = STEPS.find((x) => x.id === n);

@@ -1,5 +1,15 @@
 <template>
   <section class="panel">
+    <!-- 繼續學習：一鍵做現在最該做的事（大會考 > 回到正在學的那一步 > 今日複習） -->
+    <div v-if="resume" class="resume">
+      <q-icon :name="resume.icon" size="24px" class="resume-ic" />
+      <div class="resume-txt">
+        <b>{{ resume.title }}</b>
+        <span class="muted">{{ resume.sub }}</span>
+      </div>
+      <button class="btn primary" @click="resume.go">{{ resume.btn }} →</button>
+    </div>
+
     <div v-if="parts.length > 1" class="hrow parts" aria-label="選擇單元">
       <button v-for="pt in parts" :key="pt" class="seg" :aria-pressed="pt === step.part" @click="pickPart(pt)">
         {{ pt }}
@@ -67,11 +77,11 @@
     </div>
 
     <!-- 課本的會話 -->
-    <div v-if="step.dialogs?.length" class="sec">
+    <div v-if="detail.dialogs?.length" class="sec">
       <h3>聽會話</h3>
       <p class="muted lead">先聽錄音，想想看他們在什麼場合說這些話，再看下面的句子確認。熟了之後按「角色扮演」，換你演其中一個人。</p>
       <div class="dlist">
-        <div v-for="d in step.dialogs" :key="d.label" class="dcard">
+        <div v-for="d in detail.dialogs" :key="d.label" class="dcard">
           <div class="dhead">
             <span class="dlabel">{{ d.label }}</span>
             <button v-if="canRolePlay(d)" class="btn ghost rp-btn" @click="openRolePlay(d)">角色扮演</button>
@@ -132,12 +142,13 @@
 
     <RolePlay v-if="rpDialog" v-model="rpOpen" :dialog="rpDialog" />
 
-    <div class="sec">
+    <div v-if="detail.notes.length" class="sec">
       <h3>重點</h3>
       <ul class="notes">
-        <li v-for="n in step.notes" :key="n">{{ n }}</li>
+        <li v-for="n in detail.notes" :key="n">{{ n }}</li>
       </ul>
     </div>
+    <p v-else-if="detailErr" class="muted">這一步的會話和重點說明下載失敗，連上網路後重新整理就能看到。</p>
 
     <div class="sec">
       <h3>{{ isPhrase ? '課本裡的其他詞語和句子' : '唸唸看：用學過的字組成的單字' }}</h3>
@@ -224,11 +235,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, shallowRef, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { CULTURE, EXAMS, ROADMAP, STEPS, bookLesson, stepLabel, type Exam } from '@/data';
-import type { Dialog, RoadmapItem } from '@/data/types';
+import { EXAMS, ROADMAP, STEPS, bookLesson, stepLabel, type Exam } from '@/data';
+import { loadCulture, loadDetail } from '@/data/detail';
+import type { Culture, Dialog, RoadmapItem, StepDetail } from '@/data/types';
 import { PASS, QN, sqFontSize } from '@/lib/kana';
+import { DAILY_N } from '@/lib/daily';
 import { playAudio, say } from '@/composables/useAudio';
 import { speak } from '@/composables/useSpeech';
 import { useProgressStore } from '@/stores/progress';
@@ -254,7 +267,31 @@ const lockMsg = computed(() =>
 /** 這一步屬於第幾課，和那一課的文化專欄（漢字總複習不重複顯示） */
 const bl = computed(() => (step.value.part === '入門漢字總複習' ? { book: '入門', n: 0 } : bookLesson(step.value)));
 const lesson = computed(() => bl.value.n);
-const culture = computed(() => CULTURE.filter((c) => c.lesson === lesson.value && (c.book ?? '入門') === bl.value.book));
+const allCulture = shallowRef<Culture[]>([]);
+const culture = computed(() => allCulture.value.filter((c) => c.lesson === lesson.value && (c.book ?? '入門') === bl.value.book));
+
+/** 會話和重點說明：換到哪一步才下載那個單元的資料 */
+const detail = shallowRef<StepDetail>({ notes: [] });
+const detailErr = ref(false);
+watch(
+  () => step.value.id,
+  (id) => {
+    detailErr.value = false;
+    loadDetail(id).then(
+      (d) => {
+        if (step.value.id === id) detail.value = d;
+      },
+      () => {
+        if (step.value.id !== id) return;
+        detail.value = { notes: [] };
+        detailErr.value = true;
+      },
+    );
+    // 課本的步驟才有文化專欄
+    if (bl.value.n && !allCulture.value.length) void loadCulture().then((c) => (allCulture.value = c), () => {});
+  },
+  { immediate: true },
+);
 
 /** 接在這一步後面的大會考 */
 const stepExam = computed(() => EXAMS.find((e) => e.after === step.value.id));
@@ -345,6 +382,41 @@ const roadGroups = computed(() => {
     if (!r.ext && r.n === p.curU) g.cur = true;
   }
   return groups;
+});
+
+const resume = computed(() => {
+  const due = p.examDue;
+  if (due)
+    return {
+      icon: 'emoji_events',
+      title: `可以考${due.title}了`,
+      sub: `${due.done}！通過大會考就能繼續往下學。`,
+      btn: '開始大會考',
+      go: () => startExam(due.id),
+    };
+  if (step.value.id !== p.curU && STEPS.some((x) => x.id === p.curU))
+    return {
+      icon: 'play_circle',
+      title: `繼續學第 ${p.curU} 步・${stepLabel(p.curU)}`,
+      sub: `現在看的是第 ${step.value.id} 步，按一下回到正在學的地方。`,
+      btn: '繼續學習',
+      go: () => {
+        p.setStep(p.curU);
+        window.scrollTo(0, 0);
+      },
+    };
+  if (p.d.passed > 0 && !p.reviewedToday)
+    return {
+      icon: 'event_repeat',
+      title: '今日複習還沒做',
+      sub: `${DAILY_N} 題，常錯的、很久沒練的、最近學的混在一起。`,
+      btn: '開始今日複習',
+      go: () => {
+        void router.push({ path: '/quiz', query: { daily: '1' } });
+        window.scrollTo(0, 0);
+      },
+    };
+  return null;
 });
 
 function roadState(r: RoadmapItem): { cls: string; label: string } {

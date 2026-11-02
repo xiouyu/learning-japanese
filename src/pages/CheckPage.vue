@@ -63,7 +63,8 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { CANDO, STEPS, candoStep } from '@/data';
+import { STEPS } from '@/data';
+import { CANDO, candoStep } from '@/data/cando';
 import type { CanDo } from '@/data/types';
 import { useProgressStore } from '@/stores/progress';
 

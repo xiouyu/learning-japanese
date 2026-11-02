@@ -386,6 +386,21 @@ body,body.body--dark{background:var(--bg);color:var(--ink);font-family:var(--f-b
 .kcard:hover,.pcard:hover,.talk-scene:hover:not(:disabled){box-shadow:var(--shadow-hi);transform:translateY(-2px)}
 .chip:hover:not(.locked):not([aria-pressed="true"]){border-color:var(--accent)}
 
+/* ---- 學習頁最上面的「繼續學習」卡片 ---- */
+.resume{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--accent-soft);border:1px solid var(--accent);border-radius:14px;padding:12px 16px;max-width:720px}
+.resume-ic{color:var(--accent);flex:none}
+.resume-txt{display:grid;flex:1 1 220px;min-width:0;line-height:1.5}
+.resume-txt .muted{font-size:13px}
+.resume .btn{flex:none}
+
+/* ---- 字卡左右滑 ---- */
+.fc{position:relative;touch-action:pan-y;transition:transform .2s ease;-webkit-user-select:none;user-select:none}
+.fc.dragging{transition:none}
+.swipe-tag{position:absolute;top:18px;z-index:2;padding:2px 12px;border:2px solid;border-radius:8px;font-weight:700;font-size:18px;pointer-events:none;background:var(--surface)}
+.swipe-tag.yes{left:18px;color:var(--ok);transform:rotate(-8deg)}
+.swipe-tag.no{right:18px;color:var(--shu);transform:rotate(8deg)}
+.fc-tip{font-size:13px;text-align:center;max-width:36ch}
+
 /* ---- 手機：底部導覽列 ---- */
 .bnav{display:none}
 @media (max-width:600px){
@@ -403,6 +418,6 @@ body,body.body--dark{background:var(--bg);color:var(--ink);font-family:var(--f-b
 
 @media (prefers-reduced-motion:reduce){
   .opt.right,.opt.wrong{animation:none}
-  .btn,.chip,.seg,.opt,.kcard,.pcard,.gc,.talk-scene,.cd-star,.goal-bar i,.qbar i,.rg-bar i{transition:none}
+  .btn,.chip,.seg,.opt,.kcard,.pcard,.gc,.talk-scene,.cd-star,.goal-bar i,.qbar i,.rg-bar i,.fc{transition:none}
   .kcard:hover,.pcard:hover,.talk-scene:hover:not(:disabled),.btn:active:not(:disabled),.chip:active:not(.locked),.opt:active:not(:disabled),.gc:active,.cd-star:active{transform:none}
 }

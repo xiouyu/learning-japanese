@@ -10,7 +10,8 @@
 ## 慣例
 
 - 教材內容只放在 `src/data/steps.json`；新增一步就在最後加一筆，加完跑 `npm test`（步驟 id 要連續，不能插在中間，舊的學習紀錄靠 id 記進度）
-- Can-do 自我檢核的清單在 `src/data/cando.json`，生活文化專欄在 `src/data/culture.json`，AI 會話的情境在 `src/data/talk.json`（連 Ollama 的程式在 `src/lib/talk.ts`）
+- `steps.json` 在建置時由 `build/steps-split.ts` 拆開：核心資料（`virtual:steps-core`）跟著主程式載入，每一步的 `dialogs`、`notes` 依單元拆成小檔，學習頁用 `loadDetail()`（`src/data/detail.ts`）載入；編輯教材照樣只改 `steps.json`
+- Can-do 自我檢核的清單在 `src/data/cando.json`，生活文化專欄在 `src/data/culture.json`（都是用到才載入：`src/data/cando.ts`、`loadCulture()`），AI 會話的情境在 `src/data/talk.json`（連 Ollama 的程式在 `src/lib/talk.ts`）
 - 會話每一句的錄音時間（`lines[].at`，角色扮演用）是 `scripts/dialog_lines.py --save` 自動切的；新增有錄音的會話後要重跑
 - 學習紀錄格式和合併規則在 `src/lib/progress.ts`；改格式時 `normalize()` 要能讀舊資料
 - 自訂樣式在 `src/css/app.css`，class 名稱不要用 Quasar 已經用的工具類別（例如 `row`、`wrap`、`col`）

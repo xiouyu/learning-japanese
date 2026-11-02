@@ -525,6 +525,17 @@ watch(
   { immediate: true },
 );
 
+/** 從學習頁的「繼續學習」卡片按「開始今日複習」會帶 ?daily=1 */
+watch(
+  () => route.query.daily,
+  (v) => {
+    if (v === undefined) return;
+    void router.replace({ path: '/quiz' });
+    startDaily();
+  },
+  { immediate: true },
+);
+
 /** 從學習頁按「開始解鎖測驗」會帶 ?unlock=步驟 */
 watch(
   () => route.query.unlock,

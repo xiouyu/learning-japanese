@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { A1_LAST, ALL_KANA, BASE, BASE_K, CANDO, CULTURE, EXAMS, KANA_LAST, STEPS, VOCAB, bookLesson, candoStep, lessonOf } from '@/data';
+import { A1_LAST, ALL_KANA, BASE, BASE_K, EXAMS, KANA_LAST, STEPS as CORE, VOCAB, bookLesson, lessonOf } from '@/data';
+import { CANDO, candoStep } from '@/data/cando';
+import { CULTURE } from '@/data/culture';
+import { loadDetail } from '@/data/detail';
+import rawSteps from '@/data/steps.json';
+import type { Step } from '@/data/types';
+
+/** 完整的教材（含會話和重點），用來檢查資料本身 */
+const STEPS = rawSteps as unknown as Step[];
 import { checkTyped, gist, isMeaning, vocabModes, makeExam, makeQs, normRoma, pickWeighted, snd, toKata, weakWeight } from '@/lib/kana';
 
 describe('教材資料', () => {
@@ -290,5 +298,23 @@ describe('初級1', () => {
     const srcs = b1.flatMap((s) => s.kana.map((k) => k.audio?.src).filter(Boolean));
     expect(srcs.length).toBeGreaterThan(30);
     expect(srcs.every((x) => x!.startsWith('audio/irodori/A2-1/L01/'))).toBe(true);
+  });
+});
+
+describe('教材拆檔載入', () => {
+  it('核心資料不含會話和重點，其他欄位和 steps.json 一樣', () => {
+    expect(CORE).toHaveLength(STEPS.length);
+    CORE.forEach((s, i) => {
+      const { notes: _n, dialogs: _d, ...rest } = STEPS[i]!;
+      expect(s).toEqual(rest);
+    });
+  });
+
+  it('每一步都能載入自己的會話和重點', async () => {
+    for (const s of STEPS) {
+      const d = await loadDetail(s.id);
+      expect(d.notes, String(s.id)).toEqual(s.notes);
+      expect(d.dialogs, String(s.id)).toEqual(s.dialogs);
+    }
   });
 });
