@@ -53,7 +53,7 @@ export const emptyProgress = (): ProgressData => ({
 });
 
 const KEY = 'gojuon:';
-const QMODES: QuizMode[] = ['k2r', 'a2k', 'r2k', 't2r', 'a2t'];
+const QMODES: QuizMode[] = ['k2r', 'a2k', 'r2k', 'k2z', 'z2k', 't2r', 'a2t'];
 
 function read<T>(k: string, d: T): T {
   try {

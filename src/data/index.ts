@@ -2,7 +2,7 @@
 import raw from './steps.json';
 import rawCando from './cando.json';
 import rawCulture from './culture.json';
-import type { CanDo, Culture, GojuonRow, KanaItem, RoadmapItem, Step } from './types';
+import type { CanDo, Culture, GojuonRow, KanaItem, RoadmapItem, Step, Word } from './types';
 import { toKata, type QuizMode } from '@/lib/kana';
 
 export const STEPS = raw as Step[];
@@ -29,7 +29,26 @@ export const GOJUON: GojuonRow[] = [
 
 export const TOTAL = 46;
 
-export const ALL_KANA: KanaItem[] = STEPS.flatMap((s) => s.kana.map((k) => ({ ...k, step: s.id })));
+export const ALL_KANA: KanaItem[] = STEPS.flatMap((s) =>
+  s.kana.map((k) => (s.kind === 'phrase' ? { ...k, step: s.id, v: true } : { ...k, step: s.id })),
+);
+
+/** 每一步的單字轉成題目：m 寫成「漢字：意思」的，漢字放 o；漢字句子的唸法（假名）放 y */
+function wordItem(w: Word, step: number): KanaItem {
+  const i = w.m.indexOf('：');
+  const kanaReading = /[ぁ-んァ-ン]/.test(w.r) && !/[a-z]/i.test(w.r);
+  const it: KanaItem = { k: w.w, r: w.r, z: i > 0 ? w.m.slice(i + 1) : w.m, step, v: true };
+  if (i > 0) it.o = w.m.slice(0, i);
+  if (kanaReading) it.y = w.r;
+  if (w.audio) it.audio = w.audio;
+  return it;
+}
+
+/**
+ * 單字題（考意思）的題庫：課本的句子，加上每一步的單字（包括假名階段的「唸唸看」單字）。
+ * 假名本身（あ、か…）沒有意思，不放進來。
+ */
+export const VOCAB: KanaItem[] = [...ALL_KANA.filter((k) => k.v), ...STEPS.flatMap((s) => s.words.map((w) => wordItem(w, s.id)))];
 
 /** 46 個基本平假名／片假名，用來算頂端進度格 */
 export const BASE = new Set(GOJUON.flatMap((r) => r[1].filter((c) => c !== null).map((c) => c[0])));
@@ -103,7 +122,7 @@ export const EXAMS: Exam[] = [
     id: 'a1',
     after: A1_LAST,
     title: '入門大會考',
-    scope: '課本第 1～18 課（包括漢字）每一課各考 2 題：聽錄音選意思、看句子或漢字選意思、聽錄音選句子',
+    scope: '課本第 1～18 課（包括漢字）每一課各考 2 題：聽錄音選意思、看日文選中文、看中文選日文、聽錄音選句子',
     done: '入門 18 課全部學完了',
     reward: '就完成《いろどり》入門（A1）',
     passMsg: '恭喜通過入門大會考！《いろどり》入門（A1）結業了，生活中最基本的日文你都能聽、能說了。',
@@ -112,7 +131,7 @@ export const EXAMS: Exam[] = [
     pass: 32,
     groups: lessonGroups(),
     // 有課本錄音的句子才出聽力題
-    mode: (a) => (a.audio ? pick(['a2z', 'k2z', 'a2k'] as const) : 'k2z'),
+    mode: (a) => (a.audio ? pick(['a2z', 'k2z', 'z2k', 'a2k'] as const) : pick(['k2z', 'z2k'] as const)),
   },
 ];
 

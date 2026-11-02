@@ -78,13 +78,15 @@ export const fitPx = (t: string, base: number, room: number) =>
 export const snd = (k: KanaItem) => k.snd || k.r;
 
 /**
- * k2z、a2z（看句子／聽錄音選中文意思）只用在入門大會考；
+ * 意思題：k2z（看日文選中文）、z2k（看中文選日文）、a2z（聽錄音選中文）；
  * t2r、a2t 是打字作答（看字打拼音、聽音打字），只用在一般測驗。
  */
-export type QuizMode = 'k2r' | 'a2k' | 'r2k' | 'k2z' | 'a2z' | 't2r' | 'a2t';
+export type QuizMode = 'k2r' | 'a2k' | 'r2k' | 'k2z' | 'z2k' | 'a2z' | 't2r' | 'a2t';
 
-/** 這種題型的選項是中文意思 */
-export const isMeaning = (m: QuizMode) => m === 'k2z' || m === 'a2z';
+/** 考意思的題型：選項不能有相同的意思 */
+export const isMeaning = (m: QuizMode) => m === 'k2z' || m === 'a2z' || m === 'z2k';
+/** 選項是中文意思的題型 */
+export const showsMeaning = (m: QuizMode) => m === 'k2z' || m === 'a2z';
 /** 這種題型要先聽發音 */
 export const isListen = (m: QuizMode) => m === 'a2k' || m === 'a2z' || m === 'a2t';
 /** 打字作答的題型 */
@@ -146,10 +148,17 @@ export const MODES: { id: QuizMode; t: string }[] = [
   { id: 'k2r', t: '看字選拼音' },
   { id: 'a2k', t: '聽音選字' },
   { id: 'r2k', t: '看拼音選字' },
+  { id: 'k2z', t: '看日文選中文' },
+  { id: 'z2k', t: '看中文選日文' },
   { id: 't2r', t: '看字打拼音' },
   { id: 'a2t', t: '聽音打字' },
 ];
 export const CHOICE_MODES: QuizMode[] = ['k2r', 'a2k', 'r2k'];
+
+/** 單字、句子的題型：有課本錄音的才出聽力題，其他都考意思 */
+export function vocabModes(a: KanaItem): QuizMode[] {
+  return a.audio ? ['k2z', 'z2k', 'a2k', 'k2z', 'z2k'] : ['k2z', 'z2k'];
+}
 
 export interface Question {
   a: KanaItem;
@@ -186,7 +195,8 @@ export function makeQs(
     const opts = [a];
     for (const x of shuffle(P).concat(shuffle(D))) {
       if (opts.length >= 4) break;
-      if (opts.includes(x) || used.has(snd(x)) || usedK.has(x.k) || (isMeaning(m) && usedZ.has(gist(x.z)))) continue;
+      // 意思題只用有意思的單字、句子當選項（單一假名的說明是發音，不是意思）
+      if (opts.includes(x) || used.has(snd(x)) || usedK.has(x.k) || (isMeaning(m) && (!x.v || usedZ.has(gist(x.z))))) continue;
       used.add(snd(x));
       usedK.add(x.k);
       usedZ.add(gist(x.z));

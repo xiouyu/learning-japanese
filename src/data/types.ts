@@ -72,7 +72,8 @@ export interface RoadmapItem {
   ext?: boolean;
 }
 
-export type KanaItem = Kana & { step: number };
+/** step：屬於第幾步；v：有意思可以考的單字或句子（單一假名沒有） */
+export type KanaItem = Kana & { step: number; v?: boolean };
 
 /** 課本每一課最後的生活文化專欄（改寫成台灣用語的中文） */
 export interface Culture {

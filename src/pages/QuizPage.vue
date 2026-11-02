@@ -120,7 +120,10 @@
           <!-- 句子太長就換行顯示，不要縮到看不清楚 -->
           <span v-if="glyphs(q.a.k) > 8" class="kana sent">{{ q.a.k }}</span>
           <span v-else class="kana" :style="{ fontSize: fitPx(q.a.k, 96, 440) }">{{ q.a.k }}</span>
+          <!-- 看日文選中文：單字有漢字寫法的一起顯示（漢字字卡的 o 是唸法，不顯示，免得變成看唸法猜） -->
+          <span v-if="q.m === 'k2z' && q.a.o && q.a.ol !== '唸法' && glyphs(q.a.k) <= 8" class="kana muted q-org">{{ q.a.o }}</span>
         </template>
+        <span v-else-if="q.m === 'z2k'" class="q-zh">{{ gist(q.a.z) }}</span>
         <span v-else-if="q.m === 'r2k'" class="mono">{{ q.a.r }}</span>
         <button v-else class="btn primary" style="font-size: 16px; padding: 14px 22px" @click="say(q.a, q.a.k)">
           <SpeakerIcon /> {{ answered ? '再聽一次' : '播放發音' }}
@@ -178,7 +181,7 @@
 import { computed, nextTick, onActivated, onDeactivated, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
-import { ALL_KANA, EXAMS, ROADMAP, STEPS, stepLabel, type Exam } from '@/data';
+import { ALL_KANA, EXAMS, ROADMAP, STEPS, VOCAB, stepLabel, type Exam } from '@/data';
 import type { KanaItem } from '@/data/types';
 import {
   CHOICE_MODES,
@@ -192,6 +195,8 @@ import {
   glyphs,
   isListen,
   isMeaning,
+  showsMeaning,
+  vocabModes,
   isTyped,
   makeExam,
   makeQs,
@@ -249,8 +254,8 @@ watch(q, (cur) => {
   if (cur && isTyped(cur.m)) void nextTick(() => typedEl.value?.focus());
 });
 /** 選項顯示的文字：拼音、中文意思或假名 */
-const optText = (o: KanaItem) => (q.value?.m === 'k2r' ? o.r : q.value && isMeaning(q.value.m) ? gist(o.z) : o.k);
-const optClass = computed(() => (q.value?.m === 'k2r' ? 'r' : q.value && isMeaning(q.value.m) ? 'z' : 'k'));
+const optText = (o: KanaItem) => (q.value?.m === 'k2r' ? o.r : q.value && showsMeaning(q.value.m) ? gist(o.z) : o.k);
+const optClass = computed(() => (q.value?.m === 'k2r' ? 'r' : q.value && showsMeaning(q.value.m) ? 'z' : 'k'));
 /** 選項有長句子時排成一欄 */
 const singleCol = computed(() => !!q.value && q.value.opts.some((o) => optText(o).length > 7));
 const done = computed(() => qs.value.length > 0 && (ended.value || i.value >= qs.value.length));
@@ -261,7 +266,7 @@ const ok = computed(() => score.value >= (exam.value ? exam.value.pass : PASS));
 const dueExam = computed(() => EXAMS.find((e) => e.after === unlock.value && !p.examPassed(e.id)) ?? null);
 const examNext = computed(() => !!exam.value && STEPS.some((x) => x.id === exam.value!.after + 1));
 /** 答錯的是課本的句子（不是假名） */
-const wrongPhrase = computed(() => wrong.value.some((k) => STEPS[k.step - 1]?.kind === 'phrase'));
+const wrongPhrase = computed(() => wrong.value.some((k) => k.v));
 const unlockStep = computed(() => STEPS.find((x) => x.id === unlock.value));
 const nextHas = computed(() => STEPS.some((x) => x.id === unlock.value + 1));
 const wrongList = computed(() => [...new Map(wrong.value.map((k) => [k.k, k])).values()]);
@@ -269,7 +274,8 @@ const ASK: Record<QuizMode, string> = {
   k2r: '這個字怎麼唸？',
   r2k: '哪一個字是這個音？',
   a2k: '聽發音，選出正確的字',
-  k2z: '這句話是什麼意思？',
+  k2z: '這是什麼意思？',
+  z2k: '這個意思的日文是哪一個？',
   a2z: '聽錄音，選出意思',
   t2r: '打出這個字的唸法',
   a2t: '聽發音，打出來',
@@ -278,10 +284,15 @@ const ask = computed(() => (q.value ? ASK[q.value.m] : ''));
 /** 題型混在一起的測驗（解鎖測驗、大會考、今日複習、練答錯的），每題都要說明在問什麼 */
 const mixedModes = computed(() => !!unlock.value || !!exam.value || dailyRun.value || retry.value);
 /** 練習範圍裡有幾個不同的字（句子） */
-const poolSize = computed(() => new Set(p.pool.map((k) => k.k)).size);
+const poolSize = computed(() => new Set(curPool().map((k) => k.k)).size);
+/** 一般測驗的出題範圍：意思題用練習範圍裡的單字和句子，其他題型用假名和句子 */
+function curPool(): KanaItem[] {
+  if (!isMeaning(p.d.qmode)) return p.pool;
+  return VOCAB.filter((k) => p.d.scope.includes(k.step) && k.step <= p.curU);
+}
 /** 範圍裡最常錯的字 */
 const weakTop = computed(() =>
-  [...new Map(p.pool.filter((k) => p.d.weak[k.k]).map((k) => [k.k, k])).values()]
+  [...new Map(curPool().filter((k) => p.d.weak[k.k]).map((k) => [k.k, k])).values()]
     .sort((a, b) => p.d.weak[b.k]! - p.d.weak[a.k]!)
     .slice(0, 10),
 );
@@ -337,11 +348,18 @@ function quit() {
 
 function start(unlockId: number) {
   const u = unlockId;
-  const P = u ? ALL_KANA.filter((k) => k.step === u) : p.pool;
+  // 課本的步驟：句子加上這一步的單字，考意思（看日文選中文、看中文選日文）也考唸法；假名的步驟考發音
+  const phrase = !!u && STEPS[u - 1]?.kind === 'phrase';
+  const src = phrase ? VOCAB : ALL_KANA;
+  const P = u ? src.filter((k) => k.step === u) : curPool();
   // 只有 3 個字的行，從前一行補干擾選項
-  const D = u ? ALL_KANA.filter((k) => k.step <= u && k.step >= u - 1) : P;
-  const ids = CHOICE_MODES;
-  const modeFn = u ? () => ids[Math.floor(Math.random() * ids.length)]! : () => p.d.qmode;
+  const D = u ? src.filter((k) => k.step <= u && k.step >= u - 1) : P;
+  const pick = <T,>(a: readonly T[]) => a[Math.floor(Math.random() * a.length)]!;
+  const modeFn = phrase
+    ? (a: KanaItem) => pick([...vocabModes(a), 'k2r'] as QuizMode[])
+    : u
+      ? () => pick(CHOICE_MODES)
+      : () => p.d.qmode;
   if (u) qs.value = P.length ? makeQs(P, modeFn, D) : [];
   else qs.value = P.length ? practiceBatch(p.d.qn === ENDLESS ? 20 : p.d.qn) : [];
   reset();
@@ -355,7 +373,7 @@ function start(unlockId: number) {
  * 「常錯的優先」時依弱點分數抽題；「全部各一次」時每個字都考，但常錯的排前面。
  */
 function practiceBatch(n: number): Question[] {
-  const P = p.pool;
+  const P = curPool();
   const modeFn = () => p.d.qmode;
   const weakOn = p.d.qpick === 'weak' && P.some((k) => p.d.weak[k.k]);
   if (n === 0) {
@@ -384,7 +402,8 @@ function reset() {
 
 /** 今日複習：從已經解鎖的字和句子挑題；句子多出看句子選意思、聽錄音選字 */
 function startDaily() {
-  const all = ALL_KANA.filter((k) => k.step <= p.curU);
+  // 假名、句子，加上學過的單字
+  const all = [...new Set([...ALL_KANA, ...VOCAB])].filter((k) => k.step <= p.curU);
   const picked = pickDaily(all, {
     weak: p.d.weak,
     seen: p.d.seen,
@@ -393,7 +412,7 @@ function startDaily() {
   });
   const pick = <T,>(a: readonly T[]) => a[Math.floor(Math.random() * a.length)]!;
   const modeFn = (a: KanaItem): QuizMode =>
-    STEPS[a.step - 1]?.kind === 'phrase' ? pick(a.audio ? (['a2k', 'k2z', 'k2r'] as const) : (['k2z', 'k2r'] as const)) : pick(CHOICE_MODES);
+    a.v ? pick(vocabModes(a)) : pick(CHOICE_MODES);
   qs.value = makeQs(picked, modeFn, all, picked.length);
   reset();
   dailyRun.value = true;

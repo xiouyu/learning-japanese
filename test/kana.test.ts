@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { A1_LAST, ALL_KANA, BASE, BASE_K, CANDO, CULTURE, EXAMS, KANA_LAST, STEPS, candoStep, lessonOf } from '@/data';
-import { checkTyped, gist, isMeaning, makeExam, makeQs, normRoma, pickWeighted, snd, toKata, weakWeight } from '@/lib/kana';
+import { A1_LAST, ALL_KANA, BASE, BASE_K, CANDO, CULTURE, EXAMS, KANA_LAST, STEPS, VOCAB, candoStep, lessonOf } from '@/data';
+import { checkTyped, gist, isMeaning, vocabModes, makeExam, makeQs, normRoma, pickWeighted, snd, toKata, weakWeight } from '@/lib/kana';
 
 describe('教材資料', () => {
   it('步驟 id 從 1 開始連續', () => {
@@ -230,5 +230,44 @@ describe('文化專欄和角色扮演', () => {
         });
       }
     expect(n).toBeGreaterThan(200);
+  });
+});
+
+describe('單字意思題', () => {
+  it('題庫有課本的句子和每一步的單字，不含單一假名', () => {
+    expect(VOCAB.length).toBeGreaterThan(1500);
+    expect(VOCAB.every((k) => k.v && k.z)).toBe(true);
+    expect(VOCAB.some((k) => k.k === 'あ')).toBe(false);
+    // 「漢字：意思」的單字，漢字放在 o、意思放在 z
+    const okane = VOCAB.find((k) => k.k === 'おかね' && k.step === 129)!;
+    expect(okane.o).toBe('お金');
+    expect(okane.z).toBe('錢');
+  });
+
+  it('每個課本步驟的解鎖測驗都能出意思題，選項都是有意思的單字或句子、意思不重複', () => {
+    for (const s of STEPS.filter((x) => x.kind === 'phrase')) {
+      const P = VOCAB.filter((k) => k.step === s.id);
+      const D = VOCAB.filter((k) => k.step <= s.id && k.step >= s.id - 1);
+      for (const m of ['k2z', 'z2k'] as const) {
+        const qs = makeQs(P, () => m, D);
+        expect(qs, `第 ${s.id} 步`).toHaveLength(10);
+        for (const q of qs) {
+          expect(q.opts.length, `第 ${s.id} 步 ${q.a.k}`).toBeGreaterThanOrEqual(3);
+          expect(q.opts.every((o) => o.v)).toBe(true);
+          expect(new Set(q.opts.map((o) => gist(o.z))).size).toBe(q.opts.length);
+        }
+      }
+    }
+  });
+
+  it('意思題就算干擾選項的範圍混著單一假名，也不會拿假名當選項', () => {
+    const mixed = [...ALL_KANA.filter((k) => k.step <= 10), ...VOCAB.filter((k) => k.step <= 10)];
+    const qs = makeQs(VOCAB.filter((k) => k.step <= 10), () => 'k2z', mixed, 30);
+    for (const q of qs) expect(q.opts.every((o) => o.v)).toBe(true);
+  });
+
+  it('有錄音的才出聽力題', () => {
+    expect(vocabModes({ k: 'x', r: 'x', z: 'x', step: 40 })).not.toContain('a2k');
+    expect(vocabModes({ k: 'x', r: 'x', z: 'x', step: 40, audio: { src: 'a.mp3' } })).toContain('a2k');
   });
 });
