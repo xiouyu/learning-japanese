@@ -1,0 +1,16 @@
+{
+  "name": "learning-reminder",
+  "private": true,
+  "type": "module",
+  "description": "每天晚上檢查今天有沒有練習，沒有就用 Gmail 寄提醒（.github/workflows/reminder.yml 執行）",
+  "scripts": {
+    "remind": "node remind.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "nodemailer": "^7.0.13",
+    "pg": "^8.23.1"
+  }
+}

@@ -1,0 +1,42 @@
+name: 每日學習提醒
+
+# 每天台灣時間 19:30 檢查今天有沒有練習，沒有就寄 Gmail 提醒。
+# GitHub 的排程常常延遲 5～30 分鐘，所以提早半小時跑，20:00 前收得到。
+# 設定方式見 docs/reminder-setup.md；還沒設定好時會直接略過，不會失敗。
+on:
+  schedule:
+    - cron: '30 11 * * *' # UTC 11:30 = 台灣 19:30
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 今天練過也寄一封（測試寄信用）
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: scripts/reminder
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: scripts/reminder/package-lock.json
+      - run: npm ci --prefix scripts/reminder --no-audit --no-fund
+      - run: node scripts/reminder/remind.mjs
+        env:
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          REMINDER_DB_HOST: ${{ vars.REMINDER_DB_HOST }}
+          REMINDER_DB_PASSWORD: ${{ secrets.REMINDER_DB_PASSWORD }}
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          REMINDER_ACCOUNT: ${{ secrets.REMINDER_ACCOUNT }}
+          REMINDER_TO: ${{ secrets.REMINDER_TO }}
+          FORCE: ${{ inputs.force }}

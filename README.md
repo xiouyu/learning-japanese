@@ -62,7 +62,7 @@ src/
 src-pwa/                PWA 設定（manifest、service worker 註冊）
 supabase/migrations/    Supabase 資料表和權限設定
 test/                   單元測試
-docs/                   教學指南、Supabase 設定說明
+docs/                   教學指南、Supabase 和每日提醒的設定說明
 ```
 
 ## 加新的一步
@@ -106,6 +106,10 @@ docs/                   教學指南、Supabase 設定說明
 ## 備份
 
 `backup/` 裡的 PowerShell 腳本每天把 Supabase 上的學習進度備份到家裡電腦的 SQL Server，也能從備份還原。第一次設定請用 Claude Code 打開專案，說「照 backup/CLAUDE-SETUP.md 幫我設定學習進度備份」。詳見 [backup/README.md](backup/README.md)。
+
+## 每日學習提醒
+
+`.github/workflows/reminder.yml` 每天台灣時間 19:30 檢查今天有沒有做過任何一題，一題都沒做就用 Gmail 寄提醒信。要登入同步才有效，設定方式見 [docs/reminder-setup.md](docs/reminder-setup.md)。
 
 ## 字型
 

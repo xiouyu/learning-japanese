@@ -16,5 +16,6 @@
 - 學習紀錄格式和合併規則在 `src/lib/progress.ts`；改格式時 `normalize()` 要能讀舊資料
 - 自訂樣式在 `src/css/app.css`，class 名稱不要用 Quasar 已經用的工具類別（例如 `row`、`wrap`、`col`）
 - 部署：推到 `main` 會自動發布到 GitHub Pages
+- 每日學習提醒：`.github/workflows/reminder.yml` 每天跑 `scripts/reminder/remind.mjs`（自己的 package.json，跟網站分開），用唯讀帳號 `reminder_reader` 讀 `progress.data.daily`，設定見 `docs/reminder-setup.md`；改了 `daily` 的格式要一起改這裡
 - 初級的步驟 `part` 寫成「初級1 第N課 …」、`source` 也用「初級1 第N課」開頭（入門的課號、大會考、Can-do 只認「第N課」開頭的）；初級1 的音檔放在 `public/audio/irodori/A2-1/Lxx/`
 - 課本原始教材（PDF、mp3）在私人專案 `xiouyu/learning-japanese-materials`（入門在 `A1/`、初級1 在 `A2-1/`），不要加進這個公開專案；網站只放壓縮過的音檔（`public/audio/`）
