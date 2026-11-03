@@ -293,11 +293,16 @@ describe('初級1', () => {
     expect(a1.groups.flatMap((g) => g.kana).some((k) => k.step > A1_LAST)).toBe(false);
   });
 
-  it('第 1 課有文化專欄，音檔路徑在 A2-1', () => {
-    expect(CULTURE.filter((c) => c.book === '初級1' && c.lesson === 1).length).toBeGreaterThan(0);
-    const srcs = b1.flatMap((s) => s.kana.map((k) => k.audio?.src).filter(Boolean));
-    expect(srcs.length).toBeGreaterThan(30);
-    expect(srcs.every((x) => x!.startsWith('audio/irodori/A2-1/L01/'))).toBe(true);
+  it('每一課都有文化專欄，音檔放在 A2-1 自己那一課的資料夾', () => {
+    const lessons = [...new Set(b1.map((s) => bookLesson(s).n))];
+    expect(lessons.length).toBeGreaterThan(1);
+    for (const l of lessons) {
+      expect(CULTURE.filter((c) => c.book === '初級1' && c.lesson === l).length, `第${l}課`).toBeGreaterThan(0);
+      const dir = `audio/irodori/A2-1/L${String(l).padStart(2, '0')}/`;
+      const srcs = b1.filter((s) => bookLesson(s).n === l).flatMap((s) => s.kana.map((k) => k.audio?.src).filter(Boolean));
+      expect(srcs.length, `第${l}課`).toBeGreaterThan(20);
+      for (const x of srcs) expect(x!.startsWith(dir), x).toBe(true);
+    }
   });
 });
 
