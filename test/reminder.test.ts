@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildMail, dayKey, streakBefore } from '../scripts/reminder/lib.mjs';
+import { buildMail, dayKey, hourIn, inRemindWindow, streakBefore } from '../scripts/reminder/lib.mjs';
 
 const TZ = 'Asia/Taipei';
 
@@ -7,6 +7,15 @@ describe('每日提醒', () => {
   it('用台灣時間算今天：UTC 16:00 已經是台灣隔天', () => {
     expect(dayKey(new Date('2026-11-02T15:59:00Z'), TZ)).toBe('2026-11-02');
     expect(dayKey(new Date('2026-11-02T16:00:00Z'), TZ)).toBe('2026-11-03');
+  });
+
+  it('只在台灣時間晚上寄：排程延遲到隔天清晨就不寄', () => {
+    expect(hourIn(new Date('2026-11-02T11:30:00Z'), TZ)).toBe(19);
+    expect(inRemindWindow(new Date('2026-11-02T11:30:00Z'), TZ)).toBe(true); // 19:30
+    expect(inRemindWindow(new Date('2026-11-02T15:59:00Z'), TZ)).toBe(true); // 23:59
+    expect(inRemindWindow(new Date('2026-11-02T16:00:00Z'), TZ)).toBe(false); // 隔天 00:00
+    expect(inRemindWindow(new Date('2026-11-02T20:51:00Z'), TZ)).toBe(false); // 隔天 04:51（真的發生過）
+    expect(inRemindWindow(new Date('2026-11-02T09:59:00Z'), TZ)).toBe(false); // 17:59
   });
 
   it('連續天數從昨天往回算，中間斷掉就停', () => {

@@ -40,3 +40,5 @@ jobs:
           REMINDER_ACCOUNT: ${{ secrets.REMINDER_ACCOUNT }}
           REMINDER_TO: ${{ secrets.REMINDER_TO }}
           FORCE: ${{ inputs.force }}
+          # 排程延遲到隔天才跑的話不寄（見 scripts/reminder/lib.mjs 的 inRemindWindow）
+          EVENT: ${{ github.event_name }}

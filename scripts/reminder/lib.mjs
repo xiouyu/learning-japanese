@@ -5,6 +5,18 @@ export function dayKey(t, timeZone) {
   return new Intl.DateTimeFormat('sv-SE', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(t);
 }
 
+/** 某個時區現在是幾點（0～23） */
+export function hourIn(t, timeZone) {
+  return Number(new Intl.DateTimeFormat('en-GB', { timeZone, hour: '2-digit', hourCycle: 'h23' }).format(t));
+}
+
+/**
+ * 只在晚上寄提醒：GitHub 的排程有時會延遲好幾個小時（曾經 19:30 的排程拖到隔天 04:51 才跑），
+ * 延遲到隔天就變成一大早寄「今天還沒練」，所以 18:00～23:59 以外的排程直接略過。
+ */
+export const REMIND_FROM = 18;
+export const inRemindWindow = (t, timeZone) => hourIn(t, timeZone) >= REMIND_FROM;
+
 /** 到昨天為止連續練習了幾天（今天還沒練，所以從昨天往回算） */
 export function streakBefore(daily, now, timeZone) {
   let n = 0;

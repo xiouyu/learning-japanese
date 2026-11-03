@@ -92,7 +92,7 @@ GitHub Actions（每天 19:30）
 | `Invalid login` / `535` | Gmail 應用程式密碼不對，或 `GMAIL_USER` 跟建立應用程式密碼的帳號不一樣。 |
 | `找不到 … 的學習紀錄` | 網站登入用的 Email 跟 `GMAIL_USER` 不一樣：設定 `REMINDER_ACCOUNT`。或是還沒在網站上登入同步過。 |
 | 明明練過了還收到提醒 | 練習的那台裝置還沒同步上去（例如離線練習）。打開網站連上網路就會自動同步。 |
-| 提醒比 19:30 晚很多才到 | GitHub 排程尖峰時段會延遲。想更早，改 `.github/workflows/reminder.yml` 的 `cron`（時間是 UTC，台灣時間減 8 小時）。 |
+| 提醒比 19:30 晚很多才到 | GitHub 排程尖峰時段會延遲，有時甚至好幾個小時。延遲到半夜 00:00 以後才跑的話會自動略過，不會一大早寄「今天還沒練」。想更早，改 `.github/workflows/reminder.yml` 的 `cron`（時間是 UTC，台灣時間減 8 小時）。 |
 | 突然都沒收到提醒 | 公開專案超過 60 天沒有任何更新，GitHub 會自動停用排程（會寄信通知）。到 **Actions › 每日學習提醒** 按 **Enable workflow**。 |
 
 執行失敗時（密碼錯、連不上），GitHub 預設會寄「Run failed」的信通知你。

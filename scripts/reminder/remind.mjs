@@ -13,10 +13,11 @@
  *   SITE_URL              網站網址（信裡的按鈕連到這裡）
  *   FORCE=true            今天練過也寄（測試用）
  *   DRY_RUN=true          不寄信，只印出信件內容（測試用）
+ *   EVENT                 GitHub 的觸發方式；schedule（排程）只在晚上寄，手動執行隨時都寄
  */
 import pg from 'pg';
 import nodemailer from 'nodemailer';
-import { buildMail, dayKey, streakBefore } from './lib.mjs';
+import { REMIND_FROM, buildMail, dayKey, hourIn, inRemindWindow, streakBefore } from './lib.mjs';
 
 const env = process.env;
 const TZ = 'Asia/Taipei';
@@ -37,6 +38,11 @@ if (!account) throw new Error('請設定 REMINDER_ACCOUNT 或 GMAIL_USER');
 const ref = new URL(env.SUPABASE_URL).hostname.split('.')[0];
 const now = new Date();
 const today = dayKey(now, TZ);
+
+if (env.EVENT === 'schedule' && !inRemindWindow(now, TZ)) {
+  console.log(`::notice::排程延遲到台灣時間 ${hourIn(now, TZ)} 點才執行，不是晚上（${REMIND_FROM}:00 以後），略過不寄。`);
+  process.exit(0);
+}
 
 const db = new pg.Client({
   host: env.REMINDER_DB_HOST,
